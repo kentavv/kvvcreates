@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pyvcp>
+         <vbox>
+         <relief>RIDGE</relief>         
+         <bd>6</bd>
+                <label>
+                        <text>"Spindle Speed Target:"</text>
+                        <font>("Helvetica",20)</font>
+                </label>
+                <bar>
+                        <halpin>"spindle-speed-target"</halpin>
+                        <max_>2600</max_>
+                </bar>
+                <label>
+                        <text>"Spindle Speed Actual:"</text>
+                        <font>("Helvetica",20)</font>
+                </label>
+                <bar>
+                        <halpin>"spindle-speed"</halpin>
+                        <max_>2600</max_>
+                </bar>
+                <label>
+                        <text>"Spindle-At-Speed:"</text>
+                        <font>("Helvetica",20)</font>
+                </label>
+                <hbox>
+                    <label>
+                            <text>"             "</text>
+                            <font>("Helvetica",20)</font>
+                    </label>
+                    <led>
+                        <halpin>"spindle-at-speed-led"</halpin> 
+                        <size>30</size> 
+                        <on_color>"green"</on_color>
+                        <off_color>"red"</off_color>
+                    </led>
+                </hbox>
+        </vbox>
+</pyvcp>
