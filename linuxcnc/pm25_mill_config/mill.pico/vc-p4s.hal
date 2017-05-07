@@ -65,24 +65,24 @@ net spindle-counts vc-p4s.spindle-counts => halui.spindle-override.counts
 net jog-spindle2 halui.spindle-override.value => vc-p4s.spindle-override.value
 
 # PROGRAM
+# original lines
 #net program.is-idle    halui.program.is-idle    =>  vc-p4s.program.is-idle
-net idle-on    =>  vc-p4s.program.is-idle
 #net program.is-paused  halui.program.is-paused  =>  vc-p4s.program.is-paused
-net pause-on  =>  vc-p4s.program.is-paused
 #net program.is-running halui.program.is-running =>  vc-p4s.program.is-running
-net run-on =>  vc-p4s.program.is-running
 
-#net idle-on    =>  vc-p4s.program.is-idle
-#net pause-on  =>  vc-p4s.program.is-paused
-#net run-on =>  vc-p4s.program.is-running
+#net program.pause  vc-p4s.program.pause  => halui.program.pause
+#net program.resume vc-p4s.program.resume => halui.program.resume
+#net program.run	   vc-p4s.program.run    => halui.program.run
+#net program.stop   vc-p4s.program.stop   => halui.program.stop
+
+net idle-on    =>  vc-p4s.program.is-idle
+net pause-on  =>  vc-p4s.program.is-paused
+net run-on =>  vc-p4s.program.is-running
 
 #net program-start-btn halui.mode.auto and2.vc.in0 <=  vc-p4s.program.run  
 net program-run-ok and2.vc.in1 <= halui.mode.is-auto
 #net remote-program-run halui.program.run <= and2.vc.out
 
-#net program.pause  vc-p4s.program.pause  => halui.program.pause
-#net program.resume vc-p4s.program.resume => halui.program.resume
-#net program.stop   vc-p4s.program.stop   => halui.program.stop
 
 # ZERO
 net zero-x vc-p4s.zero-x => halui.mdi-command-05 
