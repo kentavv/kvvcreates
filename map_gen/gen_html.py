@@ -49,10 +49,11 @@ rollOverOutlineColor : "#000000"
 
 
 def main():
+  channel = 'Kvv Creates'
   print('''<!DOCTYPE html>
 <html>
 <head>
-<title>Kvv Creates Subscriber Countries Map</title>
+<title>''' + channel + ''' Subscriber Countries Map</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="white">
@@ -62,9 +63,10 @@ def main():
 <script src="https://www.amcharts.com/lib/3/ammap.js" type="text/javascript"></script>
 <script src="https://www.amcharts.com/lib/3/maps/js/worldHigh.js" type="text/javascript"></script>
 <script src="https://www.amcharts.com/lib/3/themes/dark.js" type="text/javascript"></script>''')
-  print('''<h2>Subscribers</h2>''')
+  print('''<h2>''' + channel + ''' Subscribers</h2>''')
   print(g('subscribers', 'subs'))
-  print('''<h2>Viewers</h2>''')
+  print('''<br><br>''')
+  print('''<h2>''' + channel + ''' Viewers</h2>''')
   print(g('viewers', 'viewers'))
   print('</body></html>')
 
