@@ -28,7 +28,7 @@ addf near.0          servo-thread
 addf limit1.0          servo-thread
 
 # install driver
-loadrt hal_ppmc port_addr="0xe010" extradac=0x00
+loadrt hal_ppmc port_addr="0xe010" extradac=0x00 epp_dir=1
 
 # make some signals for the scope for tuning.
 #loadrt ddt count=4
