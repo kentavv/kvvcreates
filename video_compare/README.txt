@@ -1,4 +1,4 @@
-These files are associated with the YouTube video: ...
+These files are associated with the YouTube video: https://www.youtube.com/watch?v=QAR493e84Zg
 
 They were used to examine the frame-by-frame difference between an original video and the one downloaded from YouTube.
 
