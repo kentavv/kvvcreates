@@ -42,6 +42,8 @@ net idle-on and2.a3.in1 <= halui.program.is-idle
 net run-sig halui.mode.auto halui.program.run <= and2.a3.out
 net step-sig halui.program.step <= and2.a4.out
 
+net stop-btn <= ppmc.0.din.09.in => halui.program.stop
+
 #This is how they function:
 #
 #Pressing Run/Step will begin executing a program.
