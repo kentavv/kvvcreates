@@ -1,3 +1,5 @@
 autosave.halscope
 hallib
 univstep.var.bak
+*.swp
+*.swo
