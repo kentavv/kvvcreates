@@ -48,15 +48,16 @@ net coolant-on or2.1.out                 => ppmc.0.dout.03.out
 
 # Use the spindle index pulse to measure velocity
 net spindle-position encoder.0.position => motion.spindle-revs
-net spindle-velocity encoder.0.velocity => motion.spindle-speed-in
+net spindle-rps      encoder.0.velocity => motion.spindle-speed-in
 net spindle-phase-a  ppmc.0.din.14.in   => encoder.0.phase-A
 setp encoder.0.counter-mode true
 
 
-# Filter spindle velocity for displaying on screen
+# Scale and filter spindle velocity for displaying on screen
+# The spindle speed comes from the spindle drive, not the spindle shaft, so the scaling also includes the pulley ratio (and is not 60)
 setp lowpass.0.gain 0.05
 setp scale.0.gain 20.3175
-net spindle-velocity lowpass.0.in
-net spindle-fb-filtered-rps lowpass.0.out => scale.0.in
-net SpindleRPM scale.0.out
+net spindle-rps          lowpass.0.in
+net spindle-rps-filtered lowpass.0.out => scale.0.in
+net spindle-rpm          scale.0.out
 
