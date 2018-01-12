@@ -1,50 +1,53 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <pyvcp>
-         <vbox>
-         <relief>RIDGE</relief>         
-                <bd>6</bd>
+	<vbox>
 
-                <label>
-                        <text>"Spindle"</text>
-                        <font>("Helvetica",20)</font>
-                </label>
+		<relief>RIDGE</relief>
+		<bd>6</bd>
 
-                <bar>
-                        <halpin>"spindle-speed"</halpin>
-                        <max_>2700</max_>
-                </bar>
+		<label>
+			<text>"Spindle"</text>
+			<font>("Helvetica", 20)</font>
+		</label>
 
-                <hbox>
-                        <label>
-                                <text>"  Target"</text>
-                                <font>("Helvetica",20)</font>
-                        </label>
+		<bar>
+			<halpin>"spindle-speed"</halpin>
+			<max_>2700</max_>
+		</bar>
 
-                        <number>
-                                <font>("Helvetica",20)</font>
-                                <halpin>"spindle-speed-target"</halpin>
-                                <format>"d"</format>
-                        </number>
+		<hbox>
+			<label>
+				<text>"	 Target"</text>
+				<font>("Helvetica", 20)</font>
+			</label>
 
-                        <led>
-                                <halpin>"spindle-at-speed-led"</halpin>
-                                <size>30</size>
-                                <on_color>"green"</on_color>
-                                <off_color>"red"</off_color>
-                        </led>
-                </hbox>
+			<number>
+				<font>("Helvetica", 20)</font>
+				<halpin>"spindle-speed-target"</halpin>
+				<format>"d"</format>
+			</number>
 
-                <hbox>
-                	<label>
-                        	<text>"  Good:"</text>
-                        	<font>("Helvetica",20)</font>
-                	</label>
-                    	<led>
-                        	<halpin>"spindle-fault-led"</halpin> 
-                        	<size>30</size> 
-                        	<off_color>"green"</off_color>
-                        	<on_color>"red"</on_color>
-                    	</led>
-                </hbox>
-        </vbox>
+			<led>
+				<halpin>"spindle-at-speed-led"</halpin>
+				<size>30</size>
+				<on_color>"green"</on_color>
+				<off_color>"red"</off_color>
+			</led>
+		</hbox>
+
+		<hbox>
+			<label>
+				<text>"	 Good:"</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<led>
+				<halpin>"spindle-fault-led"</halpin>
+				<size>30</size>
+				<on_color>"red"</on_color>
+				<off_color>"green"</off_color>
+			</led>
+		</hbox>
+
+	</vbox>
 </pyvcp>
