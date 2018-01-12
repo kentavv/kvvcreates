@@ -1,0 +1,150 @@
+# HAL config file for Pico Systems USC board
+#
+# Connect motion controller I/Os
+#
+
+#loadrt and2 names=and2.estop,and2.vc
+
+# connect limit/home switch outputs to motion controller
+#net Xminlim <= ppmc.0.din.01.in
+#net Xminlim => axis.0.neg-lim-sw-in
+#net Xmaxlim <= ppmc.0.din.02.in
+#net Xmaxlim => axis.0.pos-lim-sw-in
+#net Xhome <= ppmc.0.din.00.in
+#net Xhome => axis.0.home-sw-in
+
+#net Zminlim <= ppmc.0.din.09.in
+#net Zminlim => axis.2.neg-lim-sw-in
+#net Zmaxlim <= ppmc.0.din.10.in
+#net Zmaxlim => axis.2.pos-lim-sw-in
+#net Zhome <= ppmc.0.din.08.in
+#net Zhome => axis.2.home-sw-in
+
+# connect index pulses to motion controller
+# uncomment these lines only if you have a Rev 2 USC board
+#newsig Xindex bit
+#newsig Yindex  bit
+#newsig Zindex bit
+#linksp Xindex <= ppmc.0.encoder.00.index-enable
+#linksp Xindex => axis.0.index-enable
+#linksp Yindex <= ppmc.0.encoder.01.index-enable
+#linksp Yindex => axis.1.index-enable
+#linksp Zindex <= ppmc.0.encoder.02.index-enable
+#linksp Zindex => axis.2.index-enable
+
+#
+# Connect I/O controller I/Os
+#
+
+# connect e-stop write/sense to I/O controller
+# and univstep's fault with estop's output, so  estop FF is reset, but
+#      prevent continued estop signal from univstep from holding FF cleared
+#net ppmcEstop ppmc.0.din.15.in-not
+#net ppmcEstop or2.0.in0
+#net stepper-fault ppmc.0.din.14.in
+#net stepper-fault or2.0.in1
+#net ppmcEstop-fault or2.0.out
+
+net ppmcEstop ppmc.0.din.15.in-not
+net ppmcEstop and2.estop.in0
+#net ppmcEstop-fault and2.0.in0
+#net ppmcEstop-fault and2.0.in0
+#net ppmcEstop and2.0.in0
+
+net EstopOkIn estop-latch.0.fault-in
+net EstopOkIn and2.estop.out
+net EstopOkOut <= ppmc.0.dout.07.out
+net EstopOkOut iocontrol.0.emc-enable-in
+net EstopOkOut estop-latch.0.ok-out
+net EstopOkOut and2.estop.in1
+net emc-estop-out iocontrol.0.user-enable-out
+net emc-estop-out estop-latch.0.ok-in
+net emc-estop-reset iocontrol.0.user-request-enable
+net emc-estop-reset estop-latch.0.reset
+
+# connect spindle fwd/rev to I/O controller
+#net SpindleFwd <= ppmc.0.dout.00.out
+#net SpindleFwd => motion.spindle-forward
+#net SpindleRev <= ppmc.0.dout.01.out
+#net SpindleRev => motion.spindle-reverse
+
+#net SpindleFwd motion.spindle-forward => or2.0.in0
+#net SpindleRev motion.spindle-reverse => or2.0.in1
+#net SpindleOn or2.0.out => ppmc.0.dout.00.out
+#net SpindleRev => ppmc.0.dout.01.out
+
+net spindle-enable motion.spindle-on => ppmc.0.dout.00.out
+net SpindleFwd motion.spindle-forward => ppmc.0.dout.01.out
+
+# connect spindle brake to I/O controller
+#net SpindleBrakeOn <= ppmc.0.dout.02.out
+#net SpindleBrakeOn => motion.spindle-brake
+
+#net EnableSpindle axis.0.amp-enable-out => ppmc.0.dout.02.out
+net Xenable => ppmc.0.dout.02.out
+#net SpindleBrakeOn => motion.spindle-brake
+
+# connect mist/flood coolant to I/O controller
+#net MistOn <= ppmc.0.dout.03.out
+#net MistOn => iocontrol.0.coolant-mist
+#net FloodOn <= ppmc.0.dout.03.out
+#net FloodOn => iocontrol.0.coolant-flood
+
+net MistOn iocontrol.0.coolant-mist => or2.1.in0
+net FloodOn iocontrol.0.coolant-flood => or2.1.in1
+net Mist-or-FloodOn or2.1.out => ppmc.0.dout.03.out
+
+
+
+# set scale for 5000 RPM MAX and connect spindle speed to USC DAC
+#setp ppmc.0.DAC8.00.scale 500.0
+#newsig spinspeed float
+#linksp spinspeed <= motion.spindle-speed-out
+#linksp spinspeed => ppmc.0.DAC8.00.value
+
+
+
+#loadrt encoder num_chan=1
+#addf encoder.update-counters base-thread
+##addf encoder.update-counters servo-thread
+#addf encoder.capture-position servo-thread
+#setp encoder.0.counter-mode true
+#setp encoder.0.position-scale 16
+##setp encoder.0.x4-mode false 
+
+net spindle-position encoder.0.position => motion.spindle-revs
+net spindle-velocity encoder.0.velocity => motion.spindle-speed-in
+net spindle-phase-a encoder.0.phase-A <= ppmc.0.din.14.in
+
+#net spindle-index encoder.0.phase-A <= ppmc.0.din.14.in
+#net spindle-index => encoder.0.phase-Z
+
+#net encoder-output ppmc.0.din.14.in => encoder.0.phase-Z encoder.0.phase-A
+#net spindle-phase-a encoder.0.phase-A
+#net spindle-phase-z encoder.0.phase-Z
+#setp encoder.0.counter-mode 1
+#setp encoder.0.position-scale 1
+
+#net spindle-index encoder.0.phase-Z
+#net spindle-index <= encoder.0.phase-Z
+#net spindle-index-enable encoder.0.index-enable <=> motion.spindle-index-enable
+
+# lowpass filter does not seem necessary after addeding hardware filtering
+setp lowpass.0.gain 0.05
+##setp lowpass.0.gain 1
+net spindle-velocity => lowpass.0.in
+
+setp scale.0.gain 20.3175
+net spindle-fb-filtered-rps lowpass.0.out => scale.0.in
+#net spindle-velocity => scale.0.in
+
+#net spindle-fb-filtered-rpm scale.0.out 
+net SpindleRPM <= scale.0.out 
+
+# spindle speed display
+#net spindle-velocity mult2.0.in0 
+#setp   mult2.0.in1 60.
+#setp   mult2.0.in1 180.
+##newsig SpindleRPM float
+#net SpindleRPM <= mult2.0.out
+
