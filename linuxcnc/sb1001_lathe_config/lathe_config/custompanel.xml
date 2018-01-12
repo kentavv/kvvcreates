@@ -17,7 +17,7 @@
 
 		<hbox>
 			<label>
-				<text>"	 Target"</text>
+				<text>"  Target"</text>
 				<font>("Helvetica", 20)</font>
 			</label>
 
@@ -37,7 +37,7 @@
 
 		<hbox>
 			<label>
-				<text>"	 Good:"</text>
+				<text>"  Good"</text>
 				<font>("Helvetica", 20)</font>
 			</label>
 
