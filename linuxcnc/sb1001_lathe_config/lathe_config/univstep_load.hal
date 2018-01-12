@@ -37,7 +37,7 @@ loadrt ddt count=3
 loadrt estop_latch count=1
 #loadrt and2 count=1
 #loadrt and2 and2.estop
-loadrt or2 names=or2.0,or2.1,or2.o1
+loadrt or2 names=or2.0,or2.1,or2.o1,or2.estop
 loadrt mult2 count=1
 
 loadrt encoder num_chan=1
@@ -58,6 +58,7 @@ addf motion-command-handler servo-thread
 addf and2.estop servo-thread
 addf or2.0 servo-thread
 addf or2.1 servo-thread
+addf or2.estop servo-thread
 addf mult2.0 servo-thread
 addf estop-latch.0 servo-thread
 addf motion-controller servo-thread
