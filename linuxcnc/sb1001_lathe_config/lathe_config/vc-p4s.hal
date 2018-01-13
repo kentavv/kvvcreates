@@ -114,13 +114,15 @@ net machine-ison halui.machine.is-on => vc-p4s.machine.ison
 #P4-S pendant settings
 
 # STEP SIZE, set 0 to skip.
-#setp stepsize-1 0.0001
-#setp stepsize-2 0.001
-#setp stepsize-3 0.01
-#setp stepsize-4 0.1
-#setp stepsize-5 1
-#setp stepsize-6 0
-#setp stepsize-7 0
-#setp stepsize-8 0
-#setp stepsize-9 0
+setp vc-p1as.stepsize-1 0.0001
+setp vc-p1as.stepsize-2 0.001
+#setp vc-p1as.stepsize-3 0.01
+#setp vc-p1as.stepsize-4 0.1
+setp vc-p1as.stepsize-3 0
+setp vc-p1as.stepsize-4 0
+setp vc-p1as.stepsize-5 0
+setp vc-p1as.stepsize-6 0
+setp vc-p1as.stepsize-7 0
+setp vc-p1as.stepsize-8 0
+setp vc-p1as.stepsize-9 0
 
