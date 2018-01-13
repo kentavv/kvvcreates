@@ -5,6 +5,8 @@
 #Thanks to John and Andy, I got my Pause/Resume button. I did a little work on my own and was able to get the Run/Step button (admittedly the far easier). So, for what it's worth, here is the program for both buttons:
 #
 
+# The toggle component has debounce by default
+
 # External Program Pause/Resume and Run/Step Buttons
 # Pause/Resume Section
 #net pause-resume-btn and2.0.in0 and2.1.in0 <= hm2_5i20.0.gpio.027.in_not (this is your input)
