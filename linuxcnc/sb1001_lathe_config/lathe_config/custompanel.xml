@@ -13,6 +13,9 @@
 		<bar>
 			<halpin>"spindle-speed"</halpin>
 			<max_>2700</max_>
+			<range1>0, 2100, "green"</range1>
+			<range2>2100, 2300, "yellow"</range2>
+			<range3>2300, 2700, "red"</range3>
 		</bar>
 
 		<hbox>
