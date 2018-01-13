@@ -31,20 +31,23 @@ net estop-loopin  iocontrol.0.user-enable-out     => estop-latch.0.ok-in
 net estop-reset   iocontrol.0.user-request-enable => estop-latch.0.reset
 
 
-# connect spindle fwd/rev to I/O controller
-#net spindle-enable motion.spindle-on => ppmc.0.dout.00.out
-net spindle-fwd motion.spindle-forward => ppmc.0.dout.00.out
-net spindle-rev motion.spindle-reverse => ppmc.0.dout.01.out
+# Add spindle direction and enable signals.
+# The state of SSR1 and SSR2 influence the spindle speed DAC.
+# Forward and reverse should be attached to SS1 and SSR2 respectively, most likely.
+# See http://pico-systems.com/spindac.html for hardware configuration information.
+net spindle-fwd    motion.spindle-forward => ppmc.0.dout.00.out
+net spindle-rev    motion.spindle-reverse => ppmc.0.dout.01.out
+net spindle-enable motion.spindle-on      => ppmc.0.dout.02.out
 
 
 # Use the Xenable signal to enable power to the stepper motors
-net Xenable ppmc.0.dout.02.out
+net Xenable ppmc.0.dout.03.out
 
 
 # Requests for mist or flood coolant toggle the same pin
 net mist-on    iocontrol.0.coolant-mist  => or2.coolant.in0
 net flood-on   iocontrol.0.coolant-flood => or2.coolant.in1
-net coolant-on or2.coolant.out           => ppmc.0.dout.03.out
+net coolant-on or2.coolant.out           => ppmc.0.dout.04.out
 
 
 # Use the spindle index pulse to measure velocity
