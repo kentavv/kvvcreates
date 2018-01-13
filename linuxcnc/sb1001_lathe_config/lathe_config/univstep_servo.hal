@@ -70,6 +70,6 @@ setp lincurve.0.y-val-03 1.8
 setp lincurve.0.x-val-04 2000
 setp lincurve.0.y-val-04 2.9
 setp lincurve.0.x-val-05 2700
-setp lincurve.0.y-val-05 5.05
+setp lincurve.0.y-val-05 5.1
 net requested-speed-for-ppmc lincurve.0.out => ppmc.0.DAC8.00.value
 
