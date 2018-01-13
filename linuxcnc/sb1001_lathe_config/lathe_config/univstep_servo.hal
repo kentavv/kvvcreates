@@ -1,17 +1,13 @@
 # HAL config file for servos -- expanded from core_servo.hal
-# for a full four axis setup
 
-# create four position feedback signals
+# create position feedback signals
 
 # connect position feedback to PID loop
-net Xpos-fb => pid.0.feedback
-net Zpos-fb => pid.1.feedback
-
 # connect position feedback to motion module
+net Xpos-fb => pid.0.feedback
 net Xpos-fb => axis.0.motor-pos-fb
+net Zpos-fb => pid.1.feedback
 net Zpos-fb => axis.2.motor-pos-fb
-
-# create PID to DAC output signals
 
 # connect output signals to output of PID loops
 net Xoutput <= pid.0.output
@@ -22,68 +18,47 @@ setp pid.0.maxoutput [AXIS_0]PID_MAX_VEL
 setp pid.1.maxoutput [AXIS_2]PID_MAX_VEL
 
 # set PID loop gains
-setp pid.0.Pgain [AXIS_0]P
-setp pid.0.Igain [AXIS_0]I
-setp pid.0.Dgain [AXIS_0]D
-setp pid.0.bias [AXIS_0]BIAS
-setp pid.0.FF0 [AXIS_0]FF0
-setp pid.0.FF1 [AXIS_0]FF1
-setp pid.0.FF2 [AXIS_0]FF2
+setp pid.0.Pgain    [AXIS_0]P
+setp pid.0.Igain    [AXIS_0]I
+setp pid.0.Dgain    [AXIS_0]D
+setp pid.0.bias     [AXIS_0]BIAS
+setp pid.0.FF0      [AXIS_0]FF0
+setp pid.0.FF1      [AXIS_0]FF1
+setp pid.0.FF2      [AXIS_0]FF2
 setp pid.0.deadband [AXIS_0]DEADBAND
 
-setp pid.1.Pgain [AXIS_2]P
-setp pid.1.Igain [AXIS_2]I
-setp pid.1.Dgain [AXIS_2]D
-setp pid.1.bias [AXIS_2]BIAS
-setp pid.1.FF0 [AXIS_2]FF0
-setp pid.1.FF1 [AXIS_2]FF1
-setp pid.1.FF2 [AXIS_2]FF2
+setp pid.1.Pgain    [AXIS_2]P
+setp pid.1.Igain    [AXIS_2]I
+setp pid.1.Dgain    [AXIS_2]D
+setp pid.1.bias     [AXIS_2]BIAS
+setp pid.1.FF0      [AXIS_2]FF0
+setp pid.1.FF1      [AXIS_2]FF1
+setp pid.1.FF2      [AXIS_2]FF2
 setp pid.1.deadband [AXIS_2]DEADBAND
 
 # create four position command signals
-
 # connect position commands to motion controller
-net Xpos-cmd <= axis.0.motor-pos-cmd
-net Zpos-cmd <= axis.2.motor-pos-cmd
-
 # connect position commands to PID input
-net Xpos-cmd => pid.0.command
-net Zpos-cmd => pid.1.command
+net Xpos-cmd axis.0.motor-pos-cmd => pid.0.command
+net Zpos-cmd axis.2.motor-pos-cmd => pid.1.command
 
 # create bit signals to enable/disable the PID loops
-
 # connect the signals to the motion controller
-net Xenable <= axis.0.amp-enable-out
-net Zenable <= axis.2.amp-enable-out
-
 # connect the signals to the PID blocks
-net Xenable => pid.0.enable
-net Zenable => pid.1.enable
+net Xenable axis.0.amp-enable-out => pid.0.enable
+net Zenable axis.2.amp-enable-out => pid.1.enable
 
+
+# Create signals for spindle speed control and spindle-at-speed detection.
+# Piecewise linear interpolation is used to map from desired speed to DAC voltage output.
+# Slightly more than 5V is used as maximum to compensate for resistance loses.
 setp near.0.scale 1.1
-net spindle-cmd-rpm-abs => near.0.in1
-net spindle-rpm         => near.0.in2
-net spindle-at-speed near.0.out => motion.spindle-at-speed
-
-#sets spindle-at-speed true
-
-#net spindle-cmd-rpm     <= motion.spindle-speed-out
-net spindle-cmd-rpm-abs <= motion.spindle-speed-out-abs
-net spindle-cmd-rps     <= motion.spindle-speed-out-rps
-net spindle-cmd-rps-abs <= motion.spindle-speed-out-rps-abs
-#net spindle-at-speed    => motion.spindle-at-speed
-#net spindle-on <= motion.spindle-on
-
-loadrt lincurve count=1 personality=6
-addf lincurve.0 servo-thread
-#setp ppmc.0.DAC8.00.scale 0.195
 setp ppmc.0.DAC8.00.scale 1.0
 
-#setp limit1.0.min 100
-#setp limit1.0.max 2700
-#net spindle-cmd-rpm-abs => limit1.0.in
-#net spindle-cmd-rpm-abs-limited limit1.0.out => lincurve.0.in
-net spindle-cmd-rpm-abs => lincurve.0.in
+net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1 lincurve.0.in
+net spindle-rpm         near.0.in2
+net spindle-at-speed    near.0.out => motion.spindle-at-speed
+
 setp lincurve.0.x-val-00 200 
 setp lincurve.0.y-val-00 0 
 setp lincurve.0.x-val-01 500
@@ -97,30 +72,4 @@ setp lincurve.0.y-val-04 2.9
 setp lincurve.0.x-val-05 2700
 setp lincurve.0.y-val-05 5.05
 net requested-speed-for-ppmc lincurve.0.out => ppmc.0.DAC8.00.value
-
-net spindle-fault <= ppmc.0.din.13.in-not
-#net spindle-fault => pyvcp.spindle-fault
-
-### set scale for 5000 RPM MAX and connect spindle speed to USC DAC
-##  limit the rpm range to [100, 2600]
-#setp ppmc.0.DAC8.00.scale 540.0
-##net requested-speed motion.spindle-speed-out-abs => scale.1.in
-#setp limit1.0.min 100
-#setp limit1.0.max 2700
-#net spindle-cmd-rpm-abs => limit1.0.in
-#net spindle-cmd-rpm-abs-limited limit1.0.out => scale.1.in
-#setp scale.1.gain 1.072
-#setp scale.1.offset -510 
-##setp scale.1.gain 1.10 
-##setp scale.1.offset -490 
-#
-##net requested-speed-off scale.1.out => scale.2.in
-##setp scale.2.gain 1.05
-##setp scale.2.offset 0.0
-#net requested-speed-for-ppmc scale.1.out => ppmc.0.DAC8.00.value
-
-#net 
-#newsig spinspeed float
-#linksp spinspeed <= motion.spindle-speed-out
-#linksp spinspeed => ppmc.0.DAC8.00.value
 

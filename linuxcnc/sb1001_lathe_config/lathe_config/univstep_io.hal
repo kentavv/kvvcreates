@@ -21,6 +21,7 @@
 # A single fault signal for the LinuxCNC e-stop latch module is created by or-ing the USC fault and spindle fault signals
 # Pin dout.07 goes high when the e-stop circuit is OK, lighting an LED on the USC, but otherwise is not used
 
+net spindle-fault ppmc.0.din.13.in-not
 net ppmc-estop    ppmc.0.din.15.in-not            => and2.estop.in0
 net ppmc-fault    and2.estop.out                  => or2.estop.in0
 net spindle-fault or2.estop.in1
@@ -41,9 +42,9 @@ net Xenable ppmc.0.dout.02.out
 
 
 # Requests for mist or flood coolant toggle the same pin
-net mist-on    iocontrol.0.coolant-mist  => or2.1.in0
-net flood-on   iocontrol.0.coolant-flood => or2.1.in1
-net coolant-on or2.1.out                 => ppmc.0.dout.03.out
+net mist-on    iocontrol.0.coolant-mist  => or2.coolant.in0
+net flood-on   iocontrol.0.coolant-flood => or2.coolant.in1
+net coolant-on or2.coolant.out           => ppmc.0.dout.03.out
 
 
 # Use the spindle index pulse to measure velocity
@@ -55,8 +56,8 @@ setp encoder.0.counter-mode true
 
 # Scale and filter spindle velocity for displaying on screen
 # The spindle speed comes from the spindle drive, not the spindle shaft, so the scaling also includes the pulley ratio (and is not 60)
-setp lowpass.0.gain 0.05
-setp scale.0.gain 20.3175
+setp lowpass.0.gain      0.05
+setp scale.0.gain       20.3175
 net spindle-rps          lowpass.0.in
 net spindle-rps-filtered lowpass.0.out => scale.0.in
 net spindle-rpm          scale.0.out
