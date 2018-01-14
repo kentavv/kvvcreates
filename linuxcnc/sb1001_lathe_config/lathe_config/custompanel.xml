@@ -52,5 +52,32 @@
 			</led>
 		</hbox>
 
+
+		<hbox>
+			<label>
+				<text>"X Velocity"</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 20)</font>
+				<halpin>"x-velocity-upm"</halpin>
+				<format>"+3.2f"</format>
+			</number>
+		</hbox>
+
+		<hbox>
+			<label>
+				<text>"Z Velocity"</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 20)</font>
+				<halpin>"z-velocity-upm"</halpin>
+				<format>"+3.2f"</format>
+			</number>
+		</hbox>
+
 	</vbox>
 </pyvcp>

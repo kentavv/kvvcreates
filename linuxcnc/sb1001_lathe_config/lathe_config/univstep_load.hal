@@ -13,7 +13,7 @@ loadrt and2        names=and2.estop,and2.vc,and2.a1,and2.a2,and2.a3,and2.a4
 loadrt or2         names=or2.0,or2.coolant,or2.o1,or2.estop
 loadrt mult2       count=1
 loadrt estop_latch count=1
-loadrt scale       count=1
+loadrt scale       names=scale.0,scale.x-vel,scale.z-vel
 loadrt lowpass     count=1
 loadrt near        count=1
 loadrt limit1      count=1
@@ -36,6 +36,8 @@ addf or2.estop                servo-thread
 addf mult2.0                  servo-thread
 addf estop-latch.0            servo-thread
 addf scale.0                  servo-thread
+addf scale.x-vel              servo-thread
+addf scale.z-vel              servo-thread
 addf lowpass.0                servo-thread
 addf near.0                   servo-thread
 addf limit1.0                 servo-thread
