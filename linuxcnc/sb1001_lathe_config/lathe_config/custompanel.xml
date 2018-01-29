@@ -53,9 +53,14 @@
 		</hbox>
 
 
+		<label>
+			<text>"Velocity"</text>
+			<font>("Helvetica", 20)</font>
+		</label>
+
 		<hbox>
 			<label>
-				<text>"X Velocity"</text>
+				<text>"  X Vel:"</text>
 				<font>("Helvetica", 20)</font>
 			</label>
 
@@ -68,7 +73,7 @@
 
 		<hbox>
 			<label>
-				<text>"Z Velocity"</text>
+				<text>"  Z Vel:"</text>
 				<font>("Helvetica", 20)</font>
 			</label>
 
