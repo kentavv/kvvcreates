@@ -11,23 +11,23 @@ net axis.2.pos-relative halui.axis.2.pos-relative => vc-p4s.axis.2.pos-relative
 #net axis.5.pos-relative halui.axis.5.pos-relative => vc-p4s.axis.5.pos-relative
 
 # JOG
-net axis.0.jog-en vc-p4s.axis.0.jog-enable => axis.0.jog-enable
+##net axis.0.jog-en vc-p4s.axis.0.jog-enable => axis.0.jog-enable
 #net axis.1.jog-en vc-p4s.axis.1.jog-enable => axis.1.jog-enable
-net axis.2.jog-en vc-p4s.axis.2.jog-enable => axis.2.jog-enable
+##net axis.2.jog-en vc-p4s.axis.2.jog-enable => axis.2.jog-enable
 #net axis.3.jog-en vc-p4s.axis.3.jog-enable => axis.3.jog-enable
 #net axis.4.jog-en vc-p4s.axis.4.jog-enable => axis.4.jog-enable
 #net axis.5.jog-en vc-p4s.axis.5.jog-enable => axis.5.jog-enable
 
-net jog-scale vc-p4s.jog-scale => axis.0.jog-scale
+##net jog-scale vc-p4s.jog-scale => axis.0.jog-scale
 #net jog-scale vc-p4s.jog-scale => axis.1.jog-scale
-net jog-scale vc-p4s.jog-scale => axis.2.jog-scale
+##net jog-scale vc-p4s.jog-scale => axis.2.jog-scale
 #net jog-scale vc-p4s.jog-scale => axis.3.jog-scale 
 #net jog-scale vc-p4s.jog-scale => axis.4.jog-scale
 #net jog-scale vc-p4s.jog-scale => axis.5.jog-scale 
 
-net jog-counts vc-p4s.jog-counts => axis.0.jog-counts
+##net jog-counts vc-p4s.jog-counts => axis.0.jog-counts
 #net jog-counts vc-p4s.jog-counts => axis.1.jog-counts
-net jog-counts vc-p4s.jog-counts => axis.2.jog-counts
+##net jog-counts vc-p4s.jog-counts => axis.2.jog-counts
 #net jog-counts vc-p4s.jog-counts => axis.3.jog-counts 
 #net jog-counts vc-p4s.jog-counts => axis.4.jog-counts
 #net jog-counts vc-p4s.jog-counts => axis.5.jog-counts 

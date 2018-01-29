@@ -67,12 +67,16 @@ addf toggle.0 servo-thread
 addf toggle2nist.0 servo-thread
 
 
+# Spindle encoder is simply the return from a magetic index sensor, so only channel A, so enable counter-mode
 setp encoder.0.counter-mode       true
-setp encoder.0.position-scale     1
+#setp encoder.0.position-scale     1.0
 setp encoder.0.min-speed-estimate 0.5
 #setp encoder.0.x4-mode            false
 
-
+# The two MPG wheels have detents and we'll always have a full quadrature cycle per detent
+# so diable x4 mode and count only full quadrature cycles
+setp encoder.1.x4-mode            false
+setp encoder.2.x4-mode            false
 
 
 
