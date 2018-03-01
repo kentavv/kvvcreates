@@ -59,8 +59,8 @@ net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1 lincurve.0.in
 net spindle-rpm         near.0.in2
 net spindle-at-speed    near.0.out => motion.spindle-at-speed
 
-setp lincurve.0.x-val-00 200 
-setp lincurve.0.y-val-00 0 
+setp lincurve.0.x-val-00 200
+setp lincurve.0.y-val-00 0
 setp lincurve.0.x-val-01 500
 setp lincurve.0.y-val-01 0.35
 setp lincurve.0.x-val-02 1000
@@ -76,16 +76,16 @@ net requested-speed-for-ppmc lincurve.0.out => ppmc.0.DAC8.00.value
 
 # Two MPG handwheels serve as replacements for the orginal handwheels.
 #setp ilowpass.0.scale 0.25
-setp ilowpass.0.scale 1.0
-setp ilowpass.0.gain 0.005
+setp ilowpass.0.scale 1000.0
+setp ilowpass.0.gain 0.010
 #setp ilowpass.1.scale 0.25
-setp ilowpass.1.scale 1.0
-setp ilowpass.1.gain 0.005
+setp ilowpass.1.scale 1000.0
+setp ilowpass.1.gain 0.010
 
 setp axis.0.jog-enable TRUE
 setp axis.2.jog-enable TRUE
-setp axis.0.jog-scale 0.0005
-setp axis.2.jog-scale 0.0005
+setp axis.0.jog-scale 0.0000005
+setp axis.2.jog-scale 0.0000005
 
 net mpg-x-a     ppmc.0.din.02.in    => encoder.1.phase-A
 net mpg-x-b     ppmc.0.din.03.in    => encoder.1.phase-B
