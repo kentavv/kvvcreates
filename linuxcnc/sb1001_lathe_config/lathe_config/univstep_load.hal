@@ -53,18 +53,17 @@ addf pid.1.do-pid-calcs       servo-thread
 # write outputs last
 addf ppmc.0.write             servo-thread
 
-
-
 loadrt toggle count=1
 loadrt toggle2nist count=1
 
-addf and2.a1 servo-thread
-addf and2.a2 servo-thread
-addf and2.a3 servo-thread
-addf and2.a4 servo-thread
-addf or2.o1 servo-thread
-addf toggle.0 servo-thread
-addf toggle2nist.0 servo-thread
+addf and2.vc                  servo-thread
+addf and2.a1                  servo-thread
+addf and2.a2                  servo-thread
+addf and2.a3                  servo-thread
+addf and2.a4                  servo-thread
+addf or2.o1                   servo-thread
+addf toggle.0                 servo-thread
+addf toggle2nist.0            servo-thread
 
 
 # Spindle encoder is simply the return from a magetic index sensor, so only channel A, so enable counter-mode
@@ -85,5 +84,4 @@ net tool-change           iocontrol.0.tool-change      => hal_manualtoolchange.c
 net tool-changed          hal_manualtoolchange.changed => iocontrol.0.tool-changed
 net tool-number           iocontrol.0.tool-prep-number => hal_manualtoolchange.number
 net tool-prepare-loopback iocontrol.0.tool-prepare     => iocontrol.0.tool-prepared
-
 
