@@ -12,10 +12,11 @@ loadrt [EMCMOT]EMCMOT base_period_nsec=[EMCMOT]BASE_PERIOD servo_period_nsec=[EM
 #loadrt pid num_chan=4
 loadrt pid num_chan=3
 
-loadrt scale count=3
+loadrt scale names=scale.0,scale.1,scale.2,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt lowpass count=1
 loadrt near count=1
 loadrt limit1 count=1
+loadrt lincurve    count=1 personality=2
 
 loadrt and2 names=and2.estop,and2.vc,and2.a1,and2.a2,and2.a3,and2.a4
 
@@ -23,6 +24,9 @@ loadrt and2 names=and2.estop,and2.vc,and2.a1,and2.a2,and2.a3,and2.a4
 addf scale.0          servo-thread
 addf scale.1          servo-thread
 addf scale.2          servo-thread
+addf scale.x-vel servo-thread
+addf scale.y-vel servo-thread
+addf scale.z-vel servo-thread
 addf lowpass.0          servo-thread
 addf near.0          servo-thread
 addf limit1.0          servo-thread
@@ -43,6 +47,7 @@ loadrt mult2 count=1
 loadrt encoder num_chan=1
 addf encoder.update-counters base-thread
 addf encoder.capture-position servo-thread
+addf lincurve.0               servo-thread
 setp encoder.0.counter-mode true
 #setp encoder.0.position-scale 16
 #setp encoder.0.position-scale 4
