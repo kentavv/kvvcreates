@@ -125,7 +125,7 @@ net Mist-or-FloodOn or2.1.out => ppmc.0.dout.03.out
 #addf encoder.capture-position servo-thread
 #setp encoder.0.counter-mode true
 #setp encoder.0.position-scale 16
-##setp encoder.0.x4-mode false 
+##setp encoder.0.x4-mode false
 
 net spindle-position encoder.0.position => motion.spindle-revs
 net spindle-velocity encoder.0.velocity => motion.spindle-speed-in
@@ -154,13 +154,15 @@ setp scale.0.gain 60
 net spindle-fb-filtered-rps lowpass.0.out => scale.0.in
 #net spindle-velocity => scale.0.in
 
-#net spindle-fb-filtered-rpm scale.0.out 
-net SpindleRPM <= scale.0.out 
+#net spindle-fb-filtered-rpm scale.0.out
+net SpindleRPM <= scale.0.out
 
 # spindle speed display
-#net spindle-velocity mult2.0.in0 
+#net spindle-velocity mult2.0.in0
 #setp   mult2.0.in1 60.
 #setp   mult2.0.in1 180.
 ##newsig SpindleRPM float
 #net SpindleRPM <= mult2.0.out
+
+net spindle-locked motion.spindle-inhibit <= ppmc.0.din.08.in
 
