@@ -4,17 +4,35 @@
 # **** Setup of spindle speed display using pyvcp -START ****
 # **** Use COMMANDED spindle velocity from LinuxCNC because no spindle encoder was specified
 
-net spindle-cmd-rpm-abs    => pyvcp.spindle-speed-target
-net SpindleRPM    => pyvcp.spindle-speed
+net spindle-cmd-rpm-abs pyvcp.spindle-speed-target
+net SpindleRPM pyvcp.spindle-speed
 
 # **** force spindle at speed indicator true because we have no feedback ****
 
-net spindle-at-speed => pyvcp.spindle-at-speed-led
+net spindle-at-speed pyvcp.spindle-at-speed-led
 #sets spindle-at-speed true
 
-net spindle-cmd-rpm-abs => near.0.in1
-#net spindle-velocity => near.0.in2
-net SpindleRPM => near.0.in2
-net spindle-at-speed <= near.0.out
+net spindle-cmd-rpm-abs near.0.in1
+#net spindle-velocity near.0.in2
+net SpindleRPM near.0.in2
+net spindle-at-speed near.0.out
 setp near.0.scale 1.1
+
+net spindle-locked pyvcp.spindle-locked-led
+
+#loadrt scale names=scale.x-vel,scale.y-vel,scale.z-vel
+#addf scale.x-vel servo-thread
+#addf scale.y-vel servo-thread
+#addf scale.z-vel servo-thread
+
+setp scale.x-vel.gain 60
+setp scale.y-vel.gain 60
+setp scale.z-vel.gain 60
+
+net x-velocity-ups axis.0.joint-vel-cmd scale.x-vel.in
+net y-velocity-ups axis.1.joint-vel-cmd scale.y-vel.in
+net z-velocity-ups axis.2.joint-vel-cmd scale.z-vel.in
+net x-velocity-upm scale.x-vel.out pyvcp.x-velocity-upm
+net y-velocity-upm scale.y-vel.out pyvcp.y-velocity-upm
+net z-velocity-upm scale.z-vel.out pyvcp.z-velocity-upm
 
