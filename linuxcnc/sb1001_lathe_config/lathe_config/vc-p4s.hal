@@ -83,7 +83,7 @@ net max.value halui.max-velocity.value => vc-p4s.max-velocity.value
 
 # 9---SPINDLE OVERRIDE
 setp halui.spindle-override.scale 0.001
-#net spindle-enable vc-p4s.spindle-override.count.enable => halui.spindle-override.count-enable
+net spindle-enable vc-p4s.spindle-override.count.enable => halui.spindle-override.count-enable
 net spindle-counts vc-p4s.spindle-counts => halui.spindle-override.counts
 net spindle.value halui.spindle-override.value => vc-p4s.spindle-override.value
 
