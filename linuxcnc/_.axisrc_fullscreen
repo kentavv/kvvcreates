@@ -1,0 +1,26 @@
+# Fullscreen works well for maximizing space, but the title bar, 
+# which contains the name of the currently loaded file, is not shown
+#root_window.attributes('-fullscreen', True)
+
+# The zoomed attribute would seem perfect, maximizing the available space
+# while also showing the titlebar, but unfortunately on the LinuxCNC 
+# distribution only the height is maximized
+#root_window.attributes('-zoomed', True)
+
+# Adjusting the geometry of the application to fill the screen works, but
+# the titlebar may be hidden under on-top window manager decreations,
+# Also, "zoomed" is not a valid option, needs to be: normal, iconic, withdrawn
+#maxgeo=root_window.tk.call("wm","maxsize",".")
+#fullsize=maxgeo.split(' ')[0] + 'x' + maxgeo.split(' ')[1]
+#root_window.tk.call("wm","geometry",".",fullsize)
+##root_window.tk.call("wm","state",".","zoomed")
+
+# Similar to the above, the geomtry can be adjusted to be fullsize and
+# positioned below the window manager bar
+tb_h = 32
+root = root_window
+w, h = root.winfo_screenwidth(), root.winfo_screenheight() - tb_h*2.5
+root.geometry("%dx%d+%d+%d" % (w, h, -1, tb_h-1))
+
+# Another recommended method is to use devilspie, but I wanted to try
+# use only what is available on a clean installation.
