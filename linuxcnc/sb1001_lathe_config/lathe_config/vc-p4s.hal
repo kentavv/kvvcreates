@@ -8,9 +8,9 @@ loadusr -W vc-p4s
 net axis.0.pos-relative halui.axis.0.pos-relative => vc-p4s.axis.0.pos-relative
 net axis.1.pos-relative halui.axis.1.pos-relative => vc-p4s.axis.1.pos-relative
 net axis.2.pos-relative halui.axis.2.pos-relative => vc-p4s.axis.2.pos-relative
-#net axis.3.pos-relative halui.axis.3.pos-relative => vc-p4s.axis.3.pos-relative
-#net axis.4.pos-relative halui.axis.4.pos-relative => vc-p4s.axis.4.pos-relative
-#net axis.5.pos-relative halui.axis.5.pos-relative => vc-p4s.axis.5.pos-relative
+net axis.3.pos-relative halui.axis.3.pos-relative => vc-p4s.axis.3.pos-relative
+net axis.4.pos-relative halui.axis.4.pos-relative => vc-p4s.axis.4.pos-relative
+net axis.5.pos-relative halui.axis.5.pos-relative => vc-p4s.axis.5.pos-relative
 
 # 2---JOG
 #net axis.0.jog-en vc-p4s.axis.0.jog-enable => axis.0.jog-enable
@@ -114,6 +114,7 @@ net spindle.start  vc-p4s.spindle.start  => halui.spindle.start
 net spindle.stop  vc-p4s.spindle.stop  => halui.spindle.stop
 
 # 13---E-STOP
+# the 'net estop' line may not be required because the pendant's enhanced estop is wired through the Pico USC
 net estop vc-p4s.estop.activate => halui.estop.activate
 net reset vc-p4s.estop.reset => halui.estop.reset
 net estop-is-activated halui.estop.is-activated => vc-p4s.estop.is-activated

@@ -36,7 +36,7 @@ setp pid.1.FF1      [AXIS_2]FF1
 setp pid.1.FF2      [AXIS_2]FF2
 setp pid.1.deadband [AXIS_2]DEADBAND
 
-# create four position command signals
+# create position command signals
 # connect position commands to motion controller
 # connect position commands to PID input
 net Xpos-cmd axis.0.motor-pos-cmd => pid.0.command
@@ -58,6 +58,7 @@ setp ppmc.0.DAC8.00.scale 1.0
 net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1 lincurve.0.in
 net spindle-rpm         near.0.in2
 net spindle-at-speed    near.0.out => motion.spindle-at-speed
+#sets spindle-at-speed true
 
 setp lincurve.0.x-val-00 200
 setp lincurve.0.y-val-00 0

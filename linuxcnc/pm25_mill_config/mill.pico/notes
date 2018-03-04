@@ -1,0 +1,9 @@
+With signal nets, recall that the format is
+
+net <signal name> <pin name> <optional arrow> <optional pin> <optional pin> ...
+
+This format simplifies code using newsig, linkps, and linksp
+
+The <optional arrow> is only for readability and is ignored by LinuxCNC. Arrows include <=, =>, and <=>
+
+

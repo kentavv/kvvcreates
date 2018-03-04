@@ -4,81 +4,76 @@
 # kinematics
 loadrt trivkins
 # motion controller, get name and thread periods from ini file
-#loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[TRAJ]AXES
-#loadrt [EMCMOT]EMCMOT                                     servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[TRAJ]AXES
 loadrt [EMCMOT]EMCMOT base_period_nsec=[EMCMOT]BASE_PERIOD servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[TRAJ]AXES
-
-# next load the PID module, for four PID loops
-#loadrt pid num_chan=4
-loadrt pid num_chan=3
-
-loadrt scale names=scale.0,scale.1,scale.2,scale.x-vel,scale.y-vel,scale.z-vel
-loadrt lowpass count=1
-loadrt near count=1
-loadrt limit1 count=1
-loadrt lincurve    count=1 personality=2
-
-loadrt and2 names=and2.estop,and2.vc,and2.a1,and2.a2,and2.a3,and2.a4
-
-
-addf scale.0          servo-thread
-addf scale.1          servo-thread
-addf scale.2          servo-thread
-addf scale.x-vel servo-thread
-addf scale.y-vel servo-thread
-addf scale.z-vel servo-thread
-addf lowpass.0          servo-thread
-addf near.0          servo-thread
-addf limit1.0          servo-thread
 
 # install driver
 loadrt hal_ppmc port_addr="0xe010" extradac=0x00 epp_dir=1
 
-# make some signals for the scope for tuning.
-#loadrt ddt count=4
-loadrt ddt count=3
-# add components for E-stop logic
+loadrt and2        names=and2.estop,and2.vc,and2.a1,and2.a2,and2.a3,and2.a4
+loadrt or2         names=or2.0,or2.coolant,or2.o1
+loadrt mult2       count=1
 loadrt estop_latch count=1
-#loadrt and2 count=1
-#loadrt and2 and2.estop
-loadrt or2 names=or2.0,or2.1,or2.o1
-loadrt mult2 count=1
+loadrt scale       names=scale.0,scale.1,scale.2,scale.x-vel,scale.y-vel,scale.z-vel
+loadrt lowpass     count=1
+loadrt near        count=1
+loadrt limit1      count=1
+loadrt encoder     num_chan=1
+loadrt lincurve    count=1 personality=2
+loadrt pid         num_chan=3
 
-loadrt encoder num_chan=1
-addf encoder.update-counters base-thread
-addf encoder.capture-position servo-thread
-addf lincurve.0               servo-thread
-setp encoder.0.counter-mode true
-#setp encoder.0.position-scale 16
-#setp encoder.0.position-scale 4
-setp encoder.0.position-scale 1
-setp encoder.0.min-speed-estimate .5
-#setp encoder.0.x4-mode false
+# Components are executed in their addf order, and some may be order sensitive.
 
 # set up the realtime thread
 # read inputs first
-addf ppmc.0.read servo-thread
+addf ppmc.0.read              servo-thread
 # then run the motion controller
-addf motion-command-handler servo-thread
-addf and2.estop servo-thread
-addf or2.0 servo-thread
-addf or2.1 servo-thread
-addf mult2.0 servo-thread
-addf estop-latch.0 servo-thread
-addf motion-controller servo-thread
+addf motion-command-handler   servo-thread
+addf and2.estop               servo-thread
+addf or2.0                    servo-thread
+addf or2.coolant              servo-thread
+addf mult2.0                  servo-thread
+addf estop-latch.0            servo-thread
+addf scale.0                  servo-thread
+addf scale.1                  servo-thread
+addf scale.2                  servo-thread
+addf scale.x-vel              servo-thread
+addf scale.y-vel              servo-thread
+addf scale.z-vel              servo-thread
+addf lowpass.0                servo-thread
+addf near.0                   servo-thread
+addf limit1.0                 servo-thread
+addf encoder.update-counters  base-thread
+addf encoder.capture-position servo-thread
+addf lincurve.0               servo-thread
+addf motion-controller        servo-thread
 # then the PID loops
-addf pid.0.do-pid-calcs servo-thread
-addf pid.1.do-pid-calcs servo-thread
-addf pid.2.do-pid-calcs servo-thread
-#addf pid.3.do-pid-calcs servo-thread
+addf pid.0.do-pid-calcs       servo-thread
+addf pid.1.do-pid-calcs       servo-thread
+addf pid.2.do-pid-calcs       servo-thread
 # write outputs last
-addf ppmc.0.write servo-thread
+addf ppmc.0.write             servo-thread
+
+loadrt toggle count=1
+loadrt toggle2nist count=1
+
+addf and2.vc                  servo-thread
+addf and2.a1                  servo-thread
+addf and2.a2                  servo-thread
+addf and2.a3                  servo-thread
+addf and2.a4                  servo-thread
+addf or2.o1                   servo-thread
+addf toggle.0                 servo-thread
+addf toggle2nist.0            servo-thread
+
+
+setp encoder.0.counter-mode       true
+setp encoder.0.position-scale     1.0
+setp encoder.0.min-speed-estimate 0.5
 
 
 loadusr -W hal_manualtoolchange
-net tool-change iocontrol.0.tool-change => hal_manualtoolchange.change
-net tool-changed iocontrol.0.tool-changed <= hal_manualtoolchange.changed
-net tool-number iocontrol.0.tool-prep-number => hal_manualtoolchange.number
-net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
-
+net tool-change           iocontrol.0.tool-change      => hal_manualtoolchange.change
+net tool-changed          hal_manualtoolchange.changed => iocontrol.0.tool-changed
+net tool-number           iocontrol.0.tool-prep-number => hal_manualtoolchange.number
+net tool-prepare-loopback iocontrol.0.tool-prepare     => iocontrol.0.tool-prepared
 

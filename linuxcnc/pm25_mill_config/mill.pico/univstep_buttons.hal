@@ -1,28 +1,13 @@
-#I have to say,it is nice to be able to tell your machine how to run instead of having to learn to or get used to running a machine someone else has configured. I am sold on EMC.
+#I have to say, it is nice to be able to tell your machine how to run instead of having to learn to or get used to running a machine someone else has configured. I am sold on EMC.
 #
 #In the original post on this thread, I proposed 2 buttons, one a Run/Step and the other a Pause/Resume. The controller I converted from had those 2 buttons close to an e-stop and until a program was proved out, 2 fingers stayed on them.
 #
 #Thanks to John and Andy, I got my Pause/Resume button. I did a little work on my own and was able to get the Run/Step button (admittedly the far easier). So, for what it's worth, here is the program for both buttons:
 #
 
-#loadrt and2 count=4
-#loadrt or2 count=1
-#loadrt and2 names=a1,a2,a3,a4
-#loadrt or2 names=o1
-loadrt toggle count=1
-loadrt toggle2nist count=1
+# (The toggle component has debounce by default)
 
-addf and2.a1 servo-thread
-addf and2.a2 servo-thread
-addf and2.a3 servo-thread
-addf and2.a4 servo-thread
-addf or2.o1 servo-thread
-addf toggle.0 servo-thread
-addf toggle2nist.0 servo-thread
-
-# External Program Pause/Resume and Run/Step Buttons
 # Pause/Resume Section
-#net pause-resume-btn and2.0.in0 and2.1.in0 <= hm2_5i20.0.gpio.027.in_not (this is your input)
 net pause-resume-btn and2.a1.in0 and2.a2.in0 <= ppmc.0.din.11.in #(this is your input)
 net pause-on toggle2nist.0.is-on and2.a1.in1 and2.a4.in1 <= halui.program.is-paused
 net run-on and2.a2.in1 <= halui.program.is-running
@@ -32,16 +17,16 @@ net toggle-ok toggle.0.in <= or2.o1.out
 net togglesig toggle2nist.0.in <= toggle.0.out
 net toggleon halui.program.pause <= toggle2nist.0.on
 net toggleoff halui.program.resume <= toggle2nist.0.off
+
 # Run/Step Section
-#net run-step-btn and2.2.in0 and2.3.in0 <= hm2_5i20.0.gpio.026.in_not (this is your input)
 net run-step-btn and2.a3.in0 and2.a4.in0 <= ppmc.0.din.10.in #(this is your input)
-#net idle-on and2.a3.in1 <= halui.program.is-idle
 net idle-on and2.a3.in1 <= halui.program.is-idle
 # net pause.on and 2.3.in1 <= halui.program.is-paused
 # and2.3.in1 was added in the net pause-on statement in Pause/Resume Section
 net run-sig halui.mode.auto halui.program.run <= and2.a3.out
 net step-sig halui.program.step <= and2.a4.out
 
+# Stop Section
 net stop-btn <= ppmc.0.din.09.in => halui.program.stop
 
 #This is how they function:
