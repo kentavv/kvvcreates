@@ -18,7 +18,7 @@ loadrt lowpass     count=1
 loadrt near        count=1
 loadrt limit1      count=1
 loadrt encoder     num_chan=1
-loadrt lincurve    count=1 personality=2
+loadrt lincurve    count=1 personality=8
 loadrt pid         num_chan=3
 
 # Components are executed in their addf order, and some may be order sensitive.

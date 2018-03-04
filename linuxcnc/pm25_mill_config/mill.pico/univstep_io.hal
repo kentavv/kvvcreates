@@ -46,9 +46,8 @@ net estop-reset   iocontrol.0.user-request-enable => estop-latch.0.reset
 # The state of SSR1 and SSR2 influence the spindle speed DAC.
 # Forward and reverse should be attached to SS1 and SSR2 respectively, most likely.
 # See http://pico-systems.com/spindac.html for hardware configuration information.
-net spindle-fwd    motion.spindle-forward => ppmc.0.dout.00.out
-net spindle-rev    motion.spindle-reverse => ppmc.0.dout.01.out
-#net spindle-enable motion.spindle-on      => ppmc.0.dout.02.out
+net spindle-on  motion.spindle-on      => ppmc.0.dout.00.out
+net spindle-fwd motion.spindle-forward => ppmc.0.dout.01.out
 
 # connect spindle brake to I/O controller
 #net SpindleBrakeOn <= ppmc.0.dout.02.out
