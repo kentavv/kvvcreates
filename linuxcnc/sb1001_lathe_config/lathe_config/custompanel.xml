@@ -60,7 +60,7 @@
 
 		<hbox>
 			<label>
-				<text>"  X Vel:"</text>
+				<text>"  X: "</text>
 				<font>("Helvetica", 20)</font>
 			</label>
 
@@ -73,7 +73,7 @@
 
 		<hbox>
 			<label>
-				<text>"  Z Vel:"</text>
+				<text>"  Z: "</text>
 				<font>("Helvetica", 20)</font>
 			</label>
 

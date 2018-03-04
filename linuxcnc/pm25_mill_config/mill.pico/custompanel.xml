@@ -1,12 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <pyvcp>
-	 <vbox>
+	<vbox>
+
 		<relief>RIDGE</relief>
 		<bd>6</bd>
 
 		<label>
 			<text>"Spindle"</text>
-			<font>("Helvetica",20)</font>
+			<font>("Helvetica", 20)</font>
 		</label>
 
 		<bar>
@@ -17,11 +18,11 @@
 		<hbox>
 			<label>
 				<text>"  Target"</text>
-				<font>("Helvetica",20)</font>
+				<font>("Helvetica", 20)</font>
 			</label>
 
 			<number>
-				<font>("Helvetica",20)</font>
+				<font>("Helvetica", 20)</font>
 				<halpin>"spindle-speed-target"</halpin>
 				<format>"d"</format>
 			</number>
@@ -37,8 +38,9 @@
 		<hbox>
 			<label>
 				<text>"  Lock"</text>
-				<font>("Helvetica",20)</font>
+				<font>("Helvetica", 20)</font>
 			</label>
+
 			<led>
 				<halpin>"spindle-locked-led"</halpin>
 				<size>30</size>
@@ -50,7 +52,7 @@
 
 		<label>
 			<text>"Velocity"</text>
-			<font>("Helvetica",20)</font>
+			<font>("Helvetica", 20)</font>
 		</label>
 
 		<hbox>
