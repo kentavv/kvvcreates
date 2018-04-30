@@ -9,7 +9,7 @@ loadrt [EMCMOT]EMCMOT base_period_nsec=[EMCMOT]BASE_PERIOD servo_period_nsec=[EM
 # install driver
 loadrt hal_ppmc port_addr="0xe010" extradac=0x00 epp_dir=1
 
-loadrt and2        names=and2.estop,and2.vc,and2.a1,and2.a2,and2.a3,and2.a4
+loadrt and2        names=and2.estop,and2.vc,and2.a1,and2.a2,and2.a3,and2.a4,and2.motion_lock
 loadrt or2         names=or2.0,or2.coolant,or2.o1
 loadrt mult2       count=1
 loadrt estop_latch count=1
@@ -64,7 +64,10 @@ addf and2.a4                  servo-thread
 addf or2.o1                   servo-thread
 addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
+addf and2.motion_lock         servo-thread
 
+loadrt debounce cfg=1
+addf debounce.0 servo-thread
 
 setp encoder.0.counter-mode       true
 setp encoder.0.position-scale     1.0

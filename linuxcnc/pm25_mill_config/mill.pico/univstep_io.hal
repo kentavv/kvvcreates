@@ -81,5 +81,32 @@ net spindle-rps          lowpass.0.in
 net spindle-rps-filtered lowpass.0.out => scale.0.in
 net spindle-rpm          scale.0.out
 
-net spindle-locked motion.spindle-inhibit <= ppmc.0.din.08.in
+
+##
+## Spindle lock
+##
+setp debounce.0.delay 10 # 10 * servo-thread = 5ms
+net spindle-locked-raw ppmc.0.din.08.in => debounce.0.0.in
+
+# This simple method inhibits the spindle and all motion including programs, mdi commands, and pendant.
+#net spindle-locked debounce.0.0.out => motion.spindle-inhibit motion.feed-inhibit
+
+# Instead, first inhibit the spindle
+net spindle-locked debounce.0.0.out => motion.spindle-inhibit
+
+# Next, inhibit motion only if a program is running, which includes programs and mdi commands, but allow pendant 
+# motion. Non-motion commands (e.g., g20 and g21) are still executed regardless of motion.feed-inhibit.
+# This method is nice because pendant motion is allowed, but does have a couple of gotchas:
+# 1) When the feed-hold button is pressed while the spindle lock is on, a short burst of motion (0.016 at 10ips) 
+# occurs.
+# 2) The spindle-at-speed code only seems to apply to starting a new command. If motion was taking place when the
+# spindle lock was applied, once the spindle is unlocked, the motion will immediately resume before the spindle
+# is to full speed. To avoid this, if in motion, first press feed hold, then enable the spindle lock. Then once
+# the spindle is unlocked, the spindle can reach commanded speed, before resuming feed.
+#
+#  The program.is-running pin is already attached to the run-on signal in unistep_buttons.
+#net program-running halui.program.is-running => and2.motion_lock.in0
+net run-on                           => and2.motion_lock.in0
+net spindle-locked                   => and2.motion_lock.in1
+net motion_lock and2.motion_lock.out => motion.feed-inhibit
 
