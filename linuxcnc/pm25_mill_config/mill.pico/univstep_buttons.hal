@@ -8,26 +8,26 @@
 # (The toggle component has debounce by default)
 
 # Pause/Resume Section
-net pause-resume-btn and2.a1.in0 and2.a2.in0 <= ppmc.0.din.11.in #(this is your input)
-net pause-on toggle2nist.0.is-on and2.a1.in1 and2.a4.in1 <= halui.program.is-paused
-net run-on and2.a2.in1 <= halui.program.is-running
-net pause-sig or2.o1.in0 <= and2.a1.out
-net resume-sig or2.o1.in1 <= and2.a2.out
-net toggle-ok toggle.0.in <= or2.o1.out
-net togglesig toggle2nist.0.in <= toggle.0.out
-net toggleon halui.program.pause <= toggle2nist.0.on
-net toggleoff halui.program.resume <= toggle2nist.0.off
+net pause-resume-btn ppmc.0.din.11.in         => and2.a1.in0 and2.a2.in0
+net pause-on         halui.program.is-paused  => toggle2nist.0.is-on and2.a1.in1 and2.a4.in1
+net run-on           halui.program.is-running => and2.a2.in1
+net pause-sig        and2.a1.out              => or2.o1.in0
+net resume-sig       and2.a2.out              => or2.o1.in1
+net toggle-ok        or2.o1.out               => toggle.0.in
+net togglesig        toggle.0.out             => toggle2nist.0.in
+net toggleon         toggle2nist.0.on         => halui.program.pause
+net toggleoff        toggle2nist.0.off        => halui.program.resume
 
 # Run/Step Section
-net run-step-btn and2.a3.in0 and2.a4.in0 <= ppmc.0.din.10.in #(this is your input)
-net idle-on and2.a3.in1 <= halui.program.is-idle
-# net pause.on and 2.3.in1 <= halui.program.is-paused
+net run-step-btn     ppmc.0.din.10.in         => and2.a3.in0 and2.a4.in0
+net idle-on          halui.program.is-idle    => and2.a3.in1
+# net pause-on halui.program.is-paused => and2.3.in1
 # and2.3.in1 was added in the net pause-on statement in Pause/Resume Section
-net run-sig halui.mode.auto halui.program.run <= and2.a3.out
-net step-sig halui.program.step <= and2.a4.out
+net run-sig          and2.a3.out              => halui.mode.auto halui.program.run
+net step-sig         and2.a4.out              => halui.program.step
 
 # Stop Section
-net stop-btn <= ppmc.0.din.09.in => halui.program.stop
+net stop-btn         ppmc.0.din.09.in         => halui.program.stop
 
 #This is how they function:
 #
