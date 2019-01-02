@@ -1,11 +1,11 @@
 /**
-  Copyright (C) 2012-2017 by Autodesk, Inc.
+  Copyright (C) 2012-2018 by Autodesk, Inc.
   All rights reserved.
 
   LinuxCNC Lathe post processor configuration.
 
-  $Revision: 41629 8aa88f7ace42ba0869ee3a1c2abd22e5124421b7 $
-  $Date: 2017-09-28 19:21:56 $
+  $Revision: 42062 df9e7211d1d1ed0cf6628028551e39ce9548ad60 $
+  $Date: 2018-08-03 14:32:26 $
   
   FORKID {D3E630A8-AFCC-46E6-BEF1-6AD5A6FA5483}
 */
@@ -13,11 +13,11 @@
 description = "LinuxCNC Turning";
 vendor = "LinuxCNC";
 vendorUrl = "http://www.linuxcnc.org";
-legal = "Copyright (C) 2012-2017 by Autodesk, Inc.";
+legal = "Copyright (C) 2012-2018 by Autodesk, Inc.";
 certificationLevel = 2;
-minimumRevision = 24000;
+minimumRevision = 40783;
 
-longDescription = "Turning post for LinuxCNC.";
+longDescription = "Turning post for LinuxCNC. Use Turret 0 for Positional Turret, Turret 101 for QCTP on X- Post, Turret 102 for QCTP on X+ Post, Turret 103 for Gang Tooling on X- Post, Turret 104 for Gang Tooling on X+ Tool Post.";
 
 extension = "ngc";
 programNameIsInteger = false;
@@ -26,7 +26,7 @@ setCodePage("ascii");
 capabilities = CAPABILITY_TURNING;
 tolerance = spatial(0.002, MM);
 
-minimumChordLength = spatial(0.01, MM);
+minimumChordLength = spatial(0.25, MM);
 minimumCircularRadius = spatial(0.01, MM);
 maximumCircularRadius = spatial(1000, MM);
 minimumCircularSweep = toRad(0.01);
@@ -48,8 +48,6 @@ properties = {
   useRadius: false, // specifies that arcs should be output using the radius (R word) instead of the I, J, and K words.
   maximumSpindleSpeed: 3500, // specifies the maximum spindle speed, 5C high speed 3500rpm, D1-4 low speed 2500rpm
   showNotes: false, // specifies that operation notes should be output.
-  useGangTooling: false, // specifies if gang tooling should be used, if yes X is scaled with -2.
-  useQCTP: false, // specifies if the machine has Quick Change Tool Post Set installed or not, if yes it will scale X with -2.
   g53HomePositionX: 0, // home position for X-axis
   g53HomePositionZ: 0 // home position for Z-axis
 };
@@ -66,8 +64,6 @@ propertyDefinitions = {
   useRadius: {title:"Radius arcs", description:"If yes is selected, arcs are outputted using radius values rather than IJK.", type:"boolean"},
   maximumSpindleSpeed: {title:"Max spindle speed", description:"Defines the maximum spindle speed allowed by your machines.", type:"integer", range:[0, 999999999]},
   showNotes: {title:"Show notes", description:"Writes operation notes as comments in the outputted code.", type:"boolean"},
-  useGangTooling: {title:"Use gang tooling", description:"specifies if gang tooling should be used, if yes X is scaled with -2.", type:"boolean"},
-  useQCTP: {title:"Use QCTP", description:"Specifies if the machine has Quick Change Tool Post Set installed or not, if yes it will scale X with -2.", type:"boolean"},
   g53HomePositionX: {title:"G53 home position X", description:"G53 X-axis home position.", type:"number"},
   g53HomePositionZ: {title:"G53 home position Z", description:"G53 Z-axis home position.", type:"number"}
 };
@@ -115,12 +111,21 @@ var gotSecondarySpindle = false;
 
 var WARNING_WORK_OFFSET = 0;
 
+var QCTP = 0;
+var TURRET = 1;
+var GANG = 2;
+
+var FRONT = -1;
+var REAR = 1;
+
 // collected state
 var sequenceNumber;
 var currentWorkOffset;
 var optionalSection = false;
 var forceSpindleSpeed = false;
 var currentFeedId;
+var toolingData;
+var previousToolingData;
 
 function getCode(code) {
   switch(code) {
@@ -416,16 +421,47 @@ function getSpindle() {
   }
 }
 
-function onSection() {
-
-  // turning using rear tool
-  if (properties.useGangTooling || properties.useQCTP) {
-    // writeComment("Approach from below");
-    xFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true, scale:-2}); // diameter mode
-  } else {
-    // writeComment("Approach from above");
-    xFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true, scale:2}); // diameter mode
+function ToolingData(_tool) {
+  switch (_tool.turret) {
+  // Positional Turret
+  case 0:
+    this.tooling = TURRET;
+    this.toolPost = REAR;
+    break;
+  // QCTP X-
+  case 101:
+    this.tooling = QCTP;
+    this.toolPost = FRONT;
+    break;
+  // QCTP X+
+  case 102:
+    this.tooling = QCTP;
+    this.toolPost = REAR;
+    break;
+  // Gang Tooling X-
+  case 103:
+    this.tooling = GANG;
+    this.toolPost = FRONT;
+    break;
+  // Gang Tooling X+
+  case 104:
+    this.tooling = GANG;
+    this.toolPost = REAR;
+    break;
+  default:
+    error(localize("Turret number must be 0 (main turret), 101 (QCTP X-), 102 (QCTP X+, 103 (gang tooling X-), or 104 (gang tooling X+)."));
+    break;
   }
+  this.number = _tool.number;
+  this.comment = _tool.comment;
+  this.toolLength = _tool.bodyLength;
+  // HSMWorks returns 0 in tool.bodyLength
+  if ((tool.bodyLength == 0) && hasParameter("operation:tool_bodyLength")) {
+    this.toolLength = getParameter("operation:tool_bodyLength");
+  }
+}
+
+function onSection() {
 
   if (currentSection.getType() != TYPE_TURNING) {
     if (!hasParameter("operation-strategy") || (getParameter("operation-strategy") != "drill")) {
@@ -445,13 +481,46 @@ function onSection() {
   
   var insertToolCall = forceToolAndRetract || isFirstSection() ||
     currentSection.getForceToolChange && currentSection.getForceToolChange() ||
-    (tool.number != getPreviousSection().getTool().number);
+    (tool.number != getPreviousSection().getTool().number) ||
+    (tool.compensationOffset != getPreviousSection().getTool().compensationOffset) ||
+    (tool.diameterOffset != getPreviousSection().getTool().diameterOffset) ||
+    (tool.lengthOffset != getPreviousSection().getTool().lengthOffset);
   
   var retracted = false; // specifies that the tool has been retracted to the safe plane
   var newSpindle = isFirstSection() ||
     (getPreviousSection().spindle != currentSection.spindle);
   var newWorkOffset = isFirstSection() ||
     (getPreviousSection().workOffset != currentSection.workOffset); // work offset changes
+  
+  // determine which tooling holder is used
+  if (!isFirstSection()) {
+    previousToolingData = toolingData;
+  }
+  toolingData = new ToolingData(tool);
+  toolingData.operationComment = "";
+  if (hasParameter("operation-comment")) {
+    toolingData.operationComment = getParameter("operation-comment");
+  }
+  toolingData.toolChange = insertToolCall;
+  if (isFirstSection()) {
+    previousToolingData = toolingData;
+  }
+
+  // turning using front tool post
+  if (toolingData.toolPost == FRONT) {
+    xFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true, scale:-2});
+    xOutput = createVariable({prefix:"X"}, xFormat);
+    iFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true, scale:-1}); // radius mode
+    iOutput = createReferenceVariable({prefix:"I"}, iFormat);
+
+  // turning using rear tool post
+  } else {
+    xFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true, scale:2});
+    xOutput = createVariable({prefix:"X"}, xFormat);
+    iFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true, scale:1}); // radius mode
+    iOutput = createReferenceVariable({prefix:"I"}, iFormat);
+  }
+
   if (insertToolCall || newSpindle || newWorkOffset) {
     // retract to safe plane
     retracted = true;
@@ -499,12 +568,18 @@ function onSection() {
       warning(localize("Tool number exceeds maximum value."));
     }
 
+    if ((toolingData.tooling == QCTP) || tool.getManualToolChange()) {
+      var comment = formatComment(localize("CHANGE TO T") + tool.number + " " + localize("ON") + " " +
+        localize((toolingData.toolPost == REAR) ? "REAR TOOL POST" : "FRONT TOOL POST"));
+      writeBlock(mFormat.format(0), comment);
+    }
+
     var compensationOffset = tool.isTurningTool() ? tool.compensationOffset : tool.lengthOffset;
     if (compensationOffset > 99) {
       error(localize("Compensation offset is out of range."));
       return;
     }
-    writeBlock("T" + toolFormat.format(tool.number), mFormat.format(6), conditional(tool.manualToolChange, gFormat.format(43)));
+    writeBlock("T" + toolFormat.format(tool.number), mFormat.format(6), gFormat.format(43));
     if (tool.comment) {
       writeComment(tool.comment);
     }
@@ -565,15 +640,8 @@ function onSection() {
 
   // writeBlock(getCode(currentSection.tailstock ? "TAILSTOCK_ON" : "TAILSTOCK_OFF"));
 
-  var mSpindle = getCode(tool.clockwise ? "START_MAIN_SPINDLE_CW" : "START_MAIN_SPINDLE_CCW");
-  
-  gSpindleModeModal.reset();
-  if (currentSection.getTool().getSpindleMode() == SPINDLE_CONSTANT_SURFACE_SPEED) {
-    var maximumSpindleSpeed = (tool.maximumSpindleSpeed > 0) ? Math.min(tool.maximumSpindleSpeed, properties.maximumSpindleSpeed) : properties.maximumSpindleSpeed;
-    writeBlock(getCode("CONSTANT_SURFACE_SPEED_ON"), "D" + rpmFormat.format(maximumSpindleSpeed), sOutput.format(tool.surfaceSpeed * ((unit == MM) ? 1/1000.0 : 1/12.0)), mSpindle);
-  } else {
-    writeBlock(getCode("CONSTANT_SURFACE_SPEED_OFF"), sOutput.format(tool.spindleRPM), mSpindle);
-  }
+  var initialPosition = getFramePosition(currentSection.getInitialPosition());
+  startSpindle(false, true, initialPosition);
   
   gFeedModeModal.reset();
   if (currentSection.feedMode == FEED_PER_REVOLUTION) {
@@ -584,20 +652,24 @@ function onSection() {
   
   setRotation(currentSection.workPlane);
 
-  var initialPosition = getFramePosition(currentSection.getInitialPosition());
   if (!retracted) {
     if (getCurrentPosition().z < initialPosition.z) {
       writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
     }
   }
 
-  if (insertToolCall) {
+  if (insertToolCall || tool.getSpindleMode() == SPINDLE_CONSTANT_SURFACE_SPEED) {
     gMotionModal.reset();
     writeBlock(
       gAbsIncModal.format(90),
       gMotionModal.format(0), xOutput.format(initialPosition.x), yOutput.format(initialPosition.y), zOutput.format(initialPosition.z)
     );
     gMotionModal.reset();
+  }
+
+  // enable SFM spindle speed
+  if (tool.getSpindleMode() == SPINDLE_CONSTANT_SURFACE_SPEED) {
+    startSpindle(false, false);
   }
 
   if (currentSection.partCatcher) {
@@ -613,8 +685,7 @@ function onDwell(seconds) {
   if (seconds > 99999.999) {
     warning(localize("Dwelling time is out of range."));
   }
-  milliseconds = clamp(1, seconds * 1000, 99999999);
-  writeBlock(/*gFeedModeModal.format(94),*/ gFormat.format(4), "P" + milliFormat.format(milliseconds));
+  writeBlock(/*gFeedModeModal.format(94),*/ gFormat.format(4), "P" + secFormat.format(seconds));
 }
 
 var pendingRadiusCompensation = -1;
@@ -695,6 +766,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
   }
 
   var start = getCurrentPosition();
+  var directionCode = (toolingData.toolPost == REAR) ? (clockwise ? 2 : 3) : (clockwise ? 3 : 2);
 
   if (isFullCircle()) {
     if (properties.useRadius || isHelical()) { // radius mode does not support full arcs
@@ -703,13 +775,13 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
     }
     switch (getCircularPlane()) {
     case PLANE_XY:
-      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(17), gMotionModal.format(clockwise ? 2 : 3), iOutput.format(cx - start.x, 0), jOutput.format(cy - start.y, 0), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(17), gMotionModal.format(directionCode), iOutput.format(cx - start.x, 0), jOutput.format(cy - start.y, 0), getFeed(feed));
       break;
     case PLANE_ZX:
-      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(18), gMotionModal.format(clockwise ? 2 : 3), iOutput.format(cx - start.x, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(18), gMotionModal.format(directionCode), iOutput.format(cx - start.x, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
       break;
     case PLANE_YZ:
-      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(19), gMotionModal.format(clockwise ? 2 : 3), jOutput.format(cy - start.y, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(19), gMotionModal.format(directionCode), jOutput.format(cy - start.y, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
       break;
     default:
       linearize(tolerance);
@@ -720,7 +792,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
       error(localize("XY plane not allowed"));
       break;
     case PLANE_ZX:
-      writeBlock(gAbsIncModal.format(90), gMotionModal.format(clockwise ? 2 : 3), xOutput.format(x), yOutput.format(y), zOutput.format(z), iOutput.format(cx - start.x, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), iOutput.format(cx - start.x, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
       break;
     case PLANE_YZ:
       error(localize("XZ plane not allowed"));
@@ -735,13 +807,13 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
     }
     switch (getCircularPlane()) {
     case PLANE_XY:
-      writeBlock(gPlaneModal.format(17), gMotionModal.format(clockwise ? 2 : 3), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
+      writeBlock(gPlaneModal.format(17), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
       break;
     case PLANE_ZX:
-      writeBlock(gPlaneModal.format(18), gMotionModal.format(clockwise ? 2 : 3), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
+      writeBlock(gPlaneModal.format(18), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
       break;
     case PLANE_YZ:
-      writeBlock(gPlaneModal.format(19), gMotionModal.format(clockwise ? 2 : 3), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
+      writeBlock(gPlaneModal.format(19), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
       break;
     default:
       linearize(tolerance);
@@ -760,19 +832,10 @@ function getCommonCycle(x, y, z, r) {
 }
 
 function onCyclePoint(x, y, z) {
-/*
-  if (isSameDirection(currentSection.workPlane.forward, new Vector(0, 0, 1)) ||
-      isSameDirection(currentSection.workPlane.forward, new Vector(0, 0, -1))) {
-    writeBlock(gPlaneModal.format(17)); // XY plane
-  } else {
-    expandCyclePoint(x, y, z);
-    return;
-  }
-*/
-
   switch (cycleType) {
   case "thread-turning":
-    var r = -cycle.incrementalX; // positive if taper goes down - delta radius
+    var inverted = (toolingData.toolPost == REAR) ? 1 : -1;
+    var r = -cycle.incrementalX * inverted; // positive if taper goes down - delta radius
     var threadsPerInch = 1.0/cycle.pitch; // per mm for metric
     var f = 1/threadsPerInch;
     writeBlock(
@@ -786,8 +849,18 @@ function onCyclePoint(x, y, z) {
     return;
   }
 
+  var gPlane;
+  if (isSameDirection(currentSection.workPlane.forward, new Vector(0, 0, 1)) ||
+      isSameDirection(currentSection.workPlane.forward, new Vector(0, 0, -1))) {
+    // writeBlock(gPlaneModal.format(17)); // XY plane
+    gPlane = 17;
+  } else {
+    expandCyclePoint(x, y, z);
+    return;
+  }
+
   if (isFirstCyclePoint()) {
-    switch (gPlaneModal.getCurrent()) {
+    switch (gPlane) {
     case 17:
       writeBlock(gMotionModal.format(0), zOutput.format(cycle.clearance));
       break;
@@ -807,7 +880,7 @@ function onCyclePoint(x, y, z) {
     // return to initial Z which is clearance plane and set absolute mode
 
     var F = cycle.feedrate;
-    var P = (cycle.dwell == 0) ? 0 : clamp(1, cycle.dwell * 1000, 99999999); // in milliseconds
+    var P = !cycle.dwell ? 0 : clamp(1, cycle.dwell * 1000, 99999999); // in milliseconds
 
     switch (cycleType) {
     case "drilling":
@@ -823,7 +896,7 @@ function onCyclePoint(x, y, z) {
       var _y = yOutput.format(y);
       var _z = zOutput.format(z);
       if (!_x && !_y && !_z) {
-        switch (gPlaneModal.getCurrent()) {
+        switch (gPlane) {
         case 17: // XY
           xOutput.reset(); // at least one axis is required
           _x = xOutput.format(x);
@@ -889,6 +962,68 @@ function setCoolant(coolant) {
     writeBlock(m);
     currentCoolantMode = coolant;
   }
+}
+
+function onSpindleSpeed(spindleSpeed) {
+  if (rpmFormat.areDifferent(spindleSpeed, sOutput.getCurrent())) { // avoid redundant output of spindle speed
+    startSpindle(false, false, getFramePosition(currentSection.getInitialPosition()), spindleSpeed);
+  }
+}
+
+function startSpindle(tappingMode, forceRPMMode, initialPosition, rpm) {
+  var spindleDir;
+  var spindleMode;
+  var maxSpeed = "";
+  var _spindleSpeed = spindleSpeed;
+  if (rpm !== undefined) {
+    _spindleSpeed = rpm;
+  }
+  gSpindleModeModal.reset();
+  
+  if ((getSpindle() == SPINDLE_SECONDARY) && !gotSecondarySpindle) {
+    error(localize("Secondary spindle is not available."));
+    return;
+  }
+ 
+  if (false /*tappingMode*/) {
+    spindleDir = getCode("RIGID_TAPPING");
+  } else {
+    if (getSpindle() == SPINDLE_SECONDARY) {
+      spindleDir = tool.clockwise ? getCode("START_SUB_SPINDLE_CW") : getCode("START_SUB_SPINDLE_CCW");
+    } else {
+      spindleDir = tool.clockwise ? getCode("START_MAIN_SPINDLE_CW") : getCode("START_MAIN_SPINDLE_CCW");
+    }
+  }
+
+  var maximumSpindleSpeed = (tool.maximumSpindleSpeed > 0) ? Math.min(tool.maximumSpindleSpeed, properties.maximumSpindleSpeed) : properties.maximumSpindleSpeed;
+  if (tool.getSpindleMode() == SPINDLE_CONSTANT_SURFACE_SPEED) {
+    _spindleSpeed = tool.surfaceSpeed * ((unit == MM) ? 1/1000.0 : 1/12.0);
+    if (forceRPMMode) { // RPM mode is forced until move to initial position
+      _spindleSpeed = Math.min((_spindleSpeed * ((unit == MM) ? 1000.0 : 12.0) / (Math.PI*Math.abs(initialPosition.x*2))), maximumSpindleSpeed);
+      spindleMode = getCode("CONSTANT_SURFACE_SPEED_OFF");
+    } else {
+      maxSpeed = "D" + rpmFormat.format(maximumSpindleSpeed);
+      spindleMode = getCode("CONSTANT_SURFACE_SPEED_ON");
+    }
+  } else {
+    spindleMode = getCode("CONSTANT_SURFACE_SPEED_OFF");
+  }
+  if (getSpindle(true) == SPINDLE_SECONDARY) {
+    writeBlock(
+      spindleMode,
+      maxSpeed,
+      sOutput.format(_spindleSpeed),
+      spindleDir
+    );
+  } else {
+    writeBlock(
+      spindleMode,
+      maxSpeed,
+      sOutput.format(_spindleSpeed),
+      spindleDir
+    );
+  }
+  // wait for spindle here if required
 }
 
 function onCommand(command) {
@@ -987,6 +1122,11 @@ function engagePartCatcher(engage) {
 }
 
 function onSectionEnd() {
+
+  // cancel SFM mode to preserve spindle speed
+  if (tool.getSpindleMode() == SPINDLE_CONSTANT_SURFACE_SPEED) {
+    startSpindle(false, true, getFramePosition(currentSection.getFinalPosition()));
+  }
 
   if (currentSection.partCatcher) {
     engagePartCatcher(false);

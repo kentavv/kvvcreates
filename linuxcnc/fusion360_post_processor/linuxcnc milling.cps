@@ -1,11 +1,11 @@
 /**
-  Copyright (C) 2012-2015 by Autodesk, Inc.
+  Copyright (C) 2012-2018 by Autodesk, Inc.
   All rights reserved.
 
   LinuxCNC (EMC2) post processor configuration.
 
-  $Revision: 41601 2e6200651f01fad70bd72491303b9729cd57fc6e $
-  $Date: 2017-09-14 12:02:56 $
+  $Revision: 42150 28b798d7e172a1a74d44850d54eab46d018c55fd $
+  $Date: 2018-09-28 16:27:04 $
   
   FORKID {52A5C3D6-1533-413E-B493-7B93D9E48B30}
 */
@@ -13,9 +13,9 @@
 description = "LinuxCNC (EMC2)";
 vendor = "LinuxCNC";
 vendorUrl = "http://www.linuxcnc.org";
-legal = "Copyright (C) 2012-2015 by Autodesk, Inc.";
+legal = "Copyright (C) 2012-2018 by Autodesk, Inc.";
 certificationLevel = 2;
-minimumRevision = 24000;
+minimumRevision = 40783;
 
 longDescription = "Generic milling post for LinuxCNC (EMC2).";
 
@@ -25,7 +25,7 @@ setCodePage("ascii");
 capabilities = CAPABILITY_MILLING;
 tolerance = spatial(0.002, MM);
 
-minimumChordLength = spatial(0.01, MM);
+minimumChordLength = spatial(0.25, MM);
 minimumCircularRadius = spatial(0.01, MM);
 maximumCircularRadius = spatial(1000, MM);
 minimumCircularSweep = toRad(0.01);
@@ -70,11 +70,20 @@ propertyDefinitions = {
 var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-/\"";
 var maxToolNum = 199;
 
-var mapCoolantTable = new Table(
-  [9, 8, 7],
-  {initial:COOLANT_OFF, force:true},
-  "Invalid coolant mode"
-);
+// samples:
+// throughTool: {on: 88, off: 89}
+// throughTool: {on: [8, 88], off: [9, 89]}
+var coolants = {
+  flood: {on: 8},
+  mist: {on: 7},
+  throughTool: {},
+  air: {},
+  airThroughTool: {},
+  suction: {},
+  floodMist: {},
+  floodThroughTool: {},
+  off: 9
+};
 
 var gFormat = createFormat({prefix:"G", decimals:1});
 var mFormat = createFormat({prefix:"M", decimals:1});
@@ -93,7 +102,7 @@ var taperFormat = createFormat({decimals:1, scale:DEG});
 
 var xOutput = createVariable({prefix:"X"}, xyzFormat);
 var yOutput = createVariable({prefix:"Y"}, xyzFormat);
-var zOutput = createVariable({prefix:"Z"}, xyzFormat);
+var zOutput = createVariable({onchange:function () {retracted = false;}, prefix:"Z"}, xyzFormat);
 var aOutput = createVariable({prefix:"A"}, abcFormat);
 var bOutput = createVariable({prefix:"B"}, abcFormat);
 var cOutput = createVariable({prefix:"C"}, abcFormat);
@@ -125,12 +134,17 @@ var currentWorkOffset;
 var forceSpindleSpeed = false;
 var activeMovements; // do not use by default
 var currentFeedId;
+var retracted = false; // specifies that the tool has been retracted to the safe plane
 
 
 /**
   Writes the specified block.
 */
 function writeBlock() {
+  var text = formatWords(arguments);
+  if (!text) {
+    return;
+  }
   if (properties.showSequenceNumbers) {
     writeWords2("N" + sequenceNumber, arguments);
     sequenceNumber += properties.sequenceNumberIncrement;
@@ -509,8 +523,10 @@ function setWorkPlane(abc) {
 
   onCommand(COMMAND_UNLOCK_MULTI_AXIS);
 
-  // NOTE: add retract here
-
+  if (!retracted) {
+    writeRetract(Z);
+  }
+  
   writeBlock(
     gMotionModal.format(0),
     conditional(machineConfiguration.isMachineCoordinate(0), "A" + abcFormat.format(abc.x)),
@@ -566,7 +582,7 @@ function getWorkPlaneMachineABC(workPlane) {
     );
   }
 
-  var tcp = true;
+  var tcp = false;
   if (tcp) {
     setRotation(W); // TCP mode
   } else {
@@ -578,16 +594,25 @@ function getWorkPlaneMachineABC(workPlane) {
   return abc;
 }
 
+function isProbeOperation() {
+  return hasParameter("operation-strategy") && (getParameter("operation-strategy") == "probe");
+}
+
 function onSection() {
   var insertToolCall = isFirstSection() ||
     currentSection.getForceToolChange && currentSection.getForceToolChange() ||
     (tool.number != getPreviousSection().getTool().number);
   
-  var retracted = false; // specifies that the tool has been retracted to the safe plane
+  retracted = false;
   var newWorkOffset = isFirstSection() ||
     (getPreviousSection().workOffset != currentSection.workOffset); // work offset changes
   var newWorkPlane = isFirstSection() ||
-    !isSameDirection(getPreviousSection().getGlobalFinalToolAxis(), currentSection.getGlobalInitialToolAxis());
+    !isSameDirection(getPreviousSection().getGlobalFinalToolAxis(), currentSection.getGlobalInitialToolAxis()) ||
+    (currentSection.isOptimizedForMachine() && getPreviousSection().isOptimizedForMachine() &&
+      Vector.diff(getPreviousSection().getFinalToolAxisABC(), currentSection.getInitialToolAxisABC()).length > 1e-4) ||
+    (!machineConfiguration.isMultiAxisConfiguration() && currentSection.isMultiAxis()) ||
+    (!getPreviousSection().isMultiAxis() && currentSection.isMultiAxis() ||
+      getPreviousSection().isMultiAxis() && !currentSection.isMultiAxis()); // force newWorkPlane between indexing and simultaneous operations
   if (insertToolCall || newWorkOffset || newWorkPlane) {
     
     // stop spindle before retract during tool change
@@ -596,14 +621,7 @@ function onSection() {
     }
     
     // retract to safe plane
-    retracted = true;
-    if (properties.useG28) {
-      writeBlock(gFormat.format(28), gAbsIncModal.format(91), "Z" + xyzFormat.format(0)); // retract
-      writeBlock(gAbsIncModal.format(90));
-    } else {
-      writeBlock(gAbsIncModal.format(90), gFormat.format(53), gMotionModal.format(0), "Z" + xyzFormat.format(0)); // retract
-    }
-    zOutput.reset();
+    writeRetract(Z);
   }
 
   if (hasParameter("operation-comment")) {
@@ -633,8 +651,7 @@ function onSection() {
   if (insertToolCall) {
     forceWorkPlane();
     
-    retracted = true;
-    onCommand(COMMAND_COOLANT_OFF);
+    setCoolant(COOLANT_OFF);
   
     if (!isFirstSection() && properties.optionalStop) {
       onCommand(COMMAND_OPTIONAL_STOP);
@@ -683,19 +700,19 @@ function onSection() {
   if (insertToolCall ||
       forceSpindleSpeed ||
       isFirstSection() ||
-      (rpmFormat.areDifferent(tool.spindleRPM, sOutput.getCurrent())) ||
+      (rpmFormat.areDifferent(spindleSpeed, sOutput.getCurrent())) ||
       (tool.clockwise != getPreviousSection().getTool().clockwise)) {
     forceSpindleSpeed = false;
     
-    if (tool.spindleRPM < 1) {
+    if (spindleSpeed < 1) {
       error(localize("Spindle speed out of range."));
       return;
     }
-    if (tool.spindleRPM > 99999) {
+    if (spindleSpeed > 99999) {
       warning(localize("Spindle speed exceeds maximum value."));
     }
     writeBlock(
-      sOutput.format(tool.spindleRPM), mFormat.format(tool.clockwise ? 3 : 4)
+      sOutput.format(spindleSpeed), mFormat.format(tool.clockwise ? 3 : 4)
     );
   }
 
@@ -751,20 +768,13 @@ function onSection() {
   }
 
   // set coolant after we have positioned at Z
-  {
-    var c = mapCoolantTable.lookup(tool.coolant);
-    if (c) {
-      writeBlock(mFormat.format(c));
-    } else {
-      warning(localize("Coolant not supported."));
-    }
-  }
+  setCoolant(tool.coolant);
 
   forceAny();
   gMotionModal.reset();
 
   var initialPosition = getFramePosition(currentSection.getInitialPosition());
-  if (!retracted) {
+  if (!retracted && !insertToolCall) {
     if (getCurrentPosition().z < initialPosition.z) {
       writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
     }
@@ -847,6 +857,10 @@ function getCommonCycle(x, y, z, r) {
 }
 
 function onCyclePoint(x, y, z) {
+  if (!isSameDirection(getRotation().forward, new Vector(0, 0, 1))) {
+    expandCyclePoint(x, y, z);
+    return;
+  }
   switch (cycleType) {
   case "tapping":
   case "left-tapping":
@@ -887,7 +901,7 @@ function onCyclePoint(x, y, z) {
     // return to initial Z which is clearance plane and set absolute mode
 
     var F = cycle.feedrate;
-    var P = (cycle.dwell == 0) ? 0 : clamp(0.001, cycle.dwell, 99999999); // in seconds
+    var P = !cycle.dwell ? 0 : clamp(0.001, cycle.dwell, 99999999); // in seconds
 
     switch (cycleType) {
     case "drilling":
@@ -1196,6 +1210,125 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
   }
 }
 
+var currentCoolantMode = undefined;
+var coolantOff = undefined;
+
+function setCoolant(coolant) {
+  var coolantCodes = getCoolantCodes(coolant);
+  if (Array.isArray(coolantCodes)) {
+    for (var c in coolantCodes) {
+      writeBlock(coolantCodes[c]);
+    }
+    return undefined;
+  }
+  return coolantCodes;
+}
+
+function getCoolantCodes(coolant) {
+  if (!coolants) {
+    error(localize("Coolants have not been defined."));
+  }
+  if (!coolantOff) { // use the default coolant off command when an 'off' value is not specified for the previous coolant mode
+    coolantOff = coolants.off;
+  }
+
+  if (isProbeOperation()) { // avoid coolant output for probing
+    coolant = COOLANT_OFF;
+  }
+
+  if (coolant == currentCoolantMode) {
+    return undefined; // coolant is already active
+  }
+
+  var multipleCoolantBlocks = new Array(); // create a formatted array to be passed into the outputted line
+  if ((coolant != COOLANT_OFF) && (currentCoolantMode != COOLANT_OFF)) {
+    multipleCoolantBlocks.push(mFormat.format(coolantOff));
+  }
+
+  var m;
+  if (coolant == COOLANT_OFF) {
+    m = coolantOff;
+    coolantOff = coolants.off;
+  }
+
+  switch (coolant) {
+  case COOLANT_FLOOD:
+    if (!coolants.flood) {
+      break;
+    }
+    m = coolants.flood.on;
+    coolantOff = coolants.flood.off;
+    break;
+  case COOLANT_THROUGH_TOOL:
+    if (!coolants.throughTool) {
+      break;
+    }
+    m = coolants.throughTool.on;
+    coolantOff = coolants.throughTool.off;
+    break;
+  case COOLANT_AIR:
+    if (!coolants.air) {
+      break;
+    }
+    m = coolants.air.on;
+    coolantOff = coolants.air.off;
+    break;
+  case COOLANT_AIR_THROUGH_TOOL:
+    if (!coolants.airThroughTool) {
+      break;
+    }
+    m = coolants.airThroughTool.on;
+    coolantOff = coolants.airThroughTool.off;
+    break;
+  case COOLANT_FLOOD_MIST:
+    if (!coolants.floodMist) {
+      break;
+    }
+    m = coolants.floodMist.on;
+    coolantOff = coolants.floodMist.off;
+    break;
+  case COOLANT_MIST:
+    if (!coolants.mist) {
+      break;
+    }
+    m = coolants.mist.on;
+    coolantOff = coolants.mist.off;
+    break;
+  case COOLANT_SUCTION:
+    if (!coolants.suction) {
+      break;
+    }
+    m = coolants.suction.on;
+    coolantOff = coolants.suction.off;
+    break;
+  case COOLANT_FLOOD_THROUGH_TOOL:
+    if (!coolants.floodThroughTool) {
+      break;
+    }
+    m = coolants.floodThroughTool.on;
+    coolantOff = coolants.floodThroughTool.off;
+    break;
+  }
+  
+  if (!m) {
+    onUnsupportedCoolant(coolant);
+    m = 9;
+  }
+
+  if (m) {
+    if (Array.isArray(m)) {
+      for (var i in m) {
+        multipleCoolantBlocks.push(mFormat.format(m[i]));
+      }
+    } else {
+      multipleCoolantBlocks.push(mFormat.format(m));
+    }
+    currentCoolantMode = coolant;
+    return multipleCoolantBlocks; // return the single formatted coolant value
+  }
+  return undefined;
+}
+
 var mapCommand = {
   COMMAND_STOP:0,
   COMMAND_OPTIONAL_STOP:1,
@@ -1204,9 +1337,7 @@ var mapCommand = {
   COMMAND_SPINDLE_COUNTERCLOCKWISE:4,
   COMMAND_STOP_SPINDLE:5,
   COMMAND_ORIENTATE_SPINDLE:19,
-  COMMAND_LOAD_TOOL:6,
-  COMMAND_COOLANT_ON:8,
-  COMMAND_COOLANT_OFF:9
+  COMMAND_LOAD_TOOL: 6
 };
 
 function onCommand(command) {
@@ -1251,34 +1382,64 @@ function onSectionEnd() {
   forceAny();
 }
 
-function onClose() {
-  onCommand(COMMAND_COOLANT_OFF);
-
-  if (properties.useG28) {
-    writeBlock(gFormat.format(28), gAbsIncModal.format(91), "Z" + xyzFormat.format(0)); // retract
-  } else {
-    writeBlock(gAbsIncModal.format(90), gFormat.format(53), gMotionModal.format(0), "Z" + xyzFormat.format(0)); // retract
+/** Output block to do safe retract and/or move to home position. */
+function writeRetract() {
+  if (arguments.length == 0) {
+    error(localize("No axis specified for writeRetract()."));
+    return;
+  }
+  var words = []; // store all retracted axes in an array
+  for (var i = 0; i < arguments.length; ++i) {
+    let instances = 0; // checks for duplicate retract calls
+    for (var j = 0; j < arguments.length; ++j) {
+      if (arguments[i] == arguments[j]) {
+        ++instances;
+      }
+    }
+    if (instances > 1) { // error if there are multiple retract calls for the same axis
+      error(localize("Cannot retract the same axis twice in one line"));
+      return;
+    }
+    switch (arguments[i]) {
+    case X:
+      if (machineConfiguration.hasHomePositionX() || machineConfiguration.hasHomePositionY()) {
+        words.push("X" + xyzFormat.format(machineConfiguration.hasHomePositionX() ?machineConfiguration.getHomePositionX() : 0));
+      }
+      break;
+    case Y:
+      if (machineConfiguration.hasHomePositionX() || machineConfiguration.hasHomePositionY()) {
+        words.push("Y" + xyzFormat.format(machineConfiguration.hasHomePositionY() ? machineConfiguration.getHomePositionY() : 0));
+      }
+      break;
+    case Z:
+      words.push("Z" + xyzFormat.format(machineConfiguration.getRetractPlane()));
+      retracted = true; // specifies that the tool has been retracted to the safe plane
+      break;
+    default:
+      error(localize("Bad axis specified for writeRetract()."));
+      return;
+    }
+  }
+  if (words.length > 0) {
+    if (properties.useG28) {
+      gAbsIncModal.reset();
+      writeBlock(gFormat.format(28), gAbsIncModal.format(91), words); // retract
+      writeBlock(gAbsIncModal.format(90));
+    } else {
+      writeBlock(gAbsIncModal.format(90), gFormat.format(53), gMotionModal.format(0), words); // retract
+    }
   }
   zOutput.reset();
+}
+
+function onClose() {
+  setCoolant(COOLANT_OFF);
+
+  writeRetract(Z);
 
   setWorkPlane(new Vector(0, 0, 0)); // reset working plane
 
-  if (!machineConfiguration.hasHomePositionX() && !machineConfiguration.hasHomePositionY()) {
-    if (properties.useG28) {
-      // 90/91 mode is don't care
-      writeBlock(gFormat.format(28), gAbsIncModal.format(91), "X" + xyzFormat.format(0), "Y" + xyzFormat.format(0)); // return to home
-    }
-  } else {
-    var homeX;
-    if (machineConfiguration.hasHomePositionX()) {
-      homeX = "X" + xyzFormat.format(machineConfiguration.getHomePositionX());
-    }
-    var homeY;
-    if (machineConfiguration.hasHomePositionY()) {
-      homeY = "Y" + xyzFormat.format(machineConfiguration.getHomePositionY());
-    }
-    writeBlock(gAbsIncModal.format(90), gFormat.format(53), gMotionModal.format(0), homeX, homeY);
-  }
+  writeRetract(X, Y);
 
   onImpliedCommand(COMMAND_END);
   onImpliedCommand(COMMAND_STOP_SPINDLE);
