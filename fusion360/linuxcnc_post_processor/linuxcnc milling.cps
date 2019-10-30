@@ -10,8 +10,8 @@
   FORKID {52A5C3D6-1533-413E-B493-7B93D9E48B30}
 */
 
-description = "LinuxCNC Milling (KVV)";
-vendor = "(KVV) LinuxCNC";
+description = "LinuxCNC Milling (KVV 20191030)";
+vendor = "LinuxCNC";
 vendorUrl = "http://www.linuxcnc.org";
 legal = "Copyright (C) 2012-2018 by Autodesk, Inc.";
 certificationLevel = 2;
@@ -257,7 +257,7 @@ function onOpen() {
 
   // dump tool information
   if (properties.writeTools) {
-    var zRanges = {};
+    zRanges = {};
     if (is3D()) {
       var numberOfSections = getNumberOfSections();
       for (var i = 0; i < numberOfSections; ++i) {

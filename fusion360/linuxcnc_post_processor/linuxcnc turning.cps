@@ -10,8 +10,8 @@
   FORKID {D3E630A8-AFCC-46E6-BEF1-6AD5A6FA5483}
 */
 
-description = "LinuxCNC Turning (KVV)";
-vendor = "(KVV) LinuxCNC";
+description = "LinuxCNC Turning (KVV 20191030)";
+vendor = "LinuxCNC";
 vendorUrl = "http://www.linuxcnc.org";
 legal = "Copyright (C) 2012-2018 by Autodesk, Inc.";
 certificationLevel = 2;
@@ -356,7 +356,7 @@ function onOpen() {
 
   // dump tool information
   if (properties.writeTools) {
-    var zRanges = {};
+    zRanges = {};
     if (is3D()) {
       var numberOfSections = getNumberOfSections();
       for (var i = 0; i < numberOfSections; ++i) {
