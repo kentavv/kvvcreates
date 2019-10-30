@@ -4,14 +4,14 @@
 
   LinuxCNC (EMC2) post processor configuration.
 
-  $Revision: 42150 28b798d7e172a1a74d44850d54eab46d018c55fd $
-  $Date: 2018-09-28 16:27:04 $
+  $Revision: 42473 905303e8374380273c82d214b32b7e80091ba92e $
+  $Date: 2019-09-04 07:46:02 $
   
   FORKID {52A5C3D6-1533-413E-B493-7B93D9E48B30}
 */
 
-description = "LinuxCNC (EMC2)";
-vendor = "LinuxCNC";
+description = "LinuxCNC Milling (KVV)";
+vendor = "(KVV) LinuxCNC";
 vendorUrl = "http://www.linuxcnc.org";
 legal = "Copyright (C) 2012-2018 by Autodesk, Inc.";
 certificationLevel = 2;
@@ -32,8 +32,6 @@ minimumCircularSweep = toRad(0.01);
 maximumCircularSweep = toRad(180);
 allowHelicalMoves = true;
 allowedCircularPlanes = undefined; // allow any circular motion
-
-
 
 // user-defined properties
 properties = {
@@ -70,20 +68,21 @@ propertyDefinitions = {
 var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-/\"";
 var maxToolNum = 199;
 
+var singleLineCoolant = false; // specifies to output multiple coolant codes in one line rather than in separate lines
 // samples:
-// throughTool: {on: 88, off: 89}
-// throughTool: {on: [8, 88], off: [9, 89]}
-var coolants = {
-  flood: {on: 8},
-  mist: {on: 7},
-  throughTool: {},
-  air: {},
-  airThroughTool: {},
-  suction: {},
-  floodMist: {},
-  floodThroughTool: {},
-  off: 9
-};
+// {id: COOLANT_THROUGH_TOOL, on: 88, off: 89}
+// {id: COOLANT_THROUGH_TOOL, on: [8, 88], off: [9, 89]}
+var coolants = [
+  {id: COOLANT_FLOOD, on: 8},
+  {id: COOLANT_MIST, on: 7},
+  {id: COOLANT_THROUGH_TOOL},
+  {id: COOLANT_AIR},
+  {id: COOLANT_AIR_THROUGH_TOOL},
+  {id: COOLANT_SUCTION},
+  {id: COOLANT_FLOOD_MIST},
+  {id: COOLANT_FLOOD_THROUGH_TOOL},
+  {id: COOLANT_OFF, off: 9}
+];
 
 var gFormat = createFormat({prefix:"G", decimals:1});
 var mFormat = createFormat({prefix:"M", decimals:1});
@@ -135,7 +134,6 @@ var forceSpindleSpeed = false;
 var activeMovements; // do not use by default
 var currentFeedId;
 var retracted = false; // specifies that the tool has been retracted to the safe plane
-
 
 /**
   Writes the specified block.
@@ -259,6 +257,7 @@ function onOpen() {
 
   // dump tool information
   if (properties.writeTools) {
+    var zRanges = {};
     if (is3D()) {
       var numberOfSections = getNumberOfSections();
       for (var i = 0; i < numberOfSections; ++i) {
@@ -631,7 +630,9 @@ function onSection() {
     }
   }
 
-  writeToolDescription(tool);
+  if (properties.writeTools) {
+    writeToolDescription(tool);
+  }
   
   if (properties.showNotes && hasParameter("notes")) {
     var notes = getParameter("notes");
@@ -815,7 +816,6 @@ function onSection() {
       yOutput.format(initialPosition.y)
     );
   }
-
 
   if (properties.useParametricFeed &&
       hasParameter("operation-strategy") &&
@@ -1210,14 +1210,18 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
   }
 }
 
-var currentCoolantMode = undefined;
+var currentCoolantMode = COOLANT_OFF;
 var coolantOff = undefined;
 
 function setCoolant(coolant) {
   var coolantCodes = getCoolantCodes(coolant);
   if (Array.isArray(coolantCodes)) {
-    for (var c in coolantCodes) {
-      writeBlock(coolantCodes[c]);
+    if (singleLineCoolant) {
+      writeBlock(coolantCodes.join(getWordSeparator()));
+    } else {
+      for (var c in coolantCodes) {
+        writeBlock(coolantCodes[c]);
+      }
     }
     return undefined;
   }
@@ -1225,97 +1229,55 @@ function setCoolant(coolant) {
 }
 
 function getCoolantCodes(coolant) {
+  var multipleCoolantBlocks = new Array(); // create a formatted array to be passed into the outputted line
   if (!coolants) {
     error(localize("Coolants have not been defined."));
   }
-  if (!coolantOff) { // use the default coolant off command when an 'off' value is not specified for the previous coolant mode
-    coolantOff = coolants.off;
-  }
-
   if (isProbeOperation()) { // avoid coolant output for probing
     coolant = COOLANT_OFF;
   }
-
   if (coolant == currentCoolantMode) {
     return undefined; // coolant is already active
   }
-
-  var multipleCoolantBlocks = new Array(); // create a formatted array to be passed into the outputted line
-  if ((coolant != COOLANT_OFF) && (currentCoolantMode != COOLANT_OFF)) {
-    multipleCoolantBlocks.push(mFormat.format(coolantOff));
+  if ((coolant != COOLANT_OFF) && (currentCoolantMode != COOLANT_OFF) && (coolantOff != undefined)) {
+    if (Array.isArray(coolantOff)) {
+      for (var i in coolantOff) {
+        multipleCoolantBlocks.push(mFormat.format(coolantOff[i]));
+      }
+    } else {
+      multipleCoolantBlocks.push(mFormat.format(coolantOff));
+    }
   }
 
   var m;
+  var coolantCodes = {};
+  for (var c in coolants) { // find required coolant codes into the coolants array
+    if (coolants[c].id == coolant) {
+      coolantCodes.on = coolants[c].on;
+      if (coolants[c].off != undefined) {
+        coolantCodes.off = coolants[c].off;
+        break;
+      } else {
+        for (var i in coolants) {
+          if (coolants[i].id == COOLANT_OFF) {
+            coolantCodes.off = coolants[i].off;
+            break;
+          }
+        }
+      }
+    }
+  }
   if (coolant == COOLANT_OFF) {
-    m = coolantOff;
-    coolantOff = coolants.off;
+    m = !coolantOff ? coolantCodes.off : coolantOff; // use the default coolant off command when an 'off' value is not specified
+  } else {
+    coolantOff = coolantCodes.off;
+    m = coolantCodes.on;
   }
 
-  switch (coolant) {
-  case COOLANT_FLOOD:
-    if (!coolants.flood) {
-      break;
-    }
-    m = coolants.flood.on;
-    coolantOff = coolants.flood.off;
-    break;
-  case COOLANT_THROUGH_TOOL:
-    if (!coolants.throughTool) {
-      break;
-    }
-    m = coolants.throughTool.on;
-    coolantOff = coolants.throughTool.off;
-    break;
-  case COOLANT_AIR:
-    if (!coolants.air) {
-      break;
-    }
-    m = coolants.air.on;
-    coolantOff = coolants.air.off;
-    break;
-  case COOLANT_AIR_THROUGH_TOOL:
-    if (!coolants.airThroughTool) {
-      break;
-    }
-    m = coolants.airThroughTool.on;
-    coolantOff = coolants.airThroughTool.off;
-    break;
-  case COOLANT_FLOOD_MIST:
-    if (!coolants.floodMist) {
-      break;
-    }
-    m = coolants.floodMist.on;
-    coolantOff = coolants.floodMist.off;
-    break;
-  case COOLANT_MIST:
-    if (!coolants.mist) {
-      break;
-    }
-    m = coolants.mist.on;
-    coolantOff = coolants.mist.off;
-    break;
-  case COOLANT_SUCTION:
-    if (!coolants.suction) {
-      break;
-    }
-    m = coolants.suction.on;
-    coolantOff = coolants.suction.off;
-    break;
-  case COOLANT_FLOOD_THROUGH_TOOL:
-    if (!coolants.floodThroughTool) {
-      break;
-    }
-    m = coolants.floodThroughTool.on;
-    coolantOff = coolants.floodThroughTool.off;
-    break;
-  }
-  
   if (!m) {
     onUnsupportedCoolant(coolant);
     m = 9;
-  }
-
-  if (m) {
+  } else {
     if (Array.isArray(m)) {
       for (var i in m) {
         multipleCoolantBlocks.push(mFormat.format(m[i]));
@@ -1373,7 +1335,9 @@ function onSectionEnd() {
     writeBlock(gMotionModal.format(49));
   }
   writeBlock(gPlaneModal.format(17));
-
+  if (!isLastSection() && (getNextSection().getTool().coolant != tool.coolant)) {
+    setCoolant(COOLANT_OFF);
+  }
   if (((getCurrentSectionId() + 1) >= getNumberOfSections()) ||
       (tool.number != getNextSection().getTool().number)) {
     onCommand(COMMAND_BREAK_CONTROL);
@@ -1403,7 +1367,7 @@ function writeRetract() {
     switch (arguments[i]) {
     case X:
       if (machineConfiguration.hasHomePositionX() || machineConfiguration.hasHomePositionY()) {
-        words.push("X" + xyzFormat.format(machineConfiguration.hasHomePositionX() ?machineConfiguration.getHomePositionX() : 0));
+        words.push("X" + xyzFormat.format(machineConfiguration.hasHomePositionX() ? machineConfiguration.getHomePositionX() : 0));
       }
       break;
     case Y:
