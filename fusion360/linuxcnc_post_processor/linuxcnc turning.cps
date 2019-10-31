@@ -8,6 +8,11 @@
   $Date: 2019-09-20 13:29:14 $
   
   FORKID {D3E630A8-AFCC-46E6-BEF1-6AD5A6FA5483}
+  
+  Great references for post processor development:
+  https://forums.autodesk.com/t5/hsm-post-processor-forum/bd-p/218
+  https://forums.autodesk.com/t5/hsm-post-processor-forum/technical-faq/td-p/7473258
+  https://cam.autodesk.com/hsmposts?
 */
 
 description = "LinuxCNC Turning (KVV 20191030)";
@@ -380,9 +385,28 @@ function onOpen() {
     }
   }
 
+  if ((getNumberOfSections() > 0) && (getSection(0).workOffset == 0)) {
+    for (var i = 0; i < getNumberOfSections(); ++i) {
+      if (getSection(i).workOffset > 0) {
+        error(localize("Using multiple work offsets is not possible if the initial work offset is 0."));
+        return;
+      }
+    }
+  }
+
   writeBlock(gFormat.format(7)); // Diameter mode
   writeBlock(gPlaneModal.format(18)); // XZ plane
   writeBlock(gFormat.format(90)); // Absolute mode
+
+  writeBlock(gFormat.format(40)); // turn off cutter diameter compensation 
+  writeBlock(gFormat.format(49)); // cancel tool length compensation
+  writeBlock(gFormat.format(54)); // select coordinate system 1
+  writeBlock(gFormat.format(80)); // cancel canned cycle
+  writeBlock(gFormat.format(94)); // feed rate mode, effects F option, g94=units per minute mode
+  writeBlock(gFormat.format(97)); // spindle control mode, g97=RPM mode
+  // writeBlock(gFormat.format(61)); // exact path mode
+  writeBlock(gFormat.format(64) + " p.001 q.001"); // path blending, with tolerance and naive cam detector
+
 
   switch (unit) {
   case IN:
@@ -391,15 +415,6 @@ function onOpen() {
   case MM:
     writeBlock(gUnitModal.format(21));
     break;
-  }
-
-  if ((getNumberOfSections() > 0) && (getSection(0).workOffset == 0)) {
-    for (var i = 0; i < getNumberOfSections(); ++i) {
-      if (getSection(i).workOffset > 0) {
-        error(localize("Using multiple work offsets is not possible if the initial work offset is 0."));
-        return;
-      }
-    }
   }
 
   // properties.maximumSpindleSpeed // not supported
@@ -619,7 +634,7 @@ function onSection() {
     }
 
     var compensationOffset = tool.isTurningTool() ? tool.compensationOffset : tool.lengthOffset;
-    if (compensationOffset > 99) {
+    if (compensationOffset > maxToolNum) {
       error(localize("Compensation offset is out of range."));
       return;
     }
@@ -633,7 +648,7 @@ function onSection() {
       var nextTool = getNextTool(tool.number);
       if (nextTool) {
         var compensationOffset = nextTool.isTurningTool() ? nextTool.compensationOffset : nextTool.lengthOffset;
-        if (compensationOffset > 99) {
+        if (compensationOffset > maxToolNum) {
           error(localize("Compensation offset is out of range."));
           return;
         }
@@ -644,7 +659,7 @@ function onSection() {
         var firstTool = section.getTool().number;
         if (tool.number != firstTool.number) {
           var compensationOffset = firstTool.isTurningTool() ? firstTool.compensationOffset : firstTool.lengthOffset;
-          if (compensationOffset > 99) {
+          if (compensationOffset > maxToolNum) {
             error(localize("Compensation offset is out of range."));
             return;
           }
