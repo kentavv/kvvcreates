@@ -8,6 +8,11 @@
   $Date: 2019-09-04 07:46:02 $
   
   FORKID {52A5C3D6-1533-413E-B493-7B93D9E48B30}
+  
+  Great references for post processor development:
+  https://forums.autodesk.com/t5/hsm-post-processor-forum/bd-p/218
+  https://forums.autodesk.com/t5/hsm-post-processor-forum/technical-faq/td-p/7473258
+  https://cam.autodesk.com/hsmposts?
 */
 
 description = "LinuxCNC Milling (KVV 20191030)";
@@ -320,6 +325,14 @@ function onOpen() {
   // absolute coordinates, feed per min, and incremental arc center mode
   writeBlock(gAbsIncModal.format(90), gFeedModeModal.format(94), gPlaneModal.format(17), gFormat.format(91.1));
 
+  writeBlock(gFormat.format(40)); // turn off cutter diameter compensation 
+  writeBlock(gFormat.format(49)); // cancel tool length compensation
+  writeBlock(gFormat.format(54)); // select coordinate system 1
+  writeBlock(gFormat.format(80)); // cancel canned cycle
+  writeBlock(gFormat.format(97)); // spindle control mode, g97=RPM mode
+  // writeBlock(gFormat.format(61)); // exact path mode
+  writeBlock(gFormat.format(64) + " p.001 q.001"); // path blending, with tolerance and naive cam detector
+
   switch (unit) {
   case IN:
     writeBlock(gUnitModal.format(20));
@@ -616,6 +629,7 @@ function onSection() {
     
     // stop spindle before retract during tool change
     if (insertToolCall && !isFirstSection()) {
+      setCoolant(COOLANT_OFF);
       onCommand(COMMAND_STOP_SPINDLE);
     }
     
@@ -662,6 +676,11 @@ function onSection() {
       warning(localize("Tool number exceeds maximum value."));
     }
 
+    {
+        var tool_desc = "T" + toolFormat.format(tool.number) + " - " + tool.description;
+        writeComment("DEBUG, Change tool to " + tool_desc);
+    }
+    
     writeBlock("T" + toolFormat.format(tool.number), mFormat.format(6));
     if (tool.comment) {
       writeComment(tool.comment);
