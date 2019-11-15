@@ -74,6 +74,18 @@ setp encoder.0.position-scale     1.0
 setp encoder.0.min-speed-estimate 0.5
 
 
+loadusr -W datalogger
+net datalogger-enabled datalogger.enabled
+#net datalogger-xpos datalogger.xpos
+#net datalogger-ypos datalogger.ypos
+#net datalogger-zpos datalogger.zpos
+#net datalogger-xvel x-velocity-upm datalogger.xvel
+#net datalogger-yvel y-velocity-upm datalogger.yvel
+#net datalogger-zvel z-velocity-upm datalogger.zvel
+#net datalogger-spindle-speed-commanded spindle-cmd-rpm-abs datalogger.spindle-speed-commanded
+#net datalogger-spindle-speed-actual spindle-rps datalogger.spindle-speed-actual
+
+
 loadusr -W hal_manualtoolchange
 net tool-change           iocontrol.0.tool-change      => hal_manualtoolchange.change
 net tool-changed          hal_manualtoolchange.changed => iocontrol.0.tool-changed
