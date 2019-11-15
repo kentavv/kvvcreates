@@ -1,0 +1,95 @@
+# HAL config file for servos -- expanded from core_servo.hal
+
+# create position feedback signals
+
+# connect position feedback to PID loop
+# connect position feedback to motion module
+net Xpos-fb => pid.0.feedback
+net Xpos-fb => axis.0.motor-pos-fb
+net Ypos-fb => pid.1.feedback
+net Ypos-fb => axis.1.motor-pos-fb
+net Zpos-fb => pid.2.feedback
+net Zpos-fb => axis.2.motor-pos-fb
+
+# connect output signals to output of PID loops
+net Xoutput <= pid.0.output
+net Youtput <= pid.1.output
+net Zoutput <= pid.2.output
+
+# set PID loop output limits to +/-1.00
+setp pid.0.maxoutput [AXIS_0]PID_MAX_VEL
+setp pid.1.maxoutput [AXIS_1]PID_MAX_VEL
+setp pid.2.maxoutput [AXIS_2]PID_MAX_VEL
+
+# set PID loop gains
+setp pid.0.Pgain    [AXIS_0]P
+setp pid.0.Igain    [AXIS_0]I
+setp pid.0.Dgain    [AXIS_0]D
+setp pid.0.bias     [AXIS_0]BIAS
+setp pid.0.FF0      [AXIS_0]FF0
+setp pid.0.FF1      [AXIS_0]FF1
+setp pid.0.FF2      [AXIS_0]FF2
+setp pid.0.deadband [AXIS_0]DEADBAND
+
+setp pid.1.Pgain    [AXIS_1]P
+setp pid.1.Igain    [AXIS_1]I
+setp pid.1.Dgain    [AXIS_1]D
+setp pid.1.bias     [AXIS_1]BIAS
+setp pid.1.FF0      [AXIS_1]FF0
+setp pid.1.FF1      [AXIS_1]FF1
+setp pid.1.FF2      [AXIS_1]FF2
+setp pid.1.deadband [AXIS_1]DEADBAND
+
+setp pid.2.Pgain    [AXIS_2]P
+setp pid.2.Igain    [AXIS_2]I
+setp pid.2.Dgain    [AXIS_2]D
+setp pid.2.bias     [AXIS_2]BIAS
+setp pid.2.FF0      [AXIS_2]FF0
+setp pid.2.FF1      [AXIS_2]FF1
+setp pid.2.FF2      [AXIS_2]FF2
+setp pid.2.deadband [AXIS_2]DEADBAND
+
+# create position command signals
+# connect position commands to motion controller
+# connect position commands to PID input
+net Xpos-cmd axis.0.motor-pos-cmd => pid.0.command
+net Ypos-cmd axis.1.motor-pos-cmd => pid.1.command
+net Zpos-cmd axis.2.motor-pos-cmd => pid.2.command
+
+# create bit signals to enable/disable the PID loops
+# connect the signals to the motion controller
+# connect the signals to the PID blocks
+net Xenable axis.0.amp-enable-out => pid.0.enable
+net Yenable axis.1.amp-enable-out => pid.1.enable
+net Zenable axis.2.amp-enable-out => pid.2.enable
+
+
+# Create signals for spindle speed control and spindle-at-speed detection.
+# Piecewise linear interpolation is used to map from desired speed to DAC voltage output.
+# Slightly more than 5V is used as maximum to compensate for resistance loses.
+setp near.0.scale 1.1
+setp ppmc.0.DAC8.00.scale 1.0
+
+net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1 lincurve.0.in
+net spindle-rpm         near.0.in2
+net spindle-at-speed    near.0.out => motion.spindle-at-speed
+
+setp lincurve.0.x-val-00 120
+setp lincurve.0.y-val-00 0.75
+setp lincurve.0.x-val-01 250
+setp lincurve.0.y-val-01 0.95
+setp lincurve.0.x-val-02 500
+setp lincurve.0.y-val-02 1.38
+setp lincurve.0.x-val-03 1000
+setp lincurve.0.y-val-03 2.24
+setp lincurve.0.x-val-04 1500
+setp lincurve.0.y-val-04 3.10
+setp lincurve.0.x-val-05 2000
+setp lincurve.0.y-val-05 3.91
+setp lincurve.0.x-val-06 2400
+setp lincurve.0.y-val-06 4.60
+setp lincurve.0.x-val-07 2600
+setp lincurve.0.y-val-07 5.1
+
+net requested-speed-for-ppmc lincurve.0.out => ppmc.0.DAC8.00.value
+

@@ -1,0 +1,7 @@
+autosave.halscope
+hallib
+*.swp
+*.swo
+univstep.var
+univstep.var.bak
+univstep.tbl.bak

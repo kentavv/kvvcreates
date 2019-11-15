@@ -1,0 +1,31 @@
+# Include your customized HAL commands here
+# The commands in this file are run after the AXIS GUI (including PyVCP panel) starts
+
+net spindle-cmd-rpm-abs pyvcp.spindle-speed-target
+net spindle-rpm-abs     pyvcp.spindle-speed
+net spindle-rpm         pyvcp.spindle-speed-c
+
+net spindle-at-speed    pyvcp.spindle-at-speed-led
+net spindle-locked      pyvcp.spindle-locked-led
+
+#loadrt scale names=scale.x-vel,scale.y-vel,scale.z-vel
+#addf scale.x-vel servo-thread
+#addf scale.y-vel servo-thread
+#addf scale.z-vel servo-thread
+
+setp scale.x-vel.gain 60
+setp scale.y-vel.gain 60
+setp scale.z-vel.gain 60
+
+net x-velocity-ups axis.0.joint-vel-cmd scale.x-vel.in
+net y-velocity-ups axis.1.joint-vel-cmd scale.y-vel.in
+net z-velocity-ups axis.2.joint-vel-cmd scale.z-vel.in
+net x-velocity-upm scale.x-vel.out pyvcp.x-velocity-upm
+net y-velocity-upm scale.y-vel.out pyvcp.y-velocity-upm
+net z-velocity-upm scale.z-vel.out pyvcp.z-velocity-upm
+
+#loadrt mod2 count=1
+#net spindle-pos mod2.0.in
+setp angpos.0.circum 	1.0
+setp angpos.0.scale 	360.0
+net c-position angpos.0.out pyvcp.spindle-position-c
