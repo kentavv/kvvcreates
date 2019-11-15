@@ -5,9 +5,9 @@ loadusr -W vc-p4s
 #addf and2.vc servo-thread
 
 # 1---LCD reletive Coordinates
-net axis.0.pos-relative halui.axis.0.pos-relative => vc-p4s.axis.0.pos-relative
-net axis.1.pos-relative halui.axis.1.pos-relative => vc-p4s.axis.1.pos-relative
-net axis.2.pos-relative halui.axis.2.pos-relative => vc-p4s.axis.2.pos-relative
+net axis.0.pos-relative halui.axis.0.pos-relative => vc-p4s.axis.0.pos-relative datalogger.xpos
+net axis.1.pos-relative halui.axis.1.pos-relative => vc-p4s.axis.1.pos-relative datalogger.ypos
+net axis.2.pos-relative halui.axis.2.pos-relative => vc-p4s.axis.2.pos-relative datalogger.zpos
 net axis.3.pos-relative halui.axis.3.pos-relative => vc-p4s.axis.3.pos-relative
 net axis.4.pos-relative halui.axis.4.pos-relative => vc-p4s.axis.4.pos-relative
 net axis.5.pos-relative halui.axis.5.pos-relative => vc-p4s.axis.5.pos-relative
@@ -127,15 +127,16 @@ net machine-ison halui.machine.is-on => vc-p4s.machine.ison
 ##### P4-S PENDANT SETTINGS #####
 
 # 15---STEP SIZE, SET 0 TO SKIP
-setp stepsize-1 	0.0001
+setp stepsize-1 	0
 
 # DEFAULT
-setp stepsize-2 	0.001
+setp stepsize-2 	0.0001
 
+setp stepsize-3 	0.001
 #setp stepsize-3 	0.01
 #setp stepsize-4 	0.1
 #setp stepsize-5 	1
-setp stepsize-3 	0
+#setp stepsize-3 	0
 setp stepsize-4 	0
 setp stepsize-5 	0
 setp stepsize-6 	0
