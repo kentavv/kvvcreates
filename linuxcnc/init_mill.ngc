@@ -1,0 +1,27 @@
+%
+
+g17   ; XY plane select
+g20   ; g20=inches, g21=millimeters
+g40   ; turn off cutter diameter compensation
+g49   ; cancel tool length compensation
+g54   ; select coordinate system 1
+g80   ; cancel canned cycle
+g90   ; g90=absolute distance mode, g91=incremental distance mode
+g94   ; feed rate mode, effects F option, g94=units per minute mode
+g97   ; spindle control mode, g97=RPM mode
+m9    ; turn all coolant off, m7=turn mist coolant on, m8=turn flood coolant on
+m5    ; stop the spindle
+
+t0 m6 ; remove tool, change tool to nonexistant special tool
+
+;g61           ; exact path mode
+g64 p.001 q.001 ; path blending, with tolerance and naive cam detector
+
+s 300 ; default slow speed
+f 1   ; default slow feed
+
+t100 m6 g43 h100 ; typically use the Haimer first
+
+m2    ; end program
+
+%

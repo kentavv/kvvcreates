@@ -3,36 +3,18 @@
 # Connect motion controller I/Os
 #
 
-#loadrt and2 names=and2.estop,and2.vc
+# Connector limit and home switches
+#net x-min-lim ppmc.0.din.01.in => axis.0.neg-lim-sw-in
+#net x-max-lim ppmc.0.din.02.in => axis.0.pos-lim-sw-in
+#net x-home    ppmc.0.din.00.in => axis.0.home-sw-in
 
-# connect limit/home switch outputs to motion controller
-#net Xminlim <= ppmc.0.din.01.in
-#net Xminlim => axis.0.neg-lim-sw-in
-#net Xmaxlim <= ppmc.0.din.02.in
-#net Xmaxlim => axis.0.pos-lim-sw-in
-#net Xhome <= ppmc.0.din.00.in
-#net Xhome => axis.0.home-sw-in
+#net y-min-lim ppmc.0.din.05.in => axis.1.neg-lim-sw-in
+#net y-max-lim ppmc.0.din.06.in => axis.1.pos-lim-sw-in
+#net y-home    ppmc.0.din.04.in => axis.1.home-sw-in
 
-#net Yminlim <= ppmc.0.din.05.in
-#net Yminlim => axis.1.neg-lim-sw-in
-#net Ymaxlim <= ppmc.0.din.06.in
-#net Ymaxlim => axis.1.pos-lim-sw-in
-#net Yhome <= ppmc.0.din.04.in
-#net Yhome => axis.1.home-sw-in
-
-#net Zminlim <= ppmc.0.din.09.in
-#net Zminlim => axis.2.neg-lim-sw-in
-#net Zmaxlim <= ppmc.0.din.10.in
-#net Zmaxlim => axis.2.pos-lim-sw-in
-#net Zhome <= ppmc.0.din.08.in
-#net Zhome => axis.2.home-sw-in
-
-#net Aminlim <= ppmc.0.din.12.in
-#net Aminlim => axis.3.neg-lim-sw-in
-#net Amaxlim <= ppmc.0.din.13.in
-#net Amaxlim => axis.3.pos-lim-sw-in
-#net Ahome <= ppmc.0.din.11.in
-#net Ahome => axis.3.home-sw-in
+#net z-min-lim ppmc.0.din.09.in => axis.2.neg-lim-sw-in
+#net z-max-lim ppmc.0.din.10.in => axis.2.pos-lim-sw-in
+#net z-home    ppmc.0.din.08.in => axis.2.home-sw-in
 
 
 # connect index pulses to motion controller
@@ -47,120 +29,84 @@
 #linksp Zindex <= ppmc.0.encoder.02.index-enable
 #linksp Zindex => axis.2.index-enable
 
-#
-# Connect I/O controller I/Os
-#
+# Create e-stop circuit
+# Faults monitored by the USC are a watchdog timer on commands from LinuxCNC and pin din.15
+# Pin din.15 is an input from an e-stop loop, a series circuit of normally-closed switches terminating with the ground terminal,
+# and thus din.15.in-not is normally high (may not be quite right, how special is din.15?)
+# Pin dout.07 goes high when the e-stop circuit is OK, lighting an LED on the USC, but otherwise is not used
 
-# connect e-stop write/sense to I/O controller
-# and univstep's fault with estop's output, so  estop FF is reset, but
-#      prevent continued estop signal from univstep from holding FF cleared
-#net ppmcEstop ppmc.0.din.15.in-not
-#net ppmcEstop or2.0.in0
-#net stepper-fault ppmc.0.din.14.in
-#net stepper-fault or2.0.in1
-#net ppmcEstop-fault or2.0.out
+net ppmc-estop    ppmc.0.din.15.in-not            => and2.estop.in0
+net estop-faultin and2.estop.out                  => estop-latch.0.fault-in
+net estop-loopout estop-latch.0.ok-out            => iocontrol.0.emc-enable-in and2.estop.in1 ppmc.0.dout.07.out
+net estop-loopin  iocontrol.0.user-enable-out     => estop-latch.0.ok-in
+net estop-reset   iocontrol.0.user-request-enable => estop-latch.0.reset
 
-net ppmcEstop ppmc.0.din.15.in-not
-net ppmcEstop and2.estop.in0
-#net ppmcEstop-fault and2.0.in0
-#net ppmcEstop-fault and2.0.in0
-#net ppmcEstop and2.0.in0
 
-net EstopOkIn estop-latch.0.fault-in
-net EstopOkIn and2.estop.out
-net EstopOkOut <= ppmc.0.dout.07.out
-net EstopOkOut iocontrol.0.emc-enable-in
-net EstopOkOut estop-latch.0.ok-out
-net EstopOkOut and2.estop.in1
-net emc-estop-out iocontrol.0.user-enable-out
-net emc-estop-out estop-latch.0.ok-in
-net emc-estop-reset iocontrol.0.user-request-enable
-net emc-estop-reset estop-latch.0.reset
-
-# connect spindle fwd/rev to I/O controller
-#net SpindleFwd <= ppmc.0.dout.00.out
-#net SpindleFwd => motion.spindle-forward
-#net SpindleRev <= ppmc.0.dout.01.out
-#net SpindleRev => motion.spindle-reverse
-
-#net SpindleFwd motion.spindle-forward => or2.0.in0
-#net SpindleRev motion.spindle-reverse => or2.0.in1
-#net SpindleOn or2.0.out => ppmc.0.dout.00.out
-#net SpindleRev => ppmc.0.dout.01.out
-
-net spindle-enable motion.spindle-on => ppmc.0.dout.00.out
-net SpindleFwd motion.spindle-forward => ppmc.0.dout.01.out
+# Add spindle direction and enable signals.
+# The state of SSR1 and SSR2 influence the spindle speed DAC.
+# Forward and reverse should be attached to SS1 and SSR2 respectively, most likely.
+# See http://pico-systems.com/spindac.html for hardware configuration information.
+net spindle-on  motion.spindle-on      => ppmc.0.dout.00.out
+net spindle-fwd motion.spindle-forward => ppmc.0.dout.01.out
 
 # connect spindle brake to I/O controller
 #net SpindleBrakeOn <= ppmc.0.dout.02.out
 #net SpindleBrakeOn => motion.spindle-brake
 
+# Use the Xenable signal to enable power to the stepper motors
 #net EnableSpindle axis.0.amp-enable-out => ppmc.0.dout.02.out
 net Xenable => ppmc.0.dout.02.out
 #net SpindleBrakeOn => motion.spindle-brake
 
-# connect mist/flood coolant to I/O controller
-#net MistOn <= ppmc.0.dout.03.out
-#net MistOn => iocontrol.0.coolant-mist
-#net FloodOn <= ppmc.0.dout.03.out
-#net FloodOn => iocontrol.0.coolant-flood
 
-net MistOn iocontrol.0.coolant-mist => or2.1.in0
-net FloodOn iocontrol.0.coolant-flood => or2.1.in1
-net Mist-or-FloodOn or2.1.out => ppmc.0.dout.03.out
+# Requests for mist or flood coolant toggle the same pin
+net mist-on    iocontrol.0.coolant-mist  => or2.coolant.in0
+net flood-on   iocontrol.0.coolant-flood => or2.coolant.in1
+net coolant-on or2.coolant.out           => ppmc.0.dout.03.out
 
 
-
-# set scale for 5000 RPM MAX and connect spindle speed to USC DAC
-#setp ppmc.0.DAC8.00.scale 500.0
-#newsig spinspeed float
-#linksp spinspeed <= motion.spindle-speed-out
-#linksp spinspeed => ppmc.0.DAC8.00.value
-
-
-
-#loadrt encoder num_chan=1
-#addf encoder.update-counters base-thread
-##addf encoder.update-counters servo-thread
-#addf encoder.capture-position servo-thread
-#setp encoder.0.counter-mode true
-#setp encoder.0.position-scale 16
-##setp encoder.0.x4-mode false 
-
+# Use the spindle index pulse to measure velocity
 net spindle-position encoder.0.position => motion.spindle-revs
-net spindle-velocity encoder.0.velocity => motion.spindle-speed-in
-net spindle-phase-a encoder.0.phase-A <= ppmc.0.din.14.in
+net spindle-rps      encoder.0.velocity => motion.spindle-speed-in
+net spindle-phase-a  ppmc.0.din.14.in   => encoder.0.phase-A
+setp encoder.0.counter-mode true
 
-#net spindle-index encoder.0.phase-A <= ppmc.0.din.14.in
-#net spindle-index => encoder.0.phase-Z
 
-#net encoder-output ppmc.0.din.14.in => encoder.0.phase-Z encoder.0.phase-A
-#net spindle-phase-a encoder.0.phase-A
-#net spindle-phase-z encoder.0.phase-Z
-#setp encoder.0.counter-mode 1
-#setp encoder.0.position-scale 1
+# Scale and filter spindle velocity for displaying on screen
+# The spindle speed comes from an encoder on the spindle
+# The lowpass filter does not seem necessary after addeding hardware filtering
+setp lowpass.0.gain      0.05
+setp scale.0.gain       60
+net spindle-rps          lowpass.0.in
+net spindle-rps-filtered lowpass.0.out => scale.0.in
+net spindle-rpm          scale.0.out
 
-#net spindle-index encoder.0.phase-Z
-#net spindle-index <= encoder.0.phase-Z
-#net spindle-index-enable encoder.0.index-enable <=> motion.spindle-index-enable
 
-# lowpass filter does not seem necessary after addeding hardware filtering
-setp lowpass.0.gain 0.05
-##setp lowpass.0.gain 1
-net spindle-velocity => lowpass.0.in
+##
+## Spindle lock
+##
+setp debounce.0.delay 10 # 10 * servo-thread = 5ms
+net spindle-locked-raw ppmc.0.din.08.in => debounce.0.0.in
 
-setp scale.0.gain 60
-#setp scale.0.gain 240
-net spindle-fb-filtered-rps lowpass.0.out => scale.0.in
-#net spindle-velocity => scale.0.in
+# This simple method inhibits the spindle and all motion including programs, mdi commands, and pendant.
+#net spindle-locked debounce.0.0.out => motion.spindle-inhibit motion.feed-inhibit
 
-#net spindle-fb-filtered-rpm scale.0.out 
-net SpindleRPM <= scale.0.out 
+# Instead, first inhibit the spindle
+net spindle-locked debounce.0.0.out => motion.spindle-inhibit
 
-# spindle speed display
-#net spindle-velocity mult2.0.in0 
-#setp   mult2.0.in1 60.
-#setp   mult2.0.in1 180.
-##newsig SpindleRPM float
-#net SpindleRPM <= mult2.0.out
+# Next, inhibit motion only if a program is running, which includes programs and mdi commands, but allow pendant 
+# motion. Non-motion commands (e.g., g20 and g21) are still executed regardless of motion.feed-inhibit.
+# This method is nice because pendant motion is allowed, but does have a couple of gotchas:
+# 1) When the feed-hold button is pressed while the spindle lock is on, a short burst of motion (0.016 at 10ips) 
+# occurs.
+# 2) The spindle-at-speed code only seems to apply to starting a new command. If motion was taking place when the
+# spindle lock was applied, once the spindle is unlocked, the motion will immediately resume before the spindle
+# is to full speed. To avoid this, if in motion, first press feed hold, then enable the spindle lock. Then once
+# the spindle is unlocked, the spindle can reach commanded speed, before resuming feed.
+#
+#  The program.is-running pin is already attached to the run-on signal in unistep_buttons.
+#net program-running halui.program.is-running => and2.motion_lock.in0
+net run-on                           => and2.motion_lock.in0
+net spindle-locked                   => and2.motion_lock.in1
+net motion_lock and2.motion_lock.out => motion.feed-inhibit
 

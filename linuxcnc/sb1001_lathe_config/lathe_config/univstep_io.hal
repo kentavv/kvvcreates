@@ -1,0 +1,67 @@
+# HAL config file for Pico Systems USC board
+#
+# Connect motion controller I/Os
+#
+
+# Connector limit and home switches
+#net x-min-lim ppmc.0.din.01.in => axis.0.neg-lim-sw-in
+#net x-max-lim ppmc.0.din.02.in => axis.0.pos-lim-sw-in
+#net x-home    ppmc.0.din.00.in => axis.0.home-sw-in
+
+#net z-min-lim ppmc.0.din.09.in => axis.2.neg-lim-sw-in
+#net z-max-lim ppmc.0.din.10.in => axis.2.pos-lim-sw-in
+#net z-home    ppmc.0.din.08.in => axis.2.home-sw-in
+
+
+# Create e-stop circuit
+# Faults monitored by the USC are a watchdog timer on commands from LinuxCNC and pin din.15
+# Pin din.15 is an input from an e-stop loop, a series circuit of normally-closed switches terminating with the ground terminal,
+# and thus din.15.in-not is normally high (may not be quite right, how special is din.15?)
+# Spindle fault is connected to pin din.13 (signal connection made in another file)
+# A single fault signal for the LinuxCNC e-stop latch module is created by or-ing the USC fault and spindle fault signals
+# Pin dout.07 goes high when the e-stop circuit is OK, lighting an LED on the USC, but otherwise is not used
+
+net spindle-fault ppmc.0.din.13.in-not
+net ppmc-estop    ppmc.0.din.15.in-not            => and2.estop.in0
+net ppmc-fault    and2.estop.out                  => or2.estop.in0
+net spindle-fault or2.estop.in1
+net estop-faultin or2.estop.out                   => estop-latch.0.fault-in
+net estop-loopout estop-latch.0.ok-out            => iocontrol.0.emc-enable-in and2.estop.in1 ppmc.0.dout.07.out
+net estop-loopin  iocontrol.0.user-enable-out     => estop-latch.0.ok-in
+net estop-reset   iocontrol.0.user-request-enable => estop-latch.0.reset
+
+
+# Add spindle direction and enable signals.
+# The state of SSR1 and SSR2 influence the spindle speed DAC.
+# Forward and reverse should be attached to SS1 and SSR2 respectively, most likely.
+# See http://pico-systems.com/spindac.html for hardware configuration information.
+net spindle-fwd motion.spindle-forward => ppmc.0.dout.00.out
+net spindle-rev motion.spindle-reverse => ppmc.0.dout.01.out
+net spindle-on  motion.spindle-on      => ppmc.0.dout.02.out
+
+
+# Use the Xenable signal to enable power to the stepper motors
+net Xenable ppmc.0.dout.03.out
+
+
+# Requests for mist or flood coolant toggle the same pin
+net mist-on    iocontrol.0.coolant-mist  => or2.coolant.in0
+net flood-on   iocontrol.0.coolant-flood => or2.coolant.in1
+net coolant-on or2.coolant.out           => ppmc.0.dout.04.out
+
+
+# Use the spindle index pulse to measure velocity
+net spindle-position encoder.0.position => motion.spindle-revs
+net spindle-rps      encoder.0.velocity => motion.spindle-speed-in
+net spindle-phase-a  ppmc.0.din.14.in   => encoder.0.phase-A
+setp encoder.0.counter-mode true
+
+
+# Scale and filter spindle velocity for displaying on screen
+# The spindle speed comes from the spindle drive, not the spindle shaft, so the scaling also includes the pulley ratio (and is not 60)
+setp lowpass.0.gain      0.05
+setp scale.0.gain       20.3175
+net spindle-rps          lowpass.0.in
+net spindle-rps-filtered lowpass.0.out => scale.0.in
+net spindle-rpm          scale.0.out
+

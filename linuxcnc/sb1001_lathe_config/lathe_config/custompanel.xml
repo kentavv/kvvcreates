@@ -12,7 +12,10 @@
 
 		<bar>
 			<halpin>"spindle-speed"</halpin>
-			<max_>2600</max_>
+			<max_>2700</max_>
+			<range1>0, 2100, "green"</range1>
+			<range2>2100, 2300, "yellow"</range2>
+			<range3>2300, 2700, "red"</range3>
 		</bar>
 
 		<hbox>
@@ -37,12 +40,12 @@
 
 		<hbox>
 			<label>
-				<text>"  Lock"</text>
+				<text>"  Good"</text>
 				<font>("Helvetica", 20)</font>
 			</label>
 
 			<led>
-				<halpin>"spindle-locked-led"</halpin>
+				<halpin>"spindle-fault-led"</halpin>
 				<size>30</size>
 				<on_color>"red"</on_color>
 				<off_color>"green"</off_color>
@@ -64,19 +67,6 @@
 			<number>
 				<font>("Helvetica", 20)</font>
 				<halpin>"x-velocity-upm"</halpin>
-				<format>"+3.2f"</format>
-			</number>
-		</hbox>
-
-		<hbox>
-			<label>
-				<text>"  Y: "</text>
-				<font>("Helvetica", 20)</font>
-			</label>
-
-			<number>
-				<font>("Helvetica", 20)</font>
-				<halpin>"y-velocity-upm"</halpin>
 				<format>"+3.2f"</format>
 			</number>
 		</hbox>
