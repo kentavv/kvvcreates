@@ -1,0 +1,76 @@
+#!/usr/bin/python
+
+from __future__ import print_function
+
+import time
+import datetime
+
+import hal
+
+import vxi11
+
+f = open('/home/kent/bin/data.txt', 'w')
+
+params = ['xpos', 'ypos', 'zpos', 'xvel', 'yvel', 'zvel', 'spindle-speed-commanded', 'spindle-speed-actual']
+print(','.join(['datetime', 'dt'] + params + ['current [A]']), file=f)
+h = hal.component("datalogger")
+print(dir(h))
+
+h.newpin("enabled", hal.HAL_BIT, hal.HAL_IN)
+h.newpin("xpos", hal.HAL_FLOAT, hal.HAL_IN)
+h.newpin("ypos", hal.HAL_FLOAT, hal.HAL_IN)
+h.newpin("zpos", hal.HAL_FLOAT, hal.HAL_IN)
+h.newpin("xvel", hal.HAL_FLOAT, hal.HAL_IN)
+h.newpin("yvel", hal.HAL_FLOAT, hal.HAL_IN)
+h.newpin("zvel", hal.HAL_FLOAT, hal.HAL_IN)
+h.newpin("spindle-speed-commanded", hal.HAL_FLOAT, hal.HAL_IN)
+h.newpin("spindle-speed-actual", hal.HAL_FLOAT, hal.HAL_IN)
+
+
+if False:
+  instr = vxi11.Instrument('192.168.1.70')
+  idn = instr.ask('*IDN?')
+  print(idn)
+  if not idn.startswith('Agilent Technologies,34461A'):
+    print('Unknown instrument:', idn)
+    sys.exit(1)
+  instr.write('*RST')
+  #instr.write('CONF:VOLT:DC AUTO,DEF')
+  #instr.write('CONF:VOLT:DC 1,0.001')
+  instr.write('CONF:VOLT:AC 10,0.001')
+  #instr.write('VOLT:AC:BAND 200')
+  instr.write('TRIG:DEL .005')
+
+h.ready()
+
+# read n values with a small delay between each reading
+def sample(n=1, scale=10.):
+  rv = []
+  if instr is not None:
+    for i in range(n):
+      if i > 0:
+        time.sleep(.05)
+      rv += [instr.ask('READ?')]
+    rv = [float(x) * scale for x in rv]
+  else:
+    rv = [-1.] * n
+  return rv
+
+try:
+    st = datetime.datetime.now()
+    do_once = False
+    while True:
+        time.sleep(.005)
+        if h['enabled']:
+            dt = datetime.datetime.now()
+            t = (dt - st).total_seconds()
+            rv = sample()
+            row = [str(dt), str(t)] + [str(h[x]) for x in params] + [str(x) for x in rv]
+            print(','.join(row), file=f)
+            f.flush()
+            do_once = True
+        elif do_once:
+            do_once = False
+            f.flush()
+except KeyboardInterrupt:
+    raise SystemExit
