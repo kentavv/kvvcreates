@@ -26,6 +26,9 @@ T32 P32 Z-1 D0.64 ;16mm long non cc mod em
 T33 P33 Z-1 D0.669291 ;17mm short cc mod em 
 T34 P34 Z-1 D0.669291 ;17mm med cc mod em 
 T35 P35 Z5.237 D0.669291 ;17mm long cc mod em 
+T36 P36 Z-1 D0.629921 ;16mm short toroidal mod em 
+T37 P37 Z-1 D0.629921 ;16mm med toroidal mod em 
+T38 P38 Z-1 D0.629921 ;16mm long toroidal mod em 
 T39 P39 Z-1 D0.314961 ;8mm med ball mod em 
 T40 P40 Z-1 D0.314961 ;8mm long ball mod em 
 T41 P41 Z3.399 D0.487 ;shars 1/2" insert? 
@@ -51,5 +54,6 @@ T202 P202 Z3.752 D0.1 ;3.5mm
 T99 P99 Z3.818 D0.375 ;added 20190713 
 T98 P98 Z3.179 D0.125 ;temp drill 
 T121 P121 Z3.125 D0.25 ;1/4 sqr steel em 
+T122 P122 Z3.387 D0.375 ;3/8" square end mill for steel 
 T150 P150 Z4.738 D0.256 ;6.5mm drill 
 T151 P151 Z4.268 D0.217 ;5mm drill 
