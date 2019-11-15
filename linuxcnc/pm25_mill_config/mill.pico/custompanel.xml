@@ -94,5 +94,10 @@
 			</number>
 		</hbox>
 
+		<checkbutton>
+			<halpin>"datalogger-enabled"</halpin>
+			<text>"Logger"</text>
+		</checkbutton>
+
 	</vbox>
 </pyvcp>
