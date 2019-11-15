@@ -110,3 +110,15 @@ net run-on                           => and2.motion_lock.in0
 net spindle-locked                   => and2.motion_lock.in1
 net motion_lock and2.motion_lock.out => motion.feed-inhibit
 
+
+
+#net datalogger-xpos datalogger.xpos
+#net datalogger-ypos datalogger.ypos
+#net datalogger-zpos datalogger.zpos
+#net datalogger-xvel scale.x-vel.out datalogger.xvel
+#net datalogger-xvel x-velocity-upm datalogger.xvel
+#net datalogger-yvel y-velocity-upm datalogger.yvel
+#net datalogger-zvel z-velocity-upm datalogger.zvel
+#net datalogger-spindle-speed-commanded spindle-cmd-rpm-abs datalogger.spindle-speed-commanded
+#net datalogger-spindle-speed-actual spindle-rps datalogger.spindle-speed-actual
+
