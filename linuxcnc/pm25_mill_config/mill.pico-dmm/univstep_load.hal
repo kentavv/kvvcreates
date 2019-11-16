@@ -22,6 +22,7 @@ loadrt encoder     num_chan=1
 loadrt lincurve    count=1 personality=11
 loadrt pid         num_chan=3
 loadrt oneshot     names=oneshot.fault
+loadrt limit3      names=limit3.spindle
 
 # Components are executed in their addf order, and some may be order sensitive.
 
@@ -50,6 +51,7 @@ addf scale.z-vel              servo-thread
 addf lowpass.0                servo-thread
 addf near.0                   servo-thread
 addf limit1.0                 servo-thread
+addf limit3.spindle           servo-thread
 addf encoder.update-counters  base-thread
 addf encoder.capture-position servo-thread
 addf lincurve.0               servo-thread

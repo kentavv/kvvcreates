@@ -16,6 +16,8 @@ net Xoutput <= pid.0.output
 net Youtput <= pid.1.output
 net Zoutput <= pid.2.output
 
+#net Coutput <= motion.spindle−speed−out−rps
+
 # set PID loop output limits to +/-1.00
 setp pid.0.maxoutput [AXIS_0]PID_MAX_VEL
 setp pid.1.maxoutput [AXIS_1]PID_MAX_VEL
@@ -64,38 +66,47 @@ net Yenable axis.1.amp-enable-out => pid.1.enable
 net Zenable axis.2.amp-enable-out => pid.2.enable
 
 
+#net Coutput motion.spindle-speed-out
+net spindle-ramp motion.spindle-speed-out limit3.spindle.in 
+setp limit3.spindle.min -5000
+setp limit3.spindle.max 5000
+setp limit3.spindle.maxv 2500
+#setp limit3.spindle.maxa 5
+net Coutput limit3.spindle.out
+#net Cenable motion.spindle-on
+
 # Create signals for spindle speed control and spindle-at-speed detection.
 # Piecewise linear interpolation is used to map from desired speed to DAC voltage output.
 # Slightly more than 5V is used as maximum to compensate for resistance loses.
-setp near.0.scale 1.1
-setp ppmc.0.DAC8.00.scale 1.0
-
-net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1 lincurve.0.in
-net spindle-rpm         near.0.in2
-net spindle-at-speed    near.0.out => motion.spindle-at-speed
-
-setp lincurve.0.x-val-00 134
-setp lincurve.0.y-val-00 0.50
-setp lincurve.0.x-val-01 333
-setp lincurve.0.y-val-01 1.0
-setp lincurve.0.x-val-02 744
-setp lincurve.0.y-val-02 2.0
-setp lincurve.0.x-val-03 1144
-setp lincurve.0.y-val-03 3.0
-setp lincurve.0.x-val-04 1557
-setp lincurve.0.y-val-04 4.0
-setp lincurve.0.x-val-05 1956
-setp lincurve.0.y-val-05 5.0 
-setp lincurve.0.x-val-06 2370
-setp lincurve.0.y-val-06 6.0
-setp lincurve.0.x-val-07 2766
-setp lincurve.0.y-val-07 7.0
-setp lincurve.0.x-val-08 3177
-setp lincurve.0.y-val-08 8.0
-setp lincurve.0.x-val-09 3570
-setp lincurve.0.y-val-09 9.0
-setp lincurve.0.x-val-10 3955
-setp lincurve.0.y-val-10 10.0
-
-net requested-speed-for-ppmc lincurve.0.out => ppmc.0.DAC8.00.value
+#setp near.0.scale 1.1
+#setp ppmc.0.DAC8.00.scale 1.0
+#
+#net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1 lincurve.0.in
+#net spindle-rpm         near.0.in2
+#net spindle-at-speed    near.0.out => motion.spindle-at-speed
+#
+#setp lincurve.0.x-val-00 134
+#setp lincurve.0.y-val-00 0.50
+#setp lincurve.0.x-val-01 333
+#setp lincurve.0.y-val-01 1.0
+#setp lincurve.0.x-val-02 744
+#setp lincurve.0.y-val-02 2.0
+#setp lincurve.0.x-val-03 1144
+#setp lincurve.0.y-val-03 3.0
+#setp lincurve.0.x-val-04 1557
+#setp lincurve.0.y-val-04 4.0
+#setp lincurve.0.x-val-05 1956
+#setp lincurve.0.y-val-05 5.0 
+#setp lincurve.0.x-val-06 2370
+#setp lincurve.0.y-val-06 6.0
+#setp lincurve.0.x-val-07 2766
+#setp lincurve.0.y-val-07 7.0
+#setp lincurve.0.x-val-08 3177
+#setp lincurve.0.y-val-08 8.0
+#setp lincurve.0.x-val-09 3570
+#setp lincurve.0.y-val-09 9.0
+#setp lincurve.0.x-val-10 3955
+#setp lincurve.0.y-val-10 10.0
+#
+#net requested-speed-for-ppmc lincurve.0.out => ppmc.0.DAC8.00.value
 

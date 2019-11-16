@@ -13,23 +13,34 @@ setp ppmc.0.stepgen.00-03.setup-time-ns      1000
 setp ppmc.0.stepgen.00.scale [AXIS_0]SCALE
 setp ppmc.0.stepgen.01.scale [AXIS_1]SCALE
 setp ppmc.0.stepgen.02.scale [AXIS_2]SCALE
+#setp ppmc.0.stepgen.03.scale [AXIS_2]SCALE
+#setp ppmc.0.stepgen.03.scale -65536
+setp ppmc.0.stepgen.03.scale 34.188
+#setp ppmc.0.stepgen.03.maxaccel 1
+
 setp ppmc.0.encoder.00.scale [AXIS_0]SCALE
 setp ppmc.0.encoder.01.scale [AXIS_1]SCALE
 setp ppmc.0.encoder.02.scale [AXIS_2]SCALE
+#setp ppmc.0.encoder.03.scale [AXIS_2]SCALE
+#setp ppmc.0.encoder.03.scale 65536
+setp ppmc.0.encoder.03.scale 34.188
 
 
 # connect position feedback signals to encoders
 net Xpos-fb ppmc.0.encoder.00.position
 net Ypos-fb ppmc.0.encoder.01.position
 net Zpos-fb ppmc.0.encoder.02.position
+net Cpos-fb ppmc.0.encoder.03.position
 
 # connect PID output signals to step generators
 net Xoutput ppmc.0.stepgen.00.velocity
 net Youtput ppmc.0.stepgen.01.velocity
 net Zoutput ppmc.0.stepgen.02.velocity
+net Coutput ppmc.0.stepgen.03.velocity
 
 # connect axis enables to step generators
 net Xenable ppmc.0.stepgen.00.enable
 net Yenable ppmc.0.stepgen.01.enable
 net Zenable ppmc.0.stepgen.02.enable
+#net Cenable ppmc.0.stepgen.03.enable
 
