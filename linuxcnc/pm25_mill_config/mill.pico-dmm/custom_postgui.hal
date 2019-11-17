@@ -2,7 +2,8 @@
 # The commands in this file are run after the AXIS GUI (including PyVCP panel) starts
 
 net spindle-cmd-rpm-abs pyvcp.spindle-speed-target datalogger.spindle-speed-commanded
-net spindle-rpm         pyvcp.spindle-speed datalogger.spindle-speed-actual
+net spindle-rpm         datalogger.spindle-speed-actual
+net spindle-rpm-abs     pyvcp.spindle-speed-abs
 
 net spindle-at-speed    pyvcp.spindle-at-speed-led
 net spindle-locked      pyvcp.spindle-locked-led

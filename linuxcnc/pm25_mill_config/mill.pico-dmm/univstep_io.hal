@@ -68,22 +68,26 @@ net flood-on   iocontrol.0.coolant-flood => or2.coolant.in1
 net coolant-on or2.coolant.out           => ppmc.0.dout.03.out
 
 
-# Use the spindle index pulse to measure velocity
-net spindle-position encoder.0.position => motion.spindle-revs
-net spindle-rps      encoder.0.velocity => motion.spindle-speed-in
-net spindle-phase-a  ppmc.0.din.14.in   => encoder.0.phase-A
-setp encoder.0.counter-mode true
+## Use the spindle index pulse to measure velocity
+#net spindle-position encoder.0.position => motion.spindle-revs
+#net spindle-rps      encoder.0.velocity => motion.spindle-speed-in
+#net spindle-phase-a  ppmc.0.din.14.in   => encoder.0.phase-A
+#setp encoder.0.counter-mode true
 
 
 # Scale and filter spindle velocity for displaying on screen
 # The spindle speed comes from an encoder on the spindle
 # The lowpass filter does not seem necessary after adding hardware filtering
-setp lowpass.0.gain      0.05
-setp scale.0.gain       60
-net spindle-rps          lowpass.0.in
-net spindle-rps-filtered lowpass.0.out => scale.0.in
-net spindle-rpm          scale.0.out
-
+#setp lowpass.0.gain      0.05
+#setp scale.0.gain       60
+#net spindle-rps          lowpass.0.in
+#net spindle-rps-filtered lowpass.0.out => scale.0.in
+#net spindle-rpm          scale.0.out
+#setp lowpass.0.gain      0.005
+setp lowpass.0.gain      .05
+net Cpos-fb   lowpass.0.in
+net spindle-rpm lowpass.0.out abs.spindle.in
+net spindle-rpm-abs abs.spindle.out
 
 ##
 ## Spindle lock

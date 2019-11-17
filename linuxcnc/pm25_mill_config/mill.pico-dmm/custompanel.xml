@@ -3,17 +3,26 @@
 	<vbox>
 
 		<relief>RIDGE</relief>
-		<bd>6</bd>
+		<bd>3</bd>
 
 		<label>
 			<text>"Spindle"</text>
 			<font>("Helvetica", 20)</font>
 		</label>
 
-		<bar>
-			<halpin>"spindle-speed"</halpin>
-			<max_>3000</max_>
-		</bar>
+		<hbox>
+			<label>
+				<text>"  Lock"</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<led>
+				<halpin>"spindle-locked-led"</halpin>
+				<size>30</size>
+				<on_color>"red"</on_color>
+				<off_color>"green"</off_color>
+			</led>
+		</hbox>
 
 		<hbox>
 			<label>
@@ -35,19 +44,18 @@
 			</led>
 		</hbox>
 
-		<hbox>
-			<label>
-				<text>"  Lock"</text>
-				<font>("Helvetica", 20)</font>
-			</label>
+                <hbox>
+                        <label>
+                                <text>"  Actual"</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
 
-			<led>
-				<halpin>"spindle-locked-led"</halpin>
-				<size>30</size>
-				<on_color>"red"</on_color>
-				<off_color>"green"</off_color>
-			</led>
-		</hbox>
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-speed-abs"</halpin>
+                                <format>"d"</format>
+                        </number>
+                </hbox>
 
 		<label>
 			<text>"Status"</text>
@@ -162,7 +170,6 @@
                                 <text>"Load Haimer"</text>
                         </button>
                 </hbox>
-
 
 	</vbox>
 </pyvcp>
