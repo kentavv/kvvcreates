@@ -47,7 +47,7 @@ net estop-reset   iocontrol.0.user-request-enable => estop-latch.0.reset
 # Forward and reverse should be attached to SS1 and SSR2 respectively, most likely.
 # See http://pico-systems.com/spindac.html for hardware configuration information.
 #net spindle-on  motion.spindle-on      => ppmc.0.dout.00.out not.spindle.in
-net spindle-on  motion.spindle-on      => ppmc.0.dout.00.out not.spindle.in ppmc.0.stepgen.03.enable
+net spindle-on  motion.spindle-on      => ppmc.0.dout.00.out not.spindle.in ppmc.0.stepgen.03.enable pid.3.enable
 #net spindle-on  motion.spindle-on      => not.spindle.in
 net spindle-off  not.spindle.out      => ppmc.0.dout.04.out
 net spindle-fwd motion.spindle-forward => ppmc.0.dout.01.out
@@ -77,7 +77,7 @@ setp encoder.0.counter-mode true
 
 # Scale and filter spindle velocity for displaying on screen
 # The spindle speed comes from an encoder on the spindle
-# The lowpass filter does not seem necessary after addeding hardware filtering
+# The lowpass filter does not seem necessary after adding hardware filtering
 setp lowpass.0.gain      0.05
 setp scale.0.gain       60
 net spindle-rps          lowpass.0.in

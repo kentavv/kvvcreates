@@ -10,11 +10,14 @@ net Ypos-fb => pid.1.feedback
 net Ypos-fb => axis.1.motor-pos-fb
 net Zpos-fb => pid.2.feedback
 net Zpos-fb => axis.2.motor-pos-fb
+net Cpos-fb => pid.3.feedback
+# net Cpos-fb => motion.spindle-speed-out
 
 # connect output signals to output of PID loops
 net Xoutput <= pid.0.output
 net Youtput <= pid.1.output
 net Zoutput <= pid.2.output
+net Coutput <= pid.3.output
 
 #net Coutput <= motion.spindle−speed−out−rps
 
@@ -22,6 +25,7 @@ net Zoutput <= pid.2.output
 setp pid.0.maxoutput [AXIS_0]PID_MAX_VEL
 setp pid.1.maxoutput [AXIS_1]PID_MAX_VEL
 setp pid.2.maxoutput [AXIS_2]PID_MAX_VEL
+setp pid.3.maxoutput 0
 
 # set PID loop gains
 setp pid.0.Pgain    [AXIS_0]P
@@ -51,12 +55,25 @@ setp pid.2.FF1      [AXIS_2]FF1
 setp pid.2.FF2      [AXIS_2]FF2
 setp pid.2.deadband [AXIS_2]DEADBAND
 
+#setp pid.3.Pgain    .1
+#setp pid.3.Igain    6
+setp pid.3.Pgain    1
+setp pid.3.Igain    4
+setp pid.3.Dgain    0
+setp pid.3.bias     0
+setp pid.3.FF0      0
+setp pid.3.FF1      0
+setp pid.3.FF2      0
+setp pid.3.deadband 0
+
+# create position command signals
 # create position command signals
 # connect position commands to motion controller
 # connect position commands to PID input
 net Xpos-cmd axis.0.motor-pos-cmd => pid.0.command
 net Ypos-cmd axis.1.motor-pos-cmd => pid.1.command
 net Zpos-cmd axis.2.motor-pos-cmd => pid.2.command
+net Cpos-cmd motion.spindle-speed-out pid.3.command
 
 # create bit signals to enable/disable the PID loops
 # connect the signals to the motion controller
@@ -64,26 +81,28 @@ net Zpos-cmd axis.2.motor-pos-cmd => pid.2.command
 net Xenable axis.0.amp-enable-out => pid.0.enable
 net Yenable axis.1.amp-enable-out => pid.1.enable
 net Zenable axis.2.amp-enable-out => pid.2.enable
+#net Cenable pid.3.enable
 
 
 #net Coutput motion.spindle-speed-out
-net spindle-ramp motion.spindle-speed-out limit3.spindle.in 
-setp limit3.spindle.min -5000
-setp limit3.spindle.max 5000
-setp limit3.spindle.maxv 2500
+#net spindle-ramp motion.spindle-speed-out limit3.spindle.in 
+#setp limit3.spindle.min -5000
+#setp limit3.spindle.max 5000
+#setp limit3.spindle.maxv 2500
 #setp limit3.spindle.maxa 5
-net Coutput limit3.spindle.out
+#net Coutput limit3.spindle.out
 #net Cenable motion.spindle-on
 
 # Create signals for spindle speed control and spindle-at-speed detection.
 # Piecewise linear interpolation is used to map from desired speed to DAC voltage output.
 # Slightly more than 5V is used as maximum to compensate for resistance loses.
-#setp near.0.scale 1.1
+setp near.0.scale 1.1
 #setp ppmc.0.DAC8.00.scale 1.0
 #
+net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1
 #net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1 lincurve.0.in
-#net spindle-rpm         near.0.in2
-#net spindle-at-speed    near.0.out => motion.spindle-at-speed
+net spindle-rpm         near.0.in2
+net spindle-at-speed    near.0.out => motion.spindle-at-speed
 #
 #setp lincurve.0.x-val-00 134
 #setp lincurve.0.y-val-00 0.50
