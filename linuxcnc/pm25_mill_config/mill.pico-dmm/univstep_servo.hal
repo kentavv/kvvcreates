@@ -17,7 +17,7 @@ net Cpos-fb => pid.3.feedback
 net Xoutput <= pid.0.output
 net Youtput <= pid.1.output
 net Zoutput <= pid.2.output
-net Coutput <= pid.3.output
+#net Coutput <= pid.3.output
 
 #net Coutput <= motion.spindle−speed−out−rps
 
@@ -73,7 +73,7 @@ setp pid.3.deadband 0
 net Xpos-cmd axis.0.motor-pos-cmd => pid.0.command
 net Ypos-cmd axis.1.motor-pos-cmd => pid.1.command
 net Zpos-cmd axis.2.motor-pos-cmd => pid.2.command
-net Cpos-cmd motion.spindle-speed-out pid.3.command
+#net Cpos-cmd motion.spindle-speed-out-rps pid.3.command
 
 # create bit signals to enable/disable the PID loops
 # connect the signals to the motion controller

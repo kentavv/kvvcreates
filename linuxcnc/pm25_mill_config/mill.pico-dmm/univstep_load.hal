@@ -24,6 +24,7 @@ loadrt pid         num_chan=4
 loadrt oneshot     names=oneshot.fault
 loadrt limit3      names=limit3.spindle
 loadrt abs         names=abs.spindle
+loadrt angpos count=1
 
 # Components are executed in their addf order, and some may be order sensitive.
 
@@ -56,6 +57,7 @@ addf limit3.spindle           servo-thread
 addf abs.spindle              servo-thread
 addf encoder.update-counters  base-thread
 addf encoder.capture-position servo-thread
+addf angpos.0 servo-thread
 addf lincurve.0               servo-thread
 addf motion-controller        servo-thread
 # then the PID loops

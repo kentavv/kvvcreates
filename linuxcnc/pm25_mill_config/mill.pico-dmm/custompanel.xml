@@ -57,6 +57,20 @@
                         </number>
                 </hbox>
 
+                <hbox>
+                        <label>
+                                <text>"  Pos: "</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-position-c"</halpin>
+                                <format>"3.2f"</format>
+                        </number>
+                </hbox>
+
+
 		<label>
 			<text>"Status"</text>
 			<font>("Helvetica", 20)</font>
@@ -154,6 +168,19 @@
 				<format>"+3.2f"</format>
 			</number>
 		</hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  C: "</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-speed-c"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
 
                 <hbox>
 		        <checkbutton>

@@ -49,24 +49,37 @@ net estop-reset   iocontrol.0.user-request-enable => estop-latch.0.reset
 #net spindle-on  motion.spindle-on      => ppmc.0.dout.00.out not.spindle.in
 net spindle-on  motion.spindle-on      => ppmc.0.dout.00.out not.spindle.in ppmc.0.stepgen.03.enable pid.3.enable
 #net spindle-on  motion.spindle-on      => not.spindle.in
-net spindle-off  not.spindle.out      => ppmc.0.dout.04.out
-net spindle-fwd motion.spindle-forward => ppmc.0.dout.01.out
+net spindle-off  not.spindle.out      => ppmc.0.dout.03.out
+#net spindle-fwd motion.spindle-forward => ppmc.0.dout.01.out
 
 # connect spindle brake to I/O controller
-#net SpindleBrakeOn <= ppmc.0.dout.02.out
+#net SpindleBrakeOn <= ppmc.0.dout.0_.out
 #net SpindleBrakeOn => motion.spindle-brake
 
 # Use the Xenable signal to enable power to the stepper motors
-#net EnableSpindle axis.0.amp-enable-out => ppmc.0.dout.02.out
-net Xenable => ppmc.0.dout.02.out
+#net EnableSpindle axis.0.amp-enable-out => ppmc.0.dout.0_.out
+net Xenable => ppmc.0.dout.01.out
 #net SpindleBrakeOn => motion.spindle-brake
 
 
 # Requests for mist or flood coolant toggle the same pin
 net mist-on    iocontrol.0.coolant-mist  => or2.coolant.in0
 net flood-on   iocontrol.0.coolant-flood => or2.coolant.in1
-net coolant-on or2.coolant.out           => ppmc.0.dout.03.out
+net coolant-on or2.coolant.out           => ppmc.0.dout.02.out
 
+#loadrt angpos count=1
+#addf angpos.0 servo-thread
+
+net spindle-pos ppmc.0.encoder.03.position => angpos.0.in motion.spindle-revs
+#net spindle-pos ppmc.0.encoder.03.position => angpos.0.in
+#net spindle-pos-u angpos.0.out-revs => motion.spindle-revs
+#net spindle-pos-u angpos.0.out-unity => motion.spindle-revs
+#net Cpos-fb motion.spindle-revs angpos.0.in
+#net spindle-rps ppmc.0.encoder.03.velocity => angpos.0.in motion.spindle-speed-in
+#univstep_motion.hal:net Cpos-fb ppmc.0.encoder.03.velocity motion.spindle-speed-in
+#univstep_servo.hal:net Cpos-fb => pid.3.feedback
+#net Cpos-fb angpos.0.in
+net spindle-index-enable ppmc.0.encoder.03.index-enable <=> motion.spindle-index-enable
 
 ## Use the spindle index pulse to measure velocity
 #net spindle-position encoder.0.position => motion.spindle-revs
@@ -78,15 +91,16 @@ net coolant-on or2.coolant.out           => ppmc.0.dout.03.out
 # Scale and filter spindle velocity for displaying on screen
 # The spindle speed comes from an encoder on the spindle
 # The lowpass filter does not seem necessary after adding hardware filtering
-#setp lowpass.0.gain      0.05
-#setp scale.0.gain       60
+setp lowpass.0.gain      0.0063 # 1 sec time constant
+setp scale.0.gain       60
 #net spindle-rps          lowpass.0.in
-#net spindle-rps-filtered lowpass.0.out => scale.0.in
-#net spindle-rpm          scale.0.out
+net Cpos-fb          lowpass.0.in
+net spindle-rps-filtered lowpass.0.out => scale.0.in
+net spindle-rpm          scale.0.out abs.spindle.in
 #setp lowpass.0.gain      0.005
-setp lowpass.0.gain      .05
-net Cpos-fb   lowpass.0.in
-net spindle-rpm lowpass.0.out abs.spindle.in
+#setp lowpass.0.gain      .05
+#net Cpos-fb   lowpass.0.in
+#net spindle-rpm lowpass.0.out abs.spindle.in
 net spindle-rpm-abs abs.spindle.out
 
 ##
@@ -129,6 +143,6 @@ net motion_lock and2.motion_lock.out => motion.feed-inhibit
 #net datalogger-spindle-speed-commanded spindle-cmd-rpm-abs datalogger.spindle-speed-commanded
 #net datalogger-spindle-speed-actual spindle-rps datalogger.spindle-speed-actual
 
-#net Coutput <= motion.spindle−speed−out-rps
+net Coutput <= motion.spindle-speed-out-rps
 #net Coutput <= motion.spindle−speed−commanded
 
