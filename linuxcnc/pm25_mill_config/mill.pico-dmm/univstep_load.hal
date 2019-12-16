@@ -18,13 +18,14 @@ loadrt scale       names=scale.0,scale.1,scale.2,scale.x-vel,scale.y-vel,scale.z
 loadrt lowpass     count=1
 loadrt near        count=1
 loadrt limit1      count=1
-loadrt encoder     num_chan=1
-loadrt lincurve    count=1 personality=11
+#loadrt encoder     num_chan=1
+#loadrt lincurve    count=1 personality=11
 loadrt pid         num_chan=4
 loadrt oneshot     names=oneshot.fault
 loadrt limit3      names=limit3.spindle
 loadrt abs         names=abs.spindle
 loadrt angpos count=1
+loadrt stepfilter names=stepfilter.spindle
 
 # Components are executed in their addf order, and some may be order sensitive.
 
@@ -55,10 +56,11 @@ addf near.0                   servo-thread
 addf limit1.0                 servo-thread
 addf limit3.spindle           servo-thread
 addf abs.spindle              servo-thread
-addf encoder.update-counters  base-thread
-addf encoder.capture-position servo-thread
+#addf encoder.update-counters  base-thread
+#addf encoder.capture-position servo-thread
 addf angpos.0 servo-thread
-addf lincurve.0               servo-thread
+addf stepfilter.spindle servo-thread
+#addf lincurve.0               servo-thread
 addf motion-controller        servo-thread
 # then the PID loops
 addf pid.0.do-pid-calcs       servo-thread
@@ -84,9 +86,9 @@ addf and2.motion_lock         servo-thread
 loadrt debounce cfg=1
 addf debounce.0 servo-thread
 
-setp encoder.0.counter-mode       true
-setp encoder.0.position-scale     1.0
-setp encoder.0.min-speed-estimate 0.5
+#setp encoder.0.counter-mode       true
+#setp encoder.0.position-scale     1.0
+#setp encoder.0.min-speed-estimate 0.5
 
 
 loadusr -W datalogger

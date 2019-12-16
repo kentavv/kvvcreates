@@ -10,14 +10,14 @@ net Ypos-fb => pid.1.feedback
 net Ypos-fb => axis.1.motor-pos-fb
 net Zpos-fb => pid.2.feedback
 net Zpos-fb => axis.2.motor-pos-fb
+#net Cpos-fb motion.spindle-speed-out => pid.3.feedback
 net Cpos-fb => pid.3.feedback
-# net Cpos-fb => motion.spindle-speed-out
 
 # connect output signals to output of PID loops
 net Xoutput <= pid.0.output
 net Youtput <= pid.1.output
 net Zoutput <= pid.2.output
-#net Coutput <= pid.3.output
+net Coutput <= pid.3.output
 
 #net Coutput <= motion.spindle−speed−out−rps
 
@@ -25,7 +25,8 @@ net Zoutput <= pid.2.output
 setp pid.0.maxoutput [AXIS_0]PID_MAX_VEL
 setp pid.1.maxoutput [AXIS_1]PID_MAX_VEL
 setp pid.2.maxoutput [AXIS_2]PID_MAX_VEL
-setp pid.3.maxoutput 0
+#setp pid.3.maxoutput 100 # 100 RPS = 6000 RPM / 60
+setp pid.3.maxoutput 50 # 100 RPS = 3000 RPM / 60
 
 # set PID loop gains
 setp pid.0.Pgain    [AXIS_0]P
@@ -61,10 +62,10 @@ setp pid.3.Pgain    .1
 setp pid.3.Igain    6
 setp pid.3.Dgain    0
 setp pid.3.bias     0
-setp pid.3.FF0      0
+setp pid.3.FF0      1
 setp pid.3.FF1      0
 setp pid.3.FF2      0
-setp pid.3.deadband 0
+#setp pid.3.deadband 0.000126
 
 # create position command signals
 # create position command signals
@@ -73,7 +74,7 @@ setp pid.3.deadband 0
 net Xpos-cmd axis.0.motor-pos-cmd => pid.0.command
 net Ypos-cmd axis.1.motor-pos-cmd => pid.1.command
 net Zpos-cmd axis.2.motor-pos-cmd => pid.2.command
-#net Cpos-cmd motion.spindle-speed-out-rps pid.3.command
+net Cpos-cmd motion.spindle-speed-out-rps pid.3.command
 
 # create bit signals to enable/disable the PID loops
 # connect the signals to the motion controller

@@ -73,7 +73,12 @@ setp ppmc.0.encoder.03.scale 2048
 net Xpos-fb ppmc.0.encoder.00.position
 net Ypos-fb ppmc.0.encoder.01.position
 net Zpos-fb ppmc.0.encoder.02.position
-net Cpos-fb ppmc.0.encoder.03.velocity motion.spindle-speed-in
+
+#net Cpos-fb ppmc.0.encoder.03.velocity motion.spindle-speed-in
+net Cpos-fb_pre ppmc.0.encoder.03.velocity stepfilter.spindle.in
+net Cpos-fb stepfilter.spindle.out motion.spindle-speed-in
+net spindle-index-enable stepfilter.spindle.trigger
+#setp stepfilter.spindle.cycle_count 2
 
 # connect PID output signals to step generators
 net Xoutput ppmc.0.stepgen.00.velocity
