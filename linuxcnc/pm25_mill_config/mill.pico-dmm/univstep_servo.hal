@@ -25,8 +25,8 @@ net Coutput <= pid.3.output
 setp pid.0.maxoutput [AXIS_0]PID_MAX_VEL
 setp pid.1.maxoutput [AXIS_1]PID_MAX_VEL
 setp pid.2.maxoutput [AXIS_2]PID_MAX_VEL
-#setp pid.3.maxoutput 100 # 100 RPS = 6000 RPM / 60
-setp pid.3.maxoutput 50 # 100 RPS = 3000 RPM / 60
+#setp pid.3.maxoutput 50 # 100 RPS = 3000 RPM / 60
+setp pid.3.maxoutput 86.67 # 86.67 RPS = 5200 RPM / 60
 
 # set PID loop gains
 setp pid.0.Pgain    [AXIS_0]P
