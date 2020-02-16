@@ -1,0 +1,43 @@
+T2 P2 Z1.955 D2 ;2" superfly
+T3 P3 Z2.325 D1 ;1" shearhog short
+T4 P4 Z-1 D1 ;1" shearhog medium
+T5 P5 Z-1 D1 ;1" shearhog long
+T6 P6 Z2.501 D1.5 ;38mm, 1.50in, facemill
+T7 P7 Z2.639 D0.0625 ;1/16" stub em alum
+T8 P8 Z2.763 D0.0625 ;1/16" regb em alum
+T9 P9 Z2.587 D0.125 ;1/8" stub em alum
+T10 P10 Z2.905 D0.125 ;1/8" reg em alum
+T11 P11 Z2.55 D0.25 ;1/4" stub em alum
+T12 P12 Z2.881 D0.25 ;1/4" reg em alum
+T13 P13 Z3.375 D0.25 ;1/4" long em alum
+T14 P14 Z2.655 D0.375 ;3/8" stub em alum
+T15 P15 Z3.068 D0.375 ;3/8" reg em alum
+T16 P16 Z3.668 D0.375 ;3/8" long em alum
+T17 P17 Z3.064 D0.5 ;1/2" stub em alum
+T18 P18 Z3.482 D0.5 ;1/2" reg em alum
+T19 P19 Z4.339 D0.5 ;1/2" long em alum
+T20 P20 Z2.693 D0.125 ;1/8" reg em steel
+T21 P21 Z2.864 D0.25 ;1/4" reg em steel
+T22 P22 Z3.099 D0.375 ;3/8" reg em steel
+T23 P23 Z3.374 D0.5 ;1/2" reg em steel
+T30 P30 Z2.25 D0.629921 ;16mm short non cc mod em
+T31 P31 Z-1 D0.629921 ;16mm med non cc mod em
+T32 P32 Z-1 D0.629921 ;16mm long non cc mod em
+T33 P33 Z-1 D0.669291 ;17mm short cc mod em
+T34 P34 Z-1 D0.669291 ;17mm med cc mod em
+T35 P35 Z-1 D0.669291 ;17mm long cc mod em
+T36 P36 Z-1 D0.629921 ;16mm short toroidal mod em
+T37 P37 Z-1 D0.629921 ;16mm med toroidal mod em
+T38 P38 Z-1 D0.629921 ;16mm long toroidal mod em
+T39 P39 Z-1 D0.314961 ;8mm med ball mod em
+T40 P40 Z-1 D0.314961 ;8mm long ball mod em
+T41 P41 Z-1 D0.5 ;shars 1/2" insert?
+T150 P150 Z3.65 D0.25 ;1/4" spot drill
+T51 P51 Z3.448 D0.75 ;3/4" 90deg countersink
+T52 P52 Z3.178 D0.25 ;1/4" chamfer mill
+T53 P53 Z3.652 D0.25 ;1/4" drill
+T54 P54 Z4.363 D0.375 ;3/8" drill
+T55 P55 Z4.863 D0.5 ;1/2" drill
+T100 P100 Z4.776 ;haimer
+T1 P1 Z3.975 D0.1 ;temporary drill
+T50 P50 Z3.646 D0.25 ;1/4" 90deg spot drill

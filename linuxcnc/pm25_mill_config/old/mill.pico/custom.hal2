@@ -1,0 +1,62 @@
+# load and wait for shuttlexpress to be ready
+loadusr -W shuttlexpress
+
+#net feed-o shuttlexpress.0.counts => halui.max-velocity.counts
+#net feed-o shuttlexpress.0.spring-wheel-s32 => halui.max-velocity.counts
+#setp halui.max-velocity.count-enable 1
+
+setp halui.jog-speed 200
+
+loadrt mux2 count=3
+
+addf mux2.0 servo-thread
+addf mux2.1 servo-thread
+addf mux2.2 servo-thread
+
+net x-jog-enable shuttlexpress.0.button-1 mux2.0.sel
+net y-jog-enable shuttlexpress.0.button-2 mux2.1.sel
+net z-jog-enable shuttlexpress.0.button-3 mux2.2.sel
+
+net x-jog mux2.0.out halui.jog.0.analog
+net y-jog mux2.1.out halui.jog.1.analog
+net z-jog mux2.2.out halui.jog.2.analog
+
+setp halui.jog-deadband .0001
+
+loadrt lincurve personality=16
+addf lincurve.0 servo-thread
+setp lincurve.0.x-val-00 -1
+setp lincurve.0.x-val-01 -.86
+setp lincurve.0.x-val-02 -.71
+setp lincurve.0.x-val-03 -.57
+setp lincurve.0.x-val-04 -.43
+setp lincurve.0.x-val-05 -.29
+setp lincurve.0.x-val-06 -.14
+setp lincurve.0.x-val-07 0
+setp lincurve.0.x-val-08 .14
+setp lincurve.0.x-val-09 .29
+setp lincurve.0.x-val-10 .43
+setp lincurve.0.x-val-11 .57
+setp lincurve.0.x-val-12 .71
+setp lincurve.0.x-val-14 .86
+setp lincurve.0.x-val-15 1
+
+setp lincurve.0.y-val-00 -1
+setp lincurve.0.y-val-01 -.2673
+setp lincurve.0.y-val-02 -.0714
+setp lincurve.0.y-val-03 -.0190
+setp lincurve.0.y-val-04 -.0050
+setp lincurve.0.y-val-05 -.0013
+setp lincurve.0.y-val-06 -.0003
+setp lincurve.0.y-val-07 0
+setp lincurve.0.y-val-08 .0003
+setp lincurve.0.y-val-09 .0013
+setp lincurve.0.y-val-10 .0050
+setp lincurve.0.y-val-11 .0190
+setp lincurve.0.y-val-12 .0714
+setp lincurve.0.y-val-14 .2673
+setp lincurve.0.y-val-15 1
+
+net shuttle-speed shuttlexpress.0.spring-wheel-f => lincurve.0.in
+net jog-speed lincurve.0.out mux2.0.in1 mux2.1.in1 mux2.2.in1
+
