@@ -1,0 +1,48 @@
+component stepfilter "Passthrough in to out except when triggered, then pass last value before trigger, for cycle_count cycles.";
+pin in float in;
+pin in bit trigger;
+pin out float out;
+pin out bit state;
+
+param rw unsigned cycle_count = 2;
+
+variable float prev = 0.;
+variable int count = 0;
+variable int prev_trigger = 0;
+variable int triggered = 0;
+
+function _;
+license "GPL"; // indicates GPL v2 or later
+;;
+
+/*
+   HAL component installation instructions from:
+   http://linuxcnc.org/docs/html/hal/comp.html
+   halcompile --compile stepfilter.comp
+   sudo halcompile --install stepfilter.comp
+*/
+
+/* Latch failing edge */
+if(!triggered && prev_trigger && !trigger && count == 0) {
+    triggered = 1;
+}
+
+//if(triggered && count == 0) {
+//    out = prev;
+//    count++;
+//} else
+if(triggered && count < cycle_count) {
+    /* The triggering cycle must be filtered */
+    out = prev;
+    count++;
+} else {
+    out = in;
+    count = 0;
+
+    prev = in;
+    prev_trigger = trigger;
+    triggered = 0;
+}
+
+state = triggered;
+

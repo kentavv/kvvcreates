@@ -1,0 +1,69 @@
+#I have to say, it is nice to be able to tell your machine how to run instead of having to learn to or get used to running a machine someone else has configured. I am sold on EMC.
+#
+#In the original post on this thread, I proposed 2 buttons, one a Run/Step and the other a Pause/Resume. The controller I converted from had those 2 buttons close to an e-stop and until a program was proved out, 2 fingers stayed on them.
+#
+#Thanks to John and Andy, I got my Pause/Resume button. I did a little work on my own and was able to get the Run/Step button (admittedly the far easier). So, for what it's worth, here is the program for both buttons:
+#
+
+# (The toggle component has debounce by default)
+
+# Pause/Resume Section
+net pause-resume-btn ppmc.0.din.11.in         => and2.a1.in0 and2.a2.in0
+net pause-on         halui.program.is-paused  => toggle2nist.0.is-on and2.a1.in1 and2.a4.in1
+net run-on           halui.program.is-running => and2.a2.in1
+net pause-sig        and2.a1.out              => or2.o1.in0
+net resume-sig       and2.a2.out              => or2.o1.in1
+net toggle-ok        or2.o1.out               => toggle.0.in
+net togglesig        toggle.0.out             => toggle2nist.0.in
+net toggleon         toggle2nist.0.on         => halui.program.pause
+net toggleoff        toggle2nist.0.off        => halui.program.resume
+
+# Run/Step Section
+net run-step-btn     ppmc.0.din.10.in         => and2.a3.in0 and2.a4.in0
+net idle-on          halui.program.is-idle    => and2.a3.in1
+# net pause-on halui.program.is-paused => and2.3.in1
+# and2.3.in1 was added in the net pause-on statement in Pause/Resume Section
+net run-sig          and2.a3.out              => halui.mode.auto halui.program.run
+net step-sig         and2.a4.out              => halui.program.step
+
+# Stop Section
+#net stop-btn         ppmc.0.din.09.in         => halui.program.stop
+
+setp debounce.1.delay 120 # 120 * servo-thread period (500us) = 60ms
+#net spindle-good ppmc.0.din.06.in => or2.stop0.in0
+net spindle-good ppmc.0.din.06.in => debounce.1.0.in
+net spindle-good-debounced debounce.1.0.out => or2.stop0.in0
+net axes-good ppmc.0.din.07.in-not => or2.stop0.in1
+
+net fault-latch-faultin or2.stop0.out         => estop-latch.fault.fault-in
+net fault-latch-loopout estop-latch.fault.fault-out  => or2.stop.in0
+#setp estop-latch.fault.ok-in 1
+# The following single line should work, but there's a glitch or something at the start that causes a latch to occur
+# so we also use the estop-reset to reset the fault latch
+#net result-fault => estop-latch.fault.reset
+net estop-reset or2.fault.in0
+net result-fault or2.fault.in1
+net result-fault2 or2.fault.out estop-latch.fault.reset
+
+#net stop-lvl0 or2.stop0.out => or2.stop.in0
+net stop-btn         ppmc.0.din.09.in         => or2.stop.in1
+
+#net stop-request or2.stop.out halui.program.stop
+# The following is better than halui.program.stop but requires changes to Axis
+# detailed in https://forum.linuxcnc.org/21-axis/27585-enable-disable-run-button
+#net run-disabled or2.stop.out axisui.run-disable
+
+#This is how they function:
+#
+#Pressing Run/Step will begin executing a program.
+#
+#Pressing Hold/Resume while a program is running will pause the program.
+#
+#Pressing Run/Step while a program is paused will single step the program.
+#
+#Pressing Hold/Resume while a program is paused will return it to normal run mode.
+#
+#I hope this thread is of some help to someone.
+#
+#Frank
+

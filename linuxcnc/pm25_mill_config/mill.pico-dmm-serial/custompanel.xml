@@ -1,0 +1,232 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pyvcp>
+	<vbox>
+
+		<relief>RIDGE</relief>
+		<bd>3</bd>
+
+		<label>
+			<text>"Spindle"</text>
+			<font>("Helvetica", 20)</font>
+		</label>
+
+		<hbox>
+			<label>
+				<text>"  Lock"</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<led>
+				<halpin>"spindle-locked-led"</halpin>
+				<size>30</size>
+				<on_color>"red"</on_color>
+				<off_color>"green"</off_color>
+			</led>
+		</hbox>
+
+		<hbox>
+			<label>
+				<text>"  Target"</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 20)</font>
+				<halpin>"spindle-speed-target"</halpin>
+				<format>"d"</format>
+			</number>
+
+			<led>
+				<halpin>"spindle-at-speed-led"</halpin>
+				<size>30</size>
+				<on_color>"green"</on_color>
+				<off_color>"red"</off_color>
+			</led>
+		</hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Actual"</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-speed-abs"</halpin>
+                                <format>"d"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Pos: "</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-position-c"</halpin>
+                                <format>"3.2f"</format>
+                        </number>
+                </hbox>
+
+		<label>
+			<text>"Spindle Torque"</text>
+			<font>("Helvetica", 20)</font>
+		</label>
+
+                <hbox>
+                        <label>
+                                <text>"  Mean: "</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-torque1"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Instant: "</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-torque2"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+
+		<label>
+			<text>"Status"</text>
+			<font>("Helvetica", 20)</font>
+		</label>
+
+                <hbox>
+                        <label>
+                                <text>"  Axes"</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"axes-good-led"</halpin>
+                                <size>30</size>
+                                <on_color>"red"</on_color>
+                                <off_color>"green"</off_color>
+                        </led>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Spindle"</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"spindle-good-led"</halpin>
+                                <size>30</size>
+                                <on_color>"red"</on_color>
+                                <off_color>"green"</off_color>
+                        </led>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Faulted"</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"fault-led"</halpin>
+                                <size>30</size>
+                                <on_color>"red"</on_color>
+                                <off_color>"green"</off_color>
+                        </led>
+
+                        <button>
+                                <font>("Helvetica",20)</font>
+                                <width>3</width>
+                                <halpin>"reset-fault"</halpin>
+                                <text>"Reset"</text>
+                        </button>
+                </hbox>
+
+		<label>
+			<text>"Velocity"</text>
+			<font>("Helvetica", 20)</font>
+		</label>
+
+		<hbox>
+			<label>
+				<text>"  X: "</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 20)</font>
+				<halpin>"x-velocity-upm"</halpin>
+				<format>"+3.2f"</format>
+			</number>
+		</hbox>
+
+		<hbox>
+			<label>
+				<text>"  Y: "</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 20)</font>
+				<halpin>"y-velocity-upm"</halpin>
+				<format>"+3.2f"</format>
+			</number>
+		</hbox>
+
+		<hbox>
+			<label>
+				<text>"  Z: "</text>
+				<font>("Helvetica", 20)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 20)</font>
+				<halpin>"z-velocity-upm"</halpin>
+				<format>"+3.2f"</format>
+			</number>
+		</hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  C: "</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-speed-c"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+		        <checkbutton>
+				<font>("Helvetica", 20)</font>
+		        	<halpin>"datalogger-enabled"</halpin>
+		        	<text>"Data logger"</text>
+        		</checkbutton>
+		</hbox>
+
+                <hbox>
+                        <button>
+                                <font>("Helvetica",20)</font>
+                                <halpin>"load-haimer"</halpin>
+                                <text>"Load Haimer"</text>
+                        </button>
+                </hbox>
+
+	</vbox>
+</pyvcp>

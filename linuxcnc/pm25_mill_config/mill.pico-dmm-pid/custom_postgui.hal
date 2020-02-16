@@ -1,0 +1,47 @@
+# Include your customized HAL commands here
+# The commands in this file are run after the AXIS GUI (including PyVCP panel) starts
+
+net spindle-cmd-rpm-abs pyvcp.spindle-speed-target datalogger.spindle-speed-commanded
+net spindle-rpm         datalogger.spindle-speed-actual pyvcp.spindle-speed-c
+net spindle-rpm-abs     pyvcp.spindle-speed-abs
+
+net spindle-at-speed    pyvcp.spindle-at-speed-led
+net spindle-locked      pyvcp.spindle-locked-led
+
+net axes-good           pyvcp.axes-good-led
+net spindle-good        pyvcp.spindle-good-led
+net fault-latch-loopout pyvcp.fault-led
+net result-fault        pyvcp.reset-fault
+
+#loadrt scale names=scale.x-vel,scale.y-vel,scale.z-vel
+#addf scale.x-vel servo-thread
+#addf scale.y-vel servo-thread
+#addf scale.z-vel servo-thread
+
+setp scale.x-vel.gain 60
+setp scale.y-vel.gain 60
+setp scale.z-vel.gain 60
+
+net x-velocity-ups axis.0.joint-vel-cmd scale.x-vel.in
+net y-velocity-ups axis.1.joint-vel-cmd scale.y-vel.in
+net z-velocity-ups axis.2.joint-vel-cmd scale.z-vel.in
+net x-velocity-upm scale.x-vel.out pyvcp.x-velocity-upm datalogger.xvel
+net y-velocity-upm scale.y-vel.out pyvcp.y-velocity-upm datalogger.yvel
+net z-velocity-upm scale.z-vel.out pyvcp.z-velocity-upm datalogger.zvel
+
+net datalogger-enabled datalogger.enabled pyvcp.datalogger-enabled
+#net datalogger-enabled ppmc.0.encoder.03.index-enable pyvcp.datalogger-enabled
+
+net load-haimer halui.mdi-command-00 <= pyvcp.load-haimer
+
+#net stop-request or2.stop.out halui.program.stop
+# The following adds to halui.program.stop to prevent program execution but requires changes 
+# to Axis detailed in https://forum.linuxcnc.org/21-axis/27585-enable-disable-run-button
+net run-disabled or2.stop.out oneshot.fault.in axisui.run-disable
+net stop-requested oneshot.fault.out halui.program.stop 
+setp oneshot.fault.width .05
+
+setp angpos.0.scale-in    1
+setp angpos.0.scale-out     360.0
+net c-position angpos.0.out-deg pyvcp.spindle-position-c
+

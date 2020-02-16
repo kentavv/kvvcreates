@@ -1,0 +1,132 @@
+# HAL config file for servos -- expanded from core_servo.hal
+
+# create position feedback signals
+
+# connect position feedback to PID loop
+# connect position feedback to motion module
+net Xpos-fb => pid.0.feedback
+net Xpos-fb => axis.0.motor-pos-fb
+net Ypos-fb => pid.1.feedback
+net Ypos-fb => axis.1.motor-pos-fb
+net Zpos-fb => pid.2.feedback
+net Zpos-fb => axis.2.motor-pos-fb
+#net Cpos-fb motion.spindle-speed-out => pid.3.feedback
+#net Cpos-fb => pid.3.feedback
+
+# connect output signals to output of PID loops
+net Xoutput <= pid.0.output
+net Youtput <= pid.1.output
+net Zoutput <= pid.2.output
+#net Coutput <= pid.3.output
+
+#net Coutput <= motion.spindle−speed−out−rps
+
+# set PID loop output limits to +/-1.00
+setp pid.0.maxoutput [AXIS_0]PID_MAX_VEL
+setp pid.1.maxoutput [AXIS_1]PID_MAX_VEL
+setp pid.2.maxoutput [AXIS_2]PID_MAX_VEL
+#setp pid.3.maxoutput 50 # 100 RPS = 3000 RPM / 60
+#setp pid.3.maxoutput 86.67 # 86.67 RPS = 5200 RPM / 60
+
+# set PID loop gains
+setp pid.0.Pgain    [AXIS_0]P
+setp pid.0.Igain    [AXIS_0]I
+setp pid.0.Dgain    [AXIS_0]D
+setp pid.0.bias     [AXIS_0]BIAS
+setp pid.0.FF0      [AXIS_0]FF0
+setp pid.0.FF1      [AXIS_0]FF1
+setp pid.0.FF2      [AXIS_0]FF2
+setp pid.0.deadband [AXIS_0]DEADBAND
+
+setp pid.1.Pgain    [AXIS_1]P
+setp pid.1.Igain    [AXIS_1]I
+setp pid.1.Dgain    [AXIS_1]D
+setp pid.1.bias     [AXIS_1]BIAS
+setp pid.1.FF0      [AXIS_1]FF0
+setp pid.1.FF1      [AXIS_1]FF1
+setp pid.1.FF2      [AXIS_1]FF2
+setp pid.1.deadband [AXIS_1]DEADBAND
+
+setp pid.2.Pgain    [AXIS_2]P
+setp pid.2.Igain    [AXIS_2]I
+setp pid.2.Dgain    [AXIS_2]D
+setp pid.2.bias     [AXIS_2]BIAS
+setp pid.2.FF0      [AXIS_2]FF0
+setp pid.2.FF1      [AXIS_2]FF1
+setp pid.2.FF2      [AXIS_2]FF2
+setp pid.2.deadband [AXIS_2]DEADBAND
+
+#setp pid.3.Pgain    .1
+#setp pid.3.Igain    6
+#setp pid.3.Pgain    .1
+#setp pid.3.Igain    6
+#setp pid.3.Dgain    0
+#setp pid.3.bias     0
+#setp pid.3.FF0      1
+#setp pid.3.FF1      0
+#setp pid.3.FF2      0
+#setp pid.3.deadband 0.000126
+
+# create position command signals
+# create position command signals
+# connect position commands to motion controller
+# connect position commands to PID input
+net Xpos-cmd axis.0.motor-pos-cmd => pid.0.command
+net Ypos-cmd axis.1.motor-pos-cmd => pid.1.command
+net Zpos-cmd axis.2.motor-pos-cmd => pid.2.command
+#net Cpos-cmd motion.spindle-speed-out-rps pid.3.command
+
+# create bit signals to enable/disable the PID loops
+# connect the signals to the motion controller
+# connect the signals to the PID blocks
+net Xenable axis.0.amp-enable-out => pid.0.enable
+net Yenable axis.1.amp-enable-out => pid.1.enable
+net Zenable axis.2.amp-enable-out => pid.2.enable
+#net Cenable pid.3.enable
+
+
+#net Coutput motion.spindle-speed-out
+#net spindle-ramp motion.spindle-speed-out limit3.spindle.in 
+#setp limit3.spindle.min -5000
+#setp limit3.spindle.max 5000
+#setp limit3.spindle.maxv 2500
+#setp limit3.spindle.maxa 5
+#net Coutput limit3.spindle.out
+#net Cenable motion.spindle-on
+
+# Create signals for spindle speed control and spindle-at-speed detection.
+# Piecewise linear interpolation is used to map from desired speed to DAC voltage output.
+# Slightly more than 5V is used as maximum to compensate for resistance loses.
+setp near.0.scale 1.1
+#setp ppmc.0.DAC8.00.scale 1.0
+#
+net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1
+#net spindle-cmd-rpm-abs motion.spindle-speed-out-abs => near.0.in1 lincurve.0.in
+net spindle-rpm         near.0.in2
+net spindle-at-speed    near.0.out => motion.spindle-at-speed
+#
+#setp lincurve.0.x-val-00 134
+#setp lincurve.0.y-val-00 0.50
+#setp lincurve.0.x-val-01 333
+#setp lincurve.0.y-val-01 1.0
+#setp lincurve.0.x-val-02 744
+#setp lincurve.0.y-val-02 2.0
+#setp lincurve.0.x-val-03 1144
+#setp lincurve.0.y-val-03 3.0
+#setp lincurve.0.x-val-04 1557
+#setp lincurve.0.y-val-04 4.0
+#setp lincurve.0.x-val-05 1956
+#setp lincurve.0.y-val-05 5.0 
+#setp lincurve.0.x-val-06 2370
+#setp lincurve.0.y-val-06 6.0
+#setp lincurve.0.x-val-07 2766
+#setp lincurve.0.y-val-07 7.0
+#setp lincurve.0.x-val-08 3177
+#setp lincurve.0.y-val-08 8.0
+#setp lincurve.0.x-val-09 3570
+#setp lincurve.0.y-val-09 9.0
+#setp lincurve.0.x-val-10 3955
+#setp lincurve.0.y-val-10 10.0
+#
+#net requested-speed-for-ppmc lincurve.0.out => ppmc.0.DAC8.00.value
+

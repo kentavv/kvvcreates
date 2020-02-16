@@ -1,0 +1,94 @@
+# HAL config file for Pico Systems USC board
+
+# Configure the stepgen component
+
+# From: http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Universal_Stepper_Controller
+#   and https://forum.linuxcnc.org/27-driver-boards/14977-pico-systems-faq
+# ppmc.0.stepgen.00-03 parameters, specified in nanoseconds
+#     pulse-width-ns:     width of the step pulse
+#     setup-time-ns:      minimum delay between the step pulse and a change in the direction
+#     pulse-space-min-ns: minimum timing between consecutive step pulses on the same axis
+
+# Timings for the Leadshine ES-D508 Easy Servo stepper motor drive.
+# From the Leadshine ES-D508 manual:
+# Frequency: 200 kHz
+# t_DS:  Direction setup time:        > 5 us
+# t_PHS: Pulse high level setup time: > 2.5 us
+# t_PLS: Pulse low level setup time:  > 2.5 us
+# t_DD:  Direction delay time:        > 5 us
+# t_ES:  Enable setup time:           > 50 ms
+# t_ED:  Enable delay time:           > 50 ms
+
+# Timings for the DMM DYN4 AC servo drive:
+# From the DMM DYN4 manual:
+# Frequency: 500 kHz
+# Minimum pulse width:  > 0.8 us
+# Direction delay time: > 5 + 5 us ?
+# Minimum between pulses:  > 1.8 us?
+
+# Timings for the Pico Systems USC:
+# From https://pico-systems.com/univstep.html
+# Max step frequency: 300 kHz
+# Max encoder frequency: 250 kHz
+
+# With total transition time of (2500 + 2500) ns, maximum frequency is 200 kHz
+setp ppmc.0.stepgen.00-03.pulse-width-ns     2500
+setp ppmc.0.stepgen.00-03.pulse-space-min-ns 2500
+setp ppmc.0.stepgen.00-03.setup-time-ns      5000 # 10000 caused DYN4 to surge and fault, even though it seems correct
+
+
+
+# set input and output scaling from ini file
+# input and output scales should (normally) be the same for a USC
+setp ppmc.0.stepgen.00.scale [AXIS_0]SCALE
+setp ppmc.0.stepgen.01.scale [AXIS_1]SCALE
+setp ppmc.0.stepgen.02.scale [AXIS_2]SCALE
+# spindle scale needs to be in rps, so for dyn4 gear setting of 540 quadrature per rev, (desired RPM) / 60 * 540 * 4, so scale = 540*4/60=36
+#setp ppmc.0.stepgen.03.scale 36
+#setp ppmc.0.stepgen.03.scale 33.333333333
+#setp ppmc.0.stepgen.03.scale 34.133333333
+setp ppmc.0.stepgen.03.scale 2048
+#setp ppmc.0.stepgen.03.scale 2160
+
+setp ppmc.0.encoder.00.scale [AXIS_0]SCALE
+setp ppmc.0.encoder.01.scale [AXIS_1]SCALE
+setp ppmc.0.encoder.02.scale [AXIS_2]SCALE
+#setp ppmc.0.encoder.03.scale 36
+#setp ppmc.0.encoder.03.scale 33.333333333
+#setp ppmc.0.encoder.03.scale 34.133333333
+setp ppmc.0.encoder.03.scale 2048
+#setp ppmc.0.encoder.03.scale 2160
+
+# Find nice numbers for the DMM DYN4 gear number, which results in an integer scale value in LinuxCNC, and is 
+# below the maximum frequency at 5000 RPM. Perhaps 10% below to provide some margin of safety.
+# Columns are: gear number, linuxcnc scale, required frequency [kHz]
+# >>> [(i, 4*i/60., 4*i*5000/60./1000) for i in range(500,600+1) if (4*i/60.)-(4*i/60) == 0]
+# [(510, 34.0, 170.0), (525, 35.0, 175.0), (540, 36.0, 180.0), (555, 37.0, 185.0), (570, 38.0, 190.0), (585, 39.0, 195.0), (600, 40.0, 200.0)]
+#
+# E.g.,
+# Gear number 540, requires a scale value of 36, and 180 kHz
+
+
+# connect position feedback signals to encoders
+net Xpos-fb ppmc.0.encoder.00.position
+net Ypos-fb ppmc.0.encoder.01.position
+net Zpos-fb ppmc.0.encoder.02.position
+
+#net Cpos-fb ppmc.0.encoder.03.velocity motion.spindle-speed-in
+net Cpos-fb_pre ppmc.0.encoder.03.velocity stepfilter.spindle.in
+net Cpos-fb stepfilter.spindle.out motion.spindle-speed-in
+net spindle-index-enable stepfilter.spindle.trigger
+#setp stepfilter.spindle.cycle_count 2
+
+# connect PID output signals to step generators
+net Xoutput ppmc.0.stepgen.00.velocity
+net Youtput ppmc.0.stepgen.01.velocity
+net Zoutput ppmc.0.stepgen.02.velocity
+net Coutput ppmc.0.stepgen.03.velocity
+
+# connect axis enables to step generators
+net Xenable ppmc.0.stepgen.00.enable
+net Yenable ppmc.0.stepgen.01.enable
+net Zenable ppmc.0.stepgen.02.enable
+#net Cenable ppmc.0.stepgen.03.enable
+
