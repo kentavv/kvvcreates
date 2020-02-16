@@ -29,7 +29,10 @@ net step-sig         and2.a4.out              => halui.program.step
 # Stop Section
 #net stop-btn         ppmc.0.din.09.in         => halui.program.stop
 
-net spindle-good ppmc.0.din.06.in => or2.stop0.in0
+setp debounce.1.delay 120 # 120 * servo-thread period (500us) = 60ms
+#net spindle-good ppmc.0.din.06.in => or2.stop0.in0
+net spindle-good ppmc.0.din.06.in => debounce.1.0.in
+net spindle-good-debounced debounce.1.0.out => or2.stop0.in0
 net axes-good ppmc.0.din.07.in-not => or2.stop0.in1
 
 net fault-latch-faultin or2.stop0.out         => estop-latch.fault.fault-in
