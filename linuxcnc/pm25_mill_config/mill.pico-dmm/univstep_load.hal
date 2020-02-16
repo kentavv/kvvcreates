@@ -20,7 +20,7 @@ loadrt near        count=1
 loadrt limit1      count=1
 #loadrt encoder     num_chan=1
 #loadrt lincurve    count=1 personality=11
-loadrt pid         num_chan=4
+loadrt pid         num_chan=3
 loadrt oneshot     names=oneshot.fault
 loadrt limit3      names=limit3.spindle
 loadrt abs         names=abs.spindle
@@ -66,7 +66,7 @@ addf motion-controller        servo-thread
 addf pid.0.do-pid-calcs       servo-thread
 addf pid.1.do-pid-calcs       servo-thread
 addf pid.2.do-pid-calcs       servo-thread
-addf pid.3.do-pid-calcs       servo-thread
+#addf pid.3.do-pid-calcs       servo-thread
 # write outputs last
 addf ppmc.0.write             servo-thread
 
@@ -83,8 +83,9 @@ addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf and2.motion_lock         servo-thread
 
-loadrt debounce cfg=1
+loadrt debounce cfg=1,1
 addf debounce.0 servo-thread
+addf debounce.1 servo-thread
 
 #setp encoder.0.counter-mode       true
 #setp encoder.0.position-scale     1.0
