@@ -47,3 +47,4 @@ net c-position angpos.0.out-deg pyvcp.spindle-position-c
 
 net torque1 dmmserial.torque1 pyvcp.spindle-torque1
 net torque2 dmmserial.torque2 pyvcp.spindle-torque2
+net c-position2 dmmserial.pos pyvcp.spindle-position-c2

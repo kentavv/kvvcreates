@@ -59,13 +59,26 @@
 
                 <hbox>
                         <label>
-                                <text>"  Pos: "</text>
+                                <text>"  Pos1: "</text>
                                 <font>("Helvetica", 20)</font>
                         </label>
 
                         <number>
                                 <font>("Helvetica", 20)</font>
                                 <halpin>"spindle-position-c"</halpin>
+                                <format>"3.2f"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Pos2: "</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 20)</font>
+                                <halpin>"spindle-position-c2"</halpin>
                                 <format>"3.2f"</format>
                         </number>
                 </hbox>

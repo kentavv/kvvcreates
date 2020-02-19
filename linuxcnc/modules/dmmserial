@@ -648,32 +648,40 @@ def serial_loop(dev_fn, h):
      v_prev = None
      while True:
       time.sleep(.01)
+
+      if True:
+        abs_pos = abs(dmm.read_AbsPos32())
+        abs_pos_1t = (abs_pos % (2**16)) / (2.**16) * 360.
+        h['pos'] = abs_pos_1t
+        print(abs_pos_1t, abs_pos / (2.**16), abs_pos)
+
       if not h['enable']:
         if v_prev is not None:
           dmm.set_speed(0)
           v_prev = None
         if a:
          h['torque1'], h['torque2'] = dmm.update_TrqCurrent()
+
         continue
 
       a = True
       h['torque1'], h['torque2'] = dmm.update_TrqCurrent()
 
-      print(h)
-      print(h['in'], h['enable'])
+      # print(h)
+      # print(h['in'], h['enable'])
       v = -int(round(h['in']))
       if v != v_prev:
          v_prev = v 
 #         dmm.set_speed(v)
 
-      print('v:', v)
+      # print('v:', v)
       if v is None:
         continue
 
       #with DMMDrive('/dev/ttyUSB0', 0) as dmm:
       if True:
-        print(dmm)
-        print(dir(dmm))
+        # print(dmm)
+        # print(dir(dmm))
 
         d = {}
         d['Status'] = dmm.read_Status()
@@ -719,6 +727,7 @@ def main():
     h.newpin("out", hal.HAL_FLOAT, hal.HAL_OUT)
     h.newpin("torque1", hal.HAL_FLOAT, hal.HAL_OUT)
     h.newpin("torque2", hal.HAL_FLOAT, hal.HAL_OUT)
+    h.newpin("pos", hal.HAL_FLOAT, hal.HAL_OUT)
     h.ready()
 
     # while True:
