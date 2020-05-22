@@ -1,0 +1,10 @@
+
+net 	axis_0_max_vel 	vc-p4s.ini.0.max.vel => ini.0.max_velocity
+net 	axis_1_max_vel	vc-p4s.ini.1.max.vel => ini.1.max_velocity
+net 	axis_2_max_vel 	vc-p4s.ini.2.max.vel => ini.2.max_velocity
+net 	axis_3_max_vel	vc-p4s.ini.3.max.vel => ini.3.max_velocity
+net 	axis_4_max_vel	vc-p4s.ini.4.max.vel => ini.4.max_velocity
+net 	axis_5_max_vel 	vc-p4s.ini.5.max.vel => ini.5.max_velocity
+
+
+

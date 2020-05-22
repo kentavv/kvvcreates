@@ -1,0 +1,47 @@
+#I have to say, it is nice to be able to tell your machine how to run instead of having to learn to or get used to running a machine someone else has configured. I am sold on EMC.
+#
+#In the original post on this thread, I proposed 2 buttons, one a Run/Step and the other a Pause/Resume. The controller I converted from had those 2 buttons close to an e-stop and until a program was proved out, 2 fingers stayed on them.
+#
+#Thanks to John and Andy, I got my Pause/Resume button. I did a little work on my own and was able to get the Run/Step button (admittedly the far easier). So, for what it's worth, here is the program for both buttons:
+#
+
+# (The toggle component has debounce by default)
+
+# Pause/Resume Section
+#net pause-resume-btn and2.a1.in0 and2.a2.in0 <= hm2_7i76e.0.7i76.0.0.input-08 #(this is your input)
+net pause-resume-btn and2.a1.in0 and2.a2.in0
+net pause-on toggle2nist.0.is-on and2.a1.in1 and2.a4.in1 <= halui.program.is-paused
+net run-on and2.a2.in1 <= halui.program.is-running
+net pause-sig or2.o1.in0 <= and2.a1.out
+net resume-sig or2.o1.in1 <= and2.a2.out
+net toggle-ok toggle.0.in <= or2.o1.out
+net togglesig toggle2nist.0.in <= toggle.0.out
+net toggleon halui.program.pause <= toggle2nist.0.on
+net toggleoff halui.program.resume <= toggle2nist.0.off
+
+# Run/Step Section
+#net run-step-btn and2.a3.in0 and2.a4.in0 <= hm2_7i76e.0.7i76.0.0.input-07 #(this is your input)
+net run-step-btn and2.a3.in0 and2.a4.in0
+net idle-on and2.a3.in1 <= halui.program.is-idle
+# net pause.on and 2.3.in1 <= halui.program.is-paused
+# and2.3.in1 was added in the net pause-on statement in Pause/Resume Section
+net run-sig halui.mode.auto halui.program.run <= and2.a3.out
+net step-sig halui.program.step <= and2.a4.out
+
+# Stop Section
+#net stop-btn <= hm2_7i76e.0.7i76.0.0.input-09-not => halui.program.stop
+net stop-btn => halui.program.stop
+
+#This is how they function:
+#
+#Pressing Run/Step will begin executing a program.
+#
+#Pressing Hold/Resume while a program is running will pause the program.
+#
+#Pressing Run/Step while a program is paused will single step the program.
+#
+#Pressing Hold/Resume while a program is paused will return it to normal run mode.
+#
+#I hope this thread is of some help to someone.
+#
+#Frank
