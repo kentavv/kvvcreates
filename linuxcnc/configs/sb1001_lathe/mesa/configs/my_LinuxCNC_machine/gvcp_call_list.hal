@@ -1,0 +1,4 @@
+# These files are loaded post gladeVCP, in the order they appear
+
+source gvcp_options.hal
+source custom_gvcp.hal

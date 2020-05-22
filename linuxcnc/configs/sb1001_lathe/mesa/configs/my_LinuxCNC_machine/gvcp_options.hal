@@ -1,0 +1,9 @@
+# _DO NOT_ include your HAL commands here.
+# Put custom HAL commands in custom_gvcp.hal
+
+# **** Setup of spindle speed display using gladevcp ****
+
+net spindle-fb-rpm-abs-filtered       =>   gladevcp.spindle-speed
+net spindle-at-speed        =>    gladevcp.spindle-at-speed-led
+# **** Setup GLADE MDI buttons ****
+net machine-is-on          =>    gladevcp.button-box-active
