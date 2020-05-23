@@ -19,6 +19,7 @@ loadrt not count=1
 loadrt toggle count=1
 loadrt toggle2nist count=1
 loadrt debounce cfg=1,1
+loadrt timedelay names=timedelay.brake
 
 addf hm2_7i76e.0.read          servo-thread
 addf motion-command-handler   servo-thread
@@ -44,6 +45,7 @@ addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
 addf debounce.1               servo-thread
+addf timedelay.brake          servo-thread
 addf hm2_7i76e.0.write        servo-thread
 setp hm2_7i76e.0.dpll.01.timer-us -50
 setp hm2_7i76e.0.stepgen.timer-number 1
@@ -61,9 +63,13 @@ net coolant  =>     hm2_7i76e.0.7i76.0.0.output-01
 net estop-out  =>     hm2_7i76e.0.7i76.0.0.output-02
 
 # --- SPINDLE-ENABLE ---
-#net spindle-enable => not.0.in
-net spindle-brake => not.0.in
-net spindle-enable-not  not.0.out =>     hm2_7i76e.0.7i76.0.0.output-03
+net spindle-enable =>     hm2_7i76e.0.7i76.0.0.output-03
+
+# --- SPINDLE-BRAKE ---
+net spindle-brake =>     timedelay.brake.in
+net spindle-brake-delayed timedelay.brake.out =>     hm2_7i76e.0.7i76.0.0.output-04
+setp timedelay.brake.on-delay 2
+setp timedelay.brake.off-delay 0
 
 # external input signals
 
