@@ -63,6 +63,9 @@ net home-x     <=  hm2_7i76e.0.7i76.0.0.input-05-not
 # --- HOME-Z ---
 net home-z     <=  hm2_7i76e.0.7i76.0.0.input-06-not
 
+# --- SPINDLE-GOOD ---
+net spindle-good     <=  hm2_7i76e.0.7i76.0.0.input-10-not => motion.enable
+
 #*******************
 #  AXIS X JOINT 0
 #*******************
