@@ -6,11 +6,11 @@
 # Connector limit and home switches
 #net x-min-lim ppmc.0.din.01.in => axis.0.neg-lim-sw-in
 #net x-max-lim ppmc.0.din.02.in => axis.0.pos-lim-sw-in
-#net x-home    ppmc.0.din.00.in => axis.0.home-sw-in
+net x-home    ppmc.0.din.00.in => axis.0.home-sw-in
 
 #net z-min-lim ppmc.0.din.09.in => axis.2.neg-lim-sw-in
 #net z-max-lim ppmc.0.din.10.in => axis.2.pos-lim-sw-in
-#net z-home    ppmc.0.din.08.in => axis.2.home-sw-in
+net z-home    ppmc.0.din.08.in => axis.2.home-sw-in
 
 
 # Create e-stop circuit
