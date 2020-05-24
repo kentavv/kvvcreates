@@ -15,7 +15,7 @@ loadrt scale names=scale.spindle
 loadrt near
 loadrt or2 names=or2.coolant,or2.o1
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
-loadrt not count=1
+loadrt not names=not.spindle-brake
 loadrt toggle count=1
 loadrt toggle2nist count=1
 loadrt debounce cfg=1,1
@@ -40,7 +40,7 @@ addf and2.a3                  servo-thread
 addf and2.a4                  servo-thread
 addf and2.vc                  servo-thread
 addf and2.motion_lock         servo-thread
-addf not.0                    servo-thread
+addf not.spindle-brake        servo-thread
 addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
@@ -69,10 +69,12 @@ net spindle-enable =>     hm2_7i76e.0.7i76.0.0.output-03
 
 # --- SPINDLE-BRAKE ---
 # TODO Enable the brake, if not enabled manually, once the spindle RPM has below a threshold.
+# TODO On startup, the brake disables and then after the timeout reenables.
 net spindle-brake =>     timedelay.spindle-brake.in
-net spindle-brake-delayed timedelay.spindle-brake.out =>     hm2_7i76e.0.7i76.0.0.output-04
+net spindle-brake-delayed timedelay.spindle-brake.out => not.spindle-brake.in
 setp timedelay.spindle-brake.on-delay 3
 setp timedelay.spindle-brake.off-delay 0
+net spindle-brake-not not.spindle-brake.out => hm2_7i76e.0.7i76.0.0.output-04
 
 # external input signals
 
