@@ -366,13 +366,10 @@ net spindle-index-enable      <=>  spindle.0.index-enable
 
 # ---Setup spindle at speed signals---
 
-#net spindle-vel-cmd-rps    =>  near.0.in1
-#net spindle-vel-fb-rps         =>  near.0.in2
-#setp near.0.difference 3.333333
-net spindle-vel-cmd-rpm    =>  near.0.in1
-net spindle-fb-rpm-abs-filtered         =>  near.0.in2
-net spindle-at-speed       <=  near.0.out
-setp near.0.scale 1.000000
+net spindle-vel-cmd-rpm     =>  near.0.in1
+net spindle-fb-rpm-filtered =>  near.0.in2
+net spindle-at-speed        <=  near.0.out
+setp near.0.scale 1.1
 setp near.0.difference 200
 
 #  Use ACTUAL spindle velocity from spindle encoder
@@ -383,9 +380,9 @@ setp near.0.difference 200
 setp     scale.spindle.gain 60
 setp     lowpass.spindle.gain 1.000000
 net spindle-vel-fb-rps        =>     scale.spindle.in
-net spindle-fb-rpm               scale.spindle.out       =>   abs.spindle.in
-net spindle-fb-rpm-abs           abs.spindle.out         =>   lowpass.spindle.in
-net spindle-fb-rpm-abs-filtered  lowpass.spindle.out  
+net spindle-fb-rpm               scale.spindle.out       =>   lowpass.spindle.in
+net spindle-fb-rpm-filtered      lowpass.spindle.out     =>   abs.spindle.in
+net spindle-fb-rpm-filtered-abs  abs.spindle.out
 
 #******************************
 # connect miscellaneous signals
