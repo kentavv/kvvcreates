@@ -19,7 +19,7 @@ loadrt not count=1
 loadrt toggle count=1
 loadrt toggle2nist count=1
 loadrt debounce cfg=1,1
-loadrt timedelay names=timedelay.brake
+loadrt timedelay names=timedelay.spindle-brake,timedelay.spindle-pid,timedelay.spindle-enable
 
 addf hm2_7i76e.0.read          servo-thread
 addf motion-command-handler   servo-thread
@@ -45,7 +45,9 @@ addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
 addf debounce.1               servo-thread
-addf timedelay.brake          servo-thread
+addf timedelay.spindle-brake  servo-thread
+addf timedelay.spindle-pid    servo-thread
+addf timedelay.spindle-enable servo-thread
 addf hm2_7i76e.0.write        servo-thread
 setp hm2_7i76e.0.dpll.01.timer-us -50
 setp hm2_7i76e.0.stepgen.timer-number 1
@@ -66,10 +68,11 @@ net estop-out  =>     hm2_7i76e.0.7i76.0.0.output-02
 net spindle-enable =>     hm2_7i76e.0.7i76.0.0.output-03
 
 # --- SPINDLE-BRAKE ---
-net spindle-brake =>     timedelay.brake.in
-net spindle-brake-delayed timedelay.brake.out =>     hm2_7i76e.0.7i76.0.0.output-04
-setp timedelay.brake.on-delay 2
-setp timedelay.brake.off-delay 0
+# TODO Enable the brake, if not enabled manually, once the spindle RPM has below a threshold.
+net spindle-brake =>     timedelay.spindle-brake.in
+net spindle-brake-delayed timedelay.spindle-brake.out =>     hm2_7i76e.0.7i76.0.0.output-04
+setp timedelay.spindle-brake.on-delay 3
+setp timedelay.spindle-brake.off-delay 0
 
 # external input signals
 
@@ -304,9 +307,12 @@ setp   pid.s.error-previous-target true
 setp   pid.s.maxerror .0005
 
 net spindle-index-enable  <=> pid.s.index-enable
-net spindle-enable        =>  pid.s.enable
-net spindle-vel-cmd-rpm     => pid.s.command
-net spindle-vel-fb-rpm      => pid.s.feedback
+net spindle-enable         =>  timedelay.spindle-pid.in
+net spindle-enable-delayed-spindle-pid timedelay.spindle-pid.out => pid.s.enable
+setp timedelay.spindle-pid.on-delay .02
+setp timedelay.spindle-pid.off-delay 0
+net spindle-vel-cmd-rpm    => pid.s.command
+net spindle-vel-fb-rpm     => pid.s.feedback
 net spindle-output        <=  pid.s.output
 
 # Step Gen signals/setup
@@ -321,8 +327,13 @@ setp   hm2_7i76e.0.stepgen.04.control-type     1
 setp   hm2_7i76e.0.stepgen.04.maxaccel         [SPINDLE_0]MAX_ACCELERATION
 setp   hm2_7i76e.0.stepgen.04.maxvel           [SPINDLE_0]MAX_VELOCITY
 
-net spindle-enable          =>  hm2_7i76e.0.stepgen.04.enable
+# TODO Don't allow the spindle to be enabled while it is coasting, or otherwise rotating.
+net spindle-enable          =>  timedelay.spindle-enable.in
+net spindle-enable-delayed-spindle-enable  timedelay.spindle-enable.out => hm2_7i76e.0.stepgen.04.enable
+setp timedelay.spindle-enable.on-delay 0
+setp timedelay.spindle-enable.off-delay .02
 net spindle-vel-cmd-rps     =>  hm2_7i76e.0.stepgen.04.velocity-cmd
+
 # ---Encoder feedback signals/setup---
 
 setp    hm2_7i76e.0.encoder.00.counter-mode 0
