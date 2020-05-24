@@ -3,6 +3,9 @@
 # If you make changes to this file, they will be
 # overwritten when you run PNCconf again
 
+loadusr -W datalogger
+loadusr -W dmmserial
+
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
 loadrt hostmot2
@@ -11,14 +14,15 @@ setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
 loadrt pid names=pid.x,pid.y,pid.z,pid.s
 loadrt abs names=abs.spindle
 loadrt lowpass names=lowpass.spindle
-loadrt scale names=scale.spindle
+loadrt scale names=scale.spindle,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near
 loadrt or2 names=or2.coolant,or2.o1
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
-loadrt not count=1
+loadrt not names=not.spindle-brake
 loadrt toggle count=1
 loadrt toggle2nist count=1
 loadrt debounce cfg=1,1
+loadrt timedelay names=timedelay.spindle-brake,timedelay.spindle-pid,timedelay.spindle-enable
 
 addf hm2_7i76e.0.read          servo-thread
 addf motion-command-handler   servo-thread
@@ -28,6 +32,9 @@ addf pid.y.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
 addf pid.s.do-pid-calcs       servo-thread
 addf scale.spindle            servo-thread
+addf scale.x-vel              servo-thread
+addf scale.y-vel              servo-thread
+addf scale.z-vel              servo-thread
 addf abs.spindle              servo-thread
 addf lowpass.spindle          servo-thread
 addf near.0                   servo-thread
@@ -39,11 +46,14 @@ addf and2.a3                  servo-thread
 addf and2.a4                  servo-thread
 addf and2.vc                  servo-thread
 addf and2.motion_lock         servo-thread
-addf not.0                    servo-thread
+addf not.spindle-brake        servo-thread
 addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
 addf debounce.1               servo-thread
+addf timedelay.spindle-brake  servo-thread
+addf timedelay.spindle-pid    servo-thread
+addf timedelay.spindle-enable servo-thread
 addf hm2_7i76e.0.write        servo-thread
 setp hm2_7i76e.0.dpll.01.timer-us -50
 setp hm2_7i76e.0.stepgen.timer-number 1
@@ -61,9 +71,16 @@ net coolant  =>     hm2_7i76e.0.7i76.0.0.output-01
 net estop-out  =>     hm2_7i76e.0.7i76.0.0.output-02
 
 # --- SPINDLE-ENABLE ---
-#net spindle-enable => not.0.in
-net spindle-brake => not.0.in
-net spindle-enable-not  not.0.out =>     hm2_7i76e.0.7i76.0.0.output-03
+net spindle-enable =>     hm2_7i76e.0.7i76.0.0.output-03
+
+# --- SPINDLE-BRAKE ---
+# TODO Enable the brake, if not enabled manually, once the spindle RPM has below a threshold.
+# TODO On startup, the brake disables and then after the timeout reenables.
+net spindle-brake =>     timedelay.spindle-brake.in
+net spindle-brake-delayed timedelay.spindle-brake.out => not.spindle-brake.in
+setp timedelay.spindle-brake.on-delay 3
+setp timedelay.spindle-brake.off-delay 0
+net spindle-brake-not not.spindle-brake.out => hm2_7i76e.0.7i76.0.0.output-04
 
 # external input signals
 
@@ -298,9 +315,12 @@ setp   pid.s.error-previous-target true
 setp   pid.s.maxerror .0005
 
 net spindle-index-enable  <=> pid.s.index-enable
-net spindle-enable        =>  pid.s.enable
-net spindle-vel-cmd-rpm     => pid.s.command
-net spindle-vel-fb-rpm      => pid.s.feedback
+net spindle-enable         =>  timedelay.spindle-pid.in
+net spindle-enable-delayed-spindle-pid timedelay.spindle-pid.out => pid.s.enable
+setp timedelay.spindle-pid.on-delay .02
+setp timedelay.spindle-pid.off-delay 0
+net spindle-vel-cmd-rpm    => pid.s.command
+net spindle-vel-fb-rpm     => pid.s.feedback
 net spindle-output        <=  pid.s.output
 
 # Step Gen signals/setup
@@ -315,8 +335,13 @@ setp   hm2_7i76e.0.stepgen.04.control-type     1
 setp   hm2_7i76e.0.stepgen.04.maxaccel         [SPINDLE_0]MAX_ACCELERATION
 setp   hm2_7i76e.0.stepgen.04.maxvel           [SPINDLE_0]MAX_VELOCITY
 
-net spindle-enable          =>  hm2_7i76e.0.stepgen.04.enable
+# TODO Don't allow the spindle to be enabled while it is coasting, or otherwise rotating.
+net spindle-enable          =>  timedelay.spindle-enable.in
+net spindle-enable-delayed-spindle-enable  timedelay.spindle-enable.out => hm2_7i76e.0.stepgen.04.enable dmmserial.enable
+setp timedelay.spindle-enable.on-delay 0
+setp timedelay.spindle-enable.off-delay .02
 net spindle-vel-cmd-rps     =>  hm2_7i76e.0.stepgen.04.velocity-cmd
+
 # ---Encoder feedback signals/setup---
 
 setp    hm2_7i76e.0.encoder.00.counter-mode 0
@@ -347,13 +372,10 @@ net spindle-index-enable      <=>  spindle.0.index-enable
 
 # ---Setup spindle at speed signals---
 
-#net spindle-vel-cmd-rps    =>  near.0.in1
-#net spindle-vel-fb-rps         =>  near.0.in2
-#setp near.0.difference 3.333333
-net spindle-vel-cmd-rpm    =>  near.0.in1
-net spindle-fb-rpm-abs-filtered         =>  near.0.in2
-net spindle-at-speed       <=  near.0.out
-setp near.0.scale 1.000000
+net spindle-vel-cmd-rpm     =>  near.0.in1
+net spindle-fb-rpm-filtered =>  near.0.in2
+net spindle-at-speed        <=  near.0.out
+setp near.0.scale 1.1
 setp near.0.difference 200
 
 #  Use ACTUAL spindle velocity from spindle encoder
@@ -364,9 +386,9 @@ setp near.0.difference 200
 setp     scale.spindle.gain 60
 setp     lowpass.spindle.gain 1.000000
 net spindle-vel-fb-rps        =>     scale.spindle.in
-net spindle-fb-rpm               scale.spindle.out       =>   abs.spindle.in
-net spindle-fb-rpm-abs           abs.spindle.out         =>   lowpass.spindle.in
-net spindle-fb-rpm-abs-filtered  lowpass.spindle.out  
+net spindle-fb-rpm               scale.spindle.out       =>   lowpass.spindle.in
+net spindle-fb-rpm-filtered      lowpass.spindle.out     =>   abs.spindle.in
+net spindle-fb-rpm-filtered-abs  abs.spindle.out
 
 #******************************
 # connect miscellaneous signals
