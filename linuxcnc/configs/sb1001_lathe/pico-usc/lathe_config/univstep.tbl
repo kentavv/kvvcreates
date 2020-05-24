@@ -1,0 +1,16 @@
+T1 P1 X0.50695 Z4.3706 D0.001 I301.000000 J59.000000 Q7 ;temporary drill, chuck offsets: x=0, z=0 
+T10 P10 D0.032 I85.000000 J5.000000 Q2 ;80 deg diamond rh profiling 
+T11 P11 X0.015425 Z-0.763383 D0.032 I175.000000 J95.000000 Q1 ;80 deg lh profiling 
+T13 P13 D0.032 I135.000000 J45.000000 Q6 ;square nh profiling and chamfering 
+T15 P15 X-0.069875 Z-0.0206 D0.032 I85.000000 J50.000000 Q2 ;35 deg diamond rh profiling 
+T16 P16 X-0.10495 Z-0.393475 D0.032 I107.500000 J72.500000 Q6 ;35 deg diamond nh profiling 
+T17 P17 X-0.068825 Z-0.746683 D0.032 I95.000000 J130.000000 Q1 ;35 deg diamond lh profiling 
+T18 P18 X-0.09955 Z-0.1425 I90.000000 Q2 ;aloris axa16 
+T19 P19 X-0.513475 Z0.2886 I90.000000 Q2 ;aloris axa16 mounted on back 
+T20 P20 X-0.07865 Z-0.38105 D0.23755 I90.000000 J90.000000 Q6 ;round nh profiling 
+T30 P30 D0.001 I90.000000 J30.000000 Q2 ;rh external threading 
+T31 P31 D0.001 I150.000000 J90.000000 Q1 ;lh external threading 
+T40 P40 X-0.114425 Z0.2535 D0.12285 I90.000000 J90.000000 Q2 ;aloris axa71 gtn3 cutoff tool 
+T41 P41 D0.123 I90.000000 J90.000000 Q2 ;rh gtn3 .123 cutoff tool 
+T42 P42 D0.123 I90.000000 J90.000000 Q1 ;rh gtn3 .123 cutoff tool 
+T50 P50 D0.1 I0 J0 Q0 ;small boring bar 
