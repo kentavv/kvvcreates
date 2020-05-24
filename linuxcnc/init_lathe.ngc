@@ -1,14 +1,20 @@
 %
 
-g18   ; XZ plane select
+g18   ; Select XZ plane
 g20   ; g20=inches, g21=millimeters
 g40   ; turn off cutter diameter compensation
 g49   ; cancel tool length compensation
 g54   ; select coordinate system 1
 g80   ; cancel canned cycle
 g90   ; g90=absolute distance mode, g91=incremental distance mode
-g94   ; feed rate mode, effects F option, g94=units per minute mode
-g97   ; spindle control mode, g97=RPM mode
+g7    ; g7=lathe diameter mode, g8=lathe radius mode
+g94   ; feed rate mode, effects F parameter
+      ; g93=inverse time mode (1/F minutes to complete move)
+      ; g94=units per minute mode (F = IPM)
+      ; g95=units per revolution (F = IPR)
+g97   ; spindle control mode
+      ; g96=Constant surface speed mode, G96 D<max spindle speed> S<SFM>
+      ; g97=RPM mode
 m9    ; turn all coolant off, m7=turn mist coolant on, m8=turn flood coolant on
 m5    ; stop the spindle
 
