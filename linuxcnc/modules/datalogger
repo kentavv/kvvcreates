@@ -1,4 +1,24 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
+# Copyright 2019 Kent A. Vander Velden <kent.vandervelden@gmail.com>
+#
+# If you use this software, please consider contacting me. I'd like to hear
+# about your work.
+#
+# This file is part of LinuxCNC-Datalogger
+#
+#     LinuxCNC-Datalogger is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     LinuxCNC-Datalogger is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with LinuxCNC-Datalogger.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import print_function
 
@@ -8,6 +28,12 @@ import datetime
 import hal
 
 import vxi11
+
+# Installing python-vxi11:
+# apt install g++ python-serial bc git python-pip python3-pip
+# python -m pip install python-vxi11
+# python3 -m pip install python-vxi11
+
 
 f = open('/home/kent/bin/data.txt', 'w')
 
