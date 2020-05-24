@@ -3,6 +3,9 @@
 # If you make changes to this file, they will be
 # overwritten when you run PNCconf again
 
+loadusr -W datalogger
+loadusr -W dmmserial
+
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
 loadrt hostmot2
@@ -11,7 +14,7 @@ setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
 loadrt pid names=pid.x,pid.y,pid.z,pid.s
 loadrt abs names=abs.spindle
 loadrt lowpass names=lowpass.spindle
-loadrt scale names=scale.spindle
+loadrt scale names=scale.spindle,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near
 loadrt or2 names=or2.coolant,or2.o1
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
@@ -29,6 +32,9 @@ addf pid.y.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
 addf pid.s.do-pid-calcs       servo-thread
 addf scale.spindle            servo-thread
+addf scale.x-vel              servo-thread
+addf scale.y-vel              servo-thread
+addf scale.z-vel              servo-thread
 addf abs.spindle              servo-thread
 addf lowpass.spindle          servo-thread
 addf near.0                   servo-thread
