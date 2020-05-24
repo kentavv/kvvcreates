@@ -664,6 +664,9 @@ def serial_loop(dev_fn, h):
         if v_prev is not None:
           dmm.set_speed(0)
           v_prev = None
+       # TOOD Currently, the Mesa card send A/B phase to control speed and direction
+       #  Unless the Dyn4 is in serial mode, it may not matter if speed is set by software.
+       #  Only calculate torque if servo has been enabled at least once.
         if a:
          h['torque1'], h['torque2'] = dmm.update_TrqCurrent()
 
