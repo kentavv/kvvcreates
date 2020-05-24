@@ -20,6 +20,11 @@
 #     You should have received a copy of the GNU General Public License
 #     along with DMM-DYN4.  If not, see <https://www.gnu.org/licenses/>.
 
+# If you see a permission problem with accessing serial ports, the following may help.
+# Add yourself to the dialout group and remove modemmanager.
+# $ adduser kent dialout
+# $ apt remove modemmanager
+
 
 from __future__ import print_function
 
