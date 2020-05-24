@@ -337,7 +337,7 @@ setp   hm2_7i76e.0.stepgen.04.maxvel           [SPINDLE_0]MAX_VELOCITY
 
 # TODO Don't allow the spindle to be enabled while it is coasting, or otherwise rotating.
 net spindle-enable          =>  timedelay.spindle-enable.in
-net spindle-enable-delayed-spindle-enable  timedelay.spindle-enable.out => hm2_7i76e.0.stepgen.04.enable
+net spindle-enable-delayed-spindle-enable  timedelay.spindle-enable.out => hm2_7i76e.0.stepgen.04.enable dmmserial.enable
 setp timedelay.spindle-enable.on-delay 0
 setp timedelay.spindle-enable.off-delay .02
 net spindle-vel-cmd-rps     =>  hm2_7i76e.0.stepgen.04.velocity-cmd
