@@ -132,8 +132,8 @@ The contents of this file will not be overwritten when you run stepconf again.
                         <led>
                                 <halpin>"axes-good-led"</halpin>
                                 <size>30</size>
-                                <on_color>"red"</on_color>
-                                <off_color>"green"</off_color>
+                                <on_color>"green"</on_color>
+                                <off_color>"red"</off_color>
                         </led>
                 </hbox>
 
@@ -146,8 +146,8 @@ The contents of this file will not be overwritten when you run stepconf again.
                         <led>
                                 <halpin>"spindle-good-led"</halpin>
                                 <size>30</size>
-                                <on_color>"red"</on_color>
-                                <off_color>"green"</off_color>
+                                <on_color>"green"</on_color>
+                                <off_color>"red"</off_color>
                         </led>
                 </hbox>
 

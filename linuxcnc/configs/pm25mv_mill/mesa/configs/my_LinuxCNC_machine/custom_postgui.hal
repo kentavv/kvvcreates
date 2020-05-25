@@ -9,10 +9,10 @@ net spindle-fb-rpm-filtered-abs  pyvcp.spindle-speed-abs
 net spindle-at-speed    pyvcp.spindle-at-speed-led
 net spindle-locked      pyvcp.spindle-locked-led
 
-#   net axes-good           pyvcp.axes-good-led
-#   net spindle-good        pyvcp.spindle-good-led
-#   net fault-latch-loopout pyvcp.fault-led
-#   net result-fault        pyvcp.reset-fault
+net axes-good           pyvcp.axes-good-led
+net spindle-good        pyvcp.spindle-good-led
+net fault-latch-loopout pyvcp.fault-led
+net result-fault        pyvcp.reset-fault
 
 #loadrt scale names=scale.x-vel,scale.y-vel,scale.z-vel
 #addf scale.x-vel servo-thread
@@ -38,9 +38,9 @@ net load-haimer halui.mdi-command-00 <= pyvcp.load-haimer
 #net stop-request or2.stop.out halui.program.stop
 # The following adds to halui.program.stop to prevent program execution but requires changes 
 # to Axis detailed in https://forum.linuxcnc.org/21-axis/27585-enable-disable-run-button
-#   net run-disabled or2.stop.out oneshot.fault.in axisui.run-disable
-#   net stop-requested oneshot.fault.out halui.program.stop 
-#   setp oneshot.fault.width .05
+net run-disabled or2.stop.out oneshot.fault.in axisui.run-disable
+net stop-requested oneshot.fault.out halui.program.stop 
+setp oneshot.fault.width .05
 
 # setp angpos.0.scale-in    1
 # setp angpos.0.scale-out     360.0

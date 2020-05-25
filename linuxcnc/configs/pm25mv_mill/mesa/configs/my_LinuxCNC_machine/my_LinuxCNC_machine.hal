@@ -16,13 +16,15 @@ loadrt abs names=abs.spindle
 loadrt lowpass names=lowpass.spindle
 loadrt scale names=scale.spindle,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near
-loadrt or2 names=or2.coolant,or2.o1
+loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.fault
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
 loadrt not names=not.spindle-brake
 loadrt toggle count=1
 loadrt toggle2nist count=1
 loadrt debounce cfg=1,1
 loadrt timedelay names=timedelay.spindle-brake,timedelay.spindle-pid,timedelay.spindle-enable
+loadrt estop_latch names=estop_latch.fault
+loadrt oneshot names=oneshot.fault
 
 addf hm2_7i76e.0.read          servo-thread
 addf motion-command-handler   servo-thread
@@ -40,6 +42,11 @@ addf lowpass.spindle          servo-thread
 addf near.0                   servo-thread
 addf or2.coolant              servo-thread
 addf or2.o1                   servo-thread
+addf or2.stop0                servo-thread
+addf or2.stop                 servo-thread
+addf or2.fault                servo-thread
+addf estop_latch.fault        servo-thread
+addf oneshot.fault            servo-thread
 addf and2.a1                  servo-thread
 addf and2.a2                  servo-thread
 addf and2.a3                  servo-thread
@@ -101,7 +108,12 @@ net estop-ext     <=  hm2_7i76e.0.7i76.0.0.input-11
 net spindle-locked-raw     <=  hm2_7i76e.0.7i76.0.0.input-12
 
 # --- SPINDLE-ALARM ---
-net spindle-alarm     <=  hm2_7i76e.0.7i76.0.0.input-13
+net spindle-good     <=  hm2_7i76e.0.7i76.0.0.input-13
+net spindle-alarm     <=  hm2_7i76e.0.7i76.0.0.input-13-not
+
+# --- AXES-ALARM ---
+net axes-good     <=  hm2_7i76e.0.7i76.0.0.input-14
+net axes-alarm     <=  hm2_7i76e.0.7i76.0.0.input-14-not
 
 
 
