@@ -33,7 +33,7 @@ loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS 
 
 # standard components
-loadrt pid num_chan=5 
+loadrt pid num_chan=4
 
 
 # hostmot2 driver
@@ -62,7 +62,6 @@ addf pid.0.do-pid-calcs                    servo-thread
 addf pid.1.do-pid-calcs                    servo-thread
 addf pid.2.do-pid-calcs                    servo-thread
 addf pid.3.do-pid-calcs                    servo-thread
-addf pid.4.do-pid-calcs                    servo-thread
 
 addf hm2_[HOSTMOT2](BOARD).0.write         servo-thread
 
@@ -149,7 +148,7 @@ setp pid.1.deadband [JOINT_1]DEADBAND
 setp pid.1.maxoutput [JOINT_1]MAX_OUTPUT
 
 # position command signals
-setp hm2_[HOSTMOT2](BOARD).0.pwmgen.01.output-type 2 #PWM up on pin0, #PWM down on pin1
+setp hm2_[HOSTMOT2](BOARD).0.pwmgen.01.output-type 1 #PWM up on pin0, #PWM down on pin1
 setp hm2_[HOSTMOT2](BOARD).0.pwmgen.01.offset-mode 1 # offset mode so 50% = 0
 setp hm2_[HOSTMOT2](BOARD).0.pwmgen.01.scale [JOINT_1]OUTPUT_SCALE
 
@@ -191,7 +190,7 @@ setp pid.2.deadband [JOINT_2]DEADBAND
 setp pid.2.maxoutput [JOINT_2]MAX_OUTPUT
 
 # position command signals
-setp hm2_[HOSTMOT2](BOARD).0.pwmgen.02.output-type 2 #PWM up on pin0, #PWM down on pin1
+setp hm2_[HOSTMOT2](BOARD).0.pwmgen.02.output-type 1 #PWM up on pin0, #PWM down on pin1
 setp hm2_[HOSTMOT2](BOARD).0.pwmgen.02.offset-mode 1 # offset mode so 50% = 0
 setp hm2_[HOSTMOT2](BOARD).0.pwmgen.02.scale [JOINT_2]OUTPUT_SCALE
 
@@ -232,54 +231,13 @@ setp pid.3.deadband [JOINT_3]DEADBAND
 setp pid.3.maxoutput [JOINT_3]MAX_OUTPUT
 
 # position command signals
-setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.output-type 2 #PWM up on pin0, #PWM down on pin1
+setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.output-type 1 #PWM up on pin0, #PWM down on pin1
 setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.offset-mode 1 # offset mode so 50% = 0
-setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.out0.invert_output true
+#setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.out0.invert_output true
 setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.scale [JOINT_2]OUTPUT_SCALE
 
 net emcmot.03.pos-cmd joint.3.motor-pos-cmd => pid.3.command
 net motor.03.command  pid.3.output  =>  hm2_[HOSTMOT2](BOARD).0.pwmgen.03.value
-
-# ################
-# P [4] Axis
-# ################
-
-# axis enable chain
-newsig emcmot.04.enable bit
-sets emcmot.04.enable FALSE
-net emcmot.04.enable => pid.4.enable
-net emcmot.04.enable => hm2_[HOSTMOT2](BOARD).0.pwmgen.04.enable
-net emcmot.04.enable <= joint.4.amp-enable-out 
-
-# encoder feedback
-setp hm2_[HOSTMOT2](BOARD).0.encoder.04.counter-mode 0
-setp hm2_[HOSTMOT2](BOARD).0.encoder.04.filter 1
-setp hm2_[HOSTMOT2](BOARD).0.encoder.04.index-invert 0
-setp hm2_[HOSTMOT2](BOARD).0.encoder.04.index-mask 0
-setp hm2_[HOSTMOT2](BOARD).0.encoder.04.index-mask-invert 0
-
-setp  hm2_[HOSTMOT2](BOARD).0.encoder.04.scale  [JOINT_2]INPUT_SCALE
-net motor.04.pos-fb hm2_[HOSTMOT2](BOARD).0.encoder.04.position => pid.4.feedback
-net motor.04.pos-fb => joint.4.motor-pos-fb #push copy back to Axis GUI
-
-# set PID loop gains from inifile
-setp pid.4.Pgain [JOINT_4]P
-setp pid.4.Igain [JOINT_4]I
-setp pid.4.Dgain [JOINT_4]D
-setp pid.4.bias [JOINT_4]BIAS
-setp pid.4.FF0 [JOINT_4]FF0
-setp pid.4.FF1 [JOINT_4]FF1
-setp pid.4.FF2 [JOINT_4]FF2
-setp pid.4.deadband [JOINT_4]DEADBAND
-setp pid.4.maxoutput [JOINT_4]MAX_OUTPUT
-
-# position command signals
-setp hm2_[HOSTMOT2](BOARD).0.pwmgen.04.output-type 2 #PWM up on pin0, #PWM down on pin1
-setp hm2_[HOSTMOT2](BOARD).0.pwmgen.04.offset-mode 1 # offset mode so 50% = 0
-setp hm2_[HOSTMOT2](BOARD).0.pwmgen.04.scale [JOINT_4]OUTPUT_SCALE
-
-net emcmot.04.pos-cmd joint.4.motor-pos-cmd => pid.4.command
-net motor.04.command  pid.4.output  =>  hm2_[HOSTMOT2](BOARD).0.pwmgen.04.value
 
 
 # ##################################################
@@ -317,6 +275,4 @@ net tool-change-loop iocontrol.0.tool-change => iocontrol.0.tool-changed
 net home-switch => joint.0.home-sw-in
 net home-switch => joint.1.home-sw-in
 net home-switch => joint.2.home-sw-in
-
-
 
