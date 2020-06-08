@@ -215,7 +215,7 @@ setp hm2_[HOSTMOT2](BOARD).0.encoder.03.index-invert 0
 setp hm2_[HOSTMOT2](BOARD).0.encoder.03.index-mask 0
 setp hm2_[HOSTMOT2](BOARD).0.encoder.03.index-mask-invert 0
 
-setp  hm2_[HOSTMOT2](BOARD).0.encoder.03.scale  [JOINT_2]INPUT_SCALE
+setp  hm2_[HOSTMOT2](BOARD).0.encoder.03.scale  [JOINT_3]INPUT_SCALE
 net motor.03.pos-fb hm2_[HOSTMOT2](BOARD).0.encoder.03.position => pid.3.feedback
 net motor.03.pos-fb => joint.3.motor-pos-fb #push copy back to Axis GUI
 
@@ -234,7 +234,7 @@ setp pid.3.maxoutput [JOINT_3]MAX_OUTPUT
 setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.output-type 1 #PWM up on pin0, #PWM down on pin1
 setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.offset-mode 1 # offset mode so 50% = 0
 #setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.out0.invert_output true
-setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.scale [JOINT_2]OUTPUT_SCALE
+setp hm2_[HOSTMOT2](BOARD).0.pwmgen.03.scale [JOINT_3]OUTPUT_SCALE
 
 net emcmot.03.pos-cmd joint.3.motor-pos-cmd => pid.3.command
 net motor.03.command  pid.3.output  =>  hm2_[HOSTMOT2](BOARD).0.pwmgen.03.value
