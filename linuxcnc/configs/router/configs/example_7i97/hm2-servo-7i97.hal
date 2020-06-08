@@ -271,8 +271,12 @@ net tool-change-loop iocontrol.0.tool-change => iocontrol.0.tool-changed
 # pin.
 #
 
-#net home-switch <= 
-net home-switch => joint.0.home-sw-in
-net home-switch => joint.1.home-sw-in
-net home-switch => joint.2.home-sw-in
+net home-switch_y0 <= hm2_7i97.0.inmux.00.input-08
+net home-switch_y1 <= hm2_7i97.0.inmux.00.input-09
+net home-switch_x <= hm2_7i97.0.inmux.00.input-10
+net home-switch_z <= hm2_7i97.0.inmux.00.input-11
+net home-switch_x => joint.0.home-sw-in
+net home-switch_y0 => joint.1.home-sw-in
+net home-switch_y1 => joint.2.home-sw-in
+net home-switch_z => joint.3.home-sw-in
 
