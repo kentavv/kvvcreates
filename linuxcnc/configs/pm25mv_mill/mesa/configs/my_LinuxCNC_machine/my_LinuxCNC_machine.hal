@@ -104,6 +104,15 @@ net stop-btn     <=  hm2_7i76e.0.7i76.0.0.input-10-not
 # --- ESTOP-EXT ---
 net estop-ext     <=  hm2_7i76e.0.7i76.0.0.input-11
 
+# --- HOME-X ---
+net home-x     <=  hm2_7i76e.0.7i76.0.0.input-05-not
+
+# --- HOME-Y ---
+net home-z     <=  hm2_7i76e.0.7i76.0.0.input-06-not
+
+# --- HOME-Z ---
+net home-z     <=  hm2_7i76e.0.7i76.0.0.input-07-not
+
 # --- SPINDLE-LOCK ---
 net spindle-locked-raw     <=  hm2_7i76e.0.7i76.0.0.input-12
 
@@ -206,7 +215,7 @@ net x-enable     => hm2_7i76e.0.stepgen.00.enable
 
 # ---setup home / limit switch signals---
 
-net x-home-sw     =>  joint.0.home-sw-in
+net x-home     =>  joint.0.home-sw-in
 net x-neg-limit     =>  joint.0.neg-lim-sw-in
 net x-pos-limit     =>  joint.0.pos-lim-sw-in
 
@@ -256,7 +265,7 @@ net y-enable     => hm2_7i76e.0.stepgen.01.enable
 
 # ---setup home / limit switch signals---
 
-net y-home-sw     =>  joint.1.home-sw-in
+net y-home     =>  joint.1.home-sw-in
 net y-neg-limit     =>  joint.1.neg-lim-sw-in
 net y-pos-limit     =>  joint.1.pos-lim-sw-in
 
@@ -306,7 +315,7 @@ net z-enable     => hm2_7i76e.0.stepgen.02.enable
 
 # ---setup home / limit switch signals---
 
-net z-home-sw     =>  joint.2.home-sw-in
+net z-home     =>  joint.2.home-sw-in
 net z-neg-limit     =>  joint.2.neg-lim-sw-in
 net z-pos-limit     =>  joint.2.pos-lim-sw-in
 
