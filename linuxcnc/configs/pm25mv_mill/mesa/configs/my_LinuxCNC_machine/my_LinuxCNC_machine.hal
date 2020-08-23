@@ -92,6 +92,13 @@ net spindle-brake-not not.spindle-brake.out => hm2_7i76e.0.7i76.0.0.output-04
 # external input signals
 
 
+# --- PROBE ---
+net probe-in     <=  hm2_7i76e.0.7i76.0.0.input-20-not
+
+# --- PROBE-BLAST ---
+net probe-blast =>     hm2_7i76e.0.7i76.0.0.output-05
+net probe-blast => motion.digital-out-00
+
 # --- CYCLE-START ---
 net run-step-btn     <=  hm2_7i76e.0.7i76.0.0.input-08
 
