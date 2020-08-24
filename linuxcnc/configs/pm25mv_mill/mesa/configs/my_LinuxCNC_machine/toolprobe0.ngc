@@ -1,0 +1,33 @@
+o<toolprobe0> SUB
+
+; Save modal values that will be changed so they can be restored later.
+#31=#1 ; Tool to load
+#32=0 ; Z-position at home position
+#33=0 ; Calculated tool height
+#34=#<_metric>
+#35=#<_absolute>
+
+M5 M9 ; Turn spindle and coolant off.
+
+G20 ; inches
+G49 ; cancel tool length compensation
+G90 ; absolute mode
+G94 ; units / min feedrate
+
+; The X and Y values depend on the position of the tool length sensor relative to home position.
+G53 G0 Z0
+G53 G0 X-9.5287 Y-1.6061
+
+M6 T#31 ; Load tool, if not already loaded.
+
+#32=#5422 ; save the z-position of the current coordinate system
+
+(debug, P32=P5422 = #5422)
+(debug, Tool #31 current length offset = #5403)
+(debug, Manually move within .5in of tool length sensor)
+
+o<toolprobe0> ENDSUB [1]
+
+M2
+
+%

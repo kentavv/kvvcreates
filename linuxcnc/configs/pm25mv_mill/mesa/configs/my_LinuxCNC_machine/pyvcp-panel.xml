@@ -245,5 +245,40 @@ The contents of this file will not be overwritten when you run stepconf again.
                         </button>
                 </hbox>
 
+		<label>
+			<text>"Auto Tool Length"</text>
+			<font>("Helvetica", 20)</font>
+		</label>
+
+                <hbox>
+                        <button>
+                                <font>("Helvetica",20)</font>
+                                <halpin>"tool-probe0"</halpin>
+                                <text>"  First step"</text>
+                        </button>
+                </hbox>
+
+                <hbox>
+                        <button>
+                                <font>("Helvetica",20)</font>
+                                <halpin>"tool-probe1"</halpin>
+                                <text>"  Second step"</text>
+                        </button>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Probe"</text>
+                                <font>("Helvetica", 20)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"probe-led"</halpin>
+                                <size>30</size>
+                                <on_color>"red"</on_color>
+                                <off_color>"green"</off_color>
+                        </led>
+		</hbox>
+
 	</vbox>
 </pyvcp>
