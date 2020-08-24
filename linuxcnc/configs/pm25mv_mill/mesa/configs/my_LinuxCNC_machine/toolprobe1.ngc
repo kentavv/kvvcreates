@@ -25,9 +25,9 @@ G38.2 F[200/25.4] Z-1
 ; Probe away from tool length sensor, slower, in the same direction that home was probed, to minimize error from backlash.
 G38.4 F[20/25.4] Z1
 
-M65 P0 ; turn off air blast
+M65 P0 ; Turn off air blast
 
-G90 ; absolute mode
+G90 ; Absolute mode
 
 ; Calculate and save the length of tool 1.
 ; 0 is the distance from home to the nose of spindle touching off tool length sensor.
