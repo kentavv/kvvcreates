@@ -10,10 +10,14 @@ o<toolprobe1> SUB
 ; #<_tls_s_absolute>=#<_absolute>
 ; #<_tls_ref_len>            ; Reference-tool length
 
+G17 ; XY plane
 G20 ; Inches
+G40 ; Cancel tool radius compensation
 G49 ; Cancel tool length compensation
-G91 ; Incremental mode
+G80 ; Cancel canned cycle
 G94 ; Units / min feedrate
+
+G91 ; Incremental mode
 
 M6 T#<tls_tool>
 

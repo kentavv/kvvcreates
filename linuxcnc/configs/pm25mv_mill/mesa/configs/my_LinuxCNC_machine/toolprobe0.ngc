@@ -21,10 +21,14 @@ o<toolprobe0> SUB
 #<_tls_s_metric>=#<_metric>
 #<_tls_s_absolute>=#<_absolute>
 
+G17 ; XY plane
 G20 ; Inches
+G40 ; Cancel tool radius compensation
 G49 ; Cancel tool length compensation
-G90 ; Absolute mode
+G80 ; Cancel canned cycle
 G94 ; Units / min feedrate
+
+G90 ; Absolute mode
 
 M5 M9 ; Turn off spindle and coolant.
 M65 P0 ; Turn off air blast
