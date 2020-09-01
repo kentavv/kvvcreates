@@ -3,61 +3,65 @@ o<toolprobe1> SUB
 ; The following are initialized in toolprobe0.ngc
 ; #31=#1 ; Tool to load, if not already loaded.
 ; #32=#5422 ; Save the z-position of the current coordinate system.
-; #33=0 ; Calculated tool height
+; #33=0 ; Calculated tool length
 ; #34=#<_metric>
 ; #35=#<_absolute>
 ; #36=Reference tool length
+; #<_tls_tool>=#1 ; Tool to load, if not already loaded.
+; #<_tls_home_z>=#5422 ; Save the z-position of the current coordinate system.
+; #<_tls_calc_tool_length>=0 ; Calculated tool length
+; #<_tls_saved_metric>=#<_metric>
+; #<_tls_saved_absolute>=#<_absolute>
+; #<_tls_ref_len>=Reference tool length
 
-M5 M9 ; Turn spindle and coolant off.
+G20 ; Inches
+G49 ; Cancel tool length compensation
+G91 ; Incremental mode
+G94 ; Units / min feedrate
 
-G20 ; inches
-G49 ; cancel tool length compensation
-G91 ; incremental mode
-G94 ; units / min feedrate
+M5 M9 ; Turn off spindle and coolant.
+M64 P0 ; Turn on air blast
 
-M64 P0 ; turn on air blast
+; The G38 variants used below will stop execution and display an error 
+; message if probing is not successful. Alternatively, one could use the
+; non-error-signaling varieties and check #5070, which will be 1 after
+; probing is successful and otherwise 0. That would provide a means to
+; turn off the air blast on an error.
 
-; The G38 variants used below will stop execution and display an error message if probing is not
-; successful. Alternatively, one could use the non-error-signaling varieties and check #5070, which
-; will be 1 after probing is successful and otherwise 0.
-
-; Probe towards the tool length sensor, slow enough that machine can stop within travel of sensor.
+; Probe towards the tool length sensor, slow enough that machine can
+; stop within travel of sensor. Tool length maximum approach speed
+; from specification is 200mm/min.
 G38.2 F[200/25.4] Z-1
 
-; Probe away from tool length sensor, slower, in the same direction that home was probed, to minimize error from backlash.
+; Probe away from tool length sensor, slower, in the same direction
+; that home was probed, to minimize backlash error.
 G38.4 F[20/25.4] Z1
 
 M65 P0 ; Turn off air blast
 
 G90 ; Absolute mode
 
-; Calculate and save the length of tool 1.
-; 0 is the distance from home to the nose of spindle touching off tool length sensor.
-; #5403 is the tool offset of the current tool, the reference tool, i.e., tool 99, the spindle nose
-; #36 is the saved length of the reference tool in case current tool is reprobed after switching tool length to its length
-; #32 is the Z position in current coordinate system in which toolprobe0 was executed at Z=0.
+; Calculate and save the length of the selected tool.
 ; #5063 is Z position in the coordinate system in which G38 was executed.
-; #33 = [0 + #32 - #5063]
-; #33 = [#5403 + #32 + #5063]
-#33 = [#36 + #32 + #5063]
-G10 L1 P#31 Z#33
+#<_tls_calc_tool_length> = [#<_tls_ref_len> + #<_tls_home_z> + #5063]
+G10 L1 P#<_tls_tool> Z#<_tls_calc_tool_length>
 G43
 
-(debug, P32 = #32)
-(debug, P36 = #36)
+(debug, P32 = #<_tls_home_z>)
+(debug, P36 = #<_tls_ref_len>)
 (debug, P5403 = #5403)
 (debug, P5063 = #5063)
-(debug, Tool #31 length offset set to #33)
+(debug, T#<_tls_tool> H=#<_tls_calc_tool_length>)
 
 G53 G0 Z0
 
-o101 if [#34 EQ 1]
+o101 if [#<_tls_saved_metric> EQ 1]
   G21
 o101 else
   G20
 o101 endif
 
-o102 if [#35 EQ 1]
+o102 if [#<_tls_saved_absolute> EQ 1]
   G90
 o102 else
   G91

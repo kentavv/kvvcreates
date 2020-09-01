@@ -1,34 +1,52 @@
 o<toolprobe0> SUB
 
-; Save modal values that will be changed so they can be restored later.
-#31=#1 ; Tool to load
-#32=0 ; Z-position at home position
-#33=0 ; Calculated tool height
-#34=#<_metric>
-#35=#<_absolute>
-; #36=reference tool length
+; The X and Y values depend on the position of the tool
+; length sensor relative to home position. Edit these as
+; needed to center the spindle above the sensor.
+#<_tls_x_pos>=-9.5287
+#<_tls_y_pos>=-1.6061
 
-M5 M9 ; Turn spindle and coolant off.
+; The reference tool, e.g., the spindle nose. Edit as needed.
+#<_tls_ref_tool>=99
 
-G20 ; inches
-G49 ; cancel tool length compensation
-G90 ; absolute mode
-G94 ; units / min feedrate
+; Define subroutine parameters.
+#<_tls_tool>=#1             ; Tool to load
+#<_tls_home_z>=0            ; Z-position at home position
+#<_tls_calc_tool_length>=0  ; Calculated tool length
+#<_tls_ref_len>=0 ; Reference tool length
 
-; The X and Y values depend on the position of the tool length sensor relative to home position.
+; Save modal values to later restore.
+#<_tls_saved_metric>=#<_metric>
+#<_tls_saved_absolute>=#<_absolute>
+
+G20 ; Inches
+G49 ; Cancel tool length compensation
+G90 ; Absolute mode
+G94 ; Units / min feedrate
+
+M5 M9 ; Turn off spindle and coolant.
+M65 P0 ; Turn off air blast
+
+; Move to centered above the tool length sensor.
 G53 G0 Z0
-G53 G0 X-9.5287 Y-1.6061
+G53 G0 X#<_tls_x_pos> Y#<_tls_y_pos>
 
-; M6 T#31 ; Load tool, if not already loaded.
-M6 T99 ; Load reference tool, i.e., the spindle nose
+#<_tls_home_z>=#5422 ; save the z-position of the current coordinate system
 
-#32=#5422 ; save the z-position of the current coordinate system
-#36=#5403 ; save the z-position of the current coordinate system
+; Loaded requested tool, and find length of the reference tool.
+; Want to avoid the extra loading of the reference tool to get length.
+; Parameter #5403 returns the length of tool not the tool length offset,
+; which be different, especially if setting the tool length offset to a
+; different tool than the one that's loaded.
+M6 T#<_tls_tool>
+G43 H#<_tls_ref_tool>
+#<_tls_ref_len>=#<_tls_home_z>-#5422
+G49
 
 (debug, P32=P5422 = #5422)
-(debug, Reference tool length offset P35=P5403 = #36)
-; (debug, Tool #31 current length offset = #5403)
-(debug, Manually move within .5in of tool length sensor)
+(debug, Reference tool length offset P35=P5403 = #<_tls_ref_len>)
+(debug, Tool #<_tls_tool> current length offset = #5403)
+(debug, Move tool to within .5in of tool length sensor)
 
 o<toolprobe0> ENDSUB [1]
 
