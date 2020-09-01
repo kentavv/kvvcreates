@@ -10,14 +10,14 @@ o<toolprobe0> SUB
 #<_tls_ref_tool>=99
 
 ; Define subroutine parameters.
-#<_tls_tool>=#1             ; Tool to load
+#<_tls_tool>=#1             ; Tool to measure
 #<_tls_home_z>=0            ; Z-position at home position
 #<_tls_calc_tool_length>=0  ; Calculated tool length
-#<_tls_ref_len>=0 ; Reference tool length
+#<_tls_ref_len>=0           ; Reference-tool length
 
 ; Save modal values to later restore.
-#<_tls_saved_metric>=#<_metric>
-#<_tls_saved_absolute>=#<_absolute>
+#<_tls_s_metric>=#<_metric>
+#<_tls_s_absolute>=#<_absolute>
 
 G20 ; Inches
 G49 ; Cancel tool length compensation
@@ -38,14 +38,11 @@ G53 G0 X#<_tls_x_pos> Y#<_tls_y_pos>
 ; Parameter #5403 returns the length of tool not the tool length offset,
 ; which be different, especially if setting the tool length offset to a
 ; different tool than the one that's loaded.
-M6 T#<_tls_tool>
-G43 H#<_tls_ref_tool>
-#<_tls_ref_len>=#<_tls_home_z>-#5422
+M6 T#<_tls_ref_tool> G43 H#<_tls_ref_tool>
+#<_tls_ref_len>=#5403
 G49
 
-(debug, P32=P5422 = #5422)
 (debug, Reference tool length offset P35=P5403 = #<_tls_ref_len>)
-(debug, Tool #<_tls_tool> current length offset = #5403)
 (debug, Move tool to within .5in of tool length sensor)
 
 o<toolprobe0> ENDSUB [1]

@@ -1,23 +1,18 @@
 o<toolprobe1> SUB
 
 ; The following are initialized in toolprobe0.ngc
-; #31=#1 ; Tool to load, if not already loaded.
-; #32=#5422 ; Save the z-position of the current coordinate system.
-; #33=0 ; Calculated tool length
-; #34=#<_metric>
-; #35=#<_absolute>
-; #36=Reference tool length
-; #<_tls_tool>=#1 ; Tool to load, if not already loaded.
-; #<_tls_home_z>=#5422 ; Save the z-position of the current coordinate system.
-; #<_tls_calc_tool_length>=0 ; Calculated tool length
-; #<_tls_saved_metric>=#<_metric>
-; #<_tls_saved_absolute>=#<_absolute>
-; #<_tls_ref_len>=Reference tool length
+; #<_tls_tool>=#1            ; Tool to measure
+; #<_tls_home_z>=#5422       ; Z-position at home position
+; #<_tls_s_metric>=#<_metric>
+; #<_tls_s_absolute>=#<_absolute>
+; #<_tls_ref_len>            ; Reference-tool length
 
 G20 ; Inches
 G49 ; Cancel tool length compensation
 G91 ; Incremental mode
 G94 ; Units / min feedrate
+
+M6 T#<_tls_tool>
 
 M5 M9 ; Turn off spindle and coolant.
 M64 P0 ; Turn on air blast
@@ -43,25 +38,25 @@ G90 ; Absolute mode
 
 ; Calculate and save the length of the selected tool.
 ; #5063 is Z position in the coordinate system in which G38 was executed.
-#<_tls_calc_tool_length> = [#<_tls_ref_len> + #<_tls_home_z> + #5063]
-G10 L1 P#<_tls_tool> Z#<_tls_calc_tool_length>
+#<tool_length> = [#<_tls_ref_len> + #<_tls_home_z> + #5063]
+G10 L1 P#<_tls_tool> Z#<tool_length>
 G43
 
 (debug, P32 = #<_tls_home_z>)
 (debug, P36 = #<_tls_ref_len>)
 (debug, P5403 = #5403)
 (debug, P5063 = #5063)
-(debug, T#<_tls_tool> H=#<_tls_calc_tool_length>)
+(debug, T#<_tls_tool> H=#<tool_length>)
 
 G53 G0 Z0
 
-o101 if [#<_tls_saved_metric> EQ 1]
+o101 if [#<_tls_s_metric> EQ 1]
   G21
 o101 else
   G20
 o101 endif
 
-o102 if [#<_tls_saved_absolute> EQ 1]
+o102 if [#<_tls_s_absolute> EQ 1]
   G90
 o102 else
   G91
