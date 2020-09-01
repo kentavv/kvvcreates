@@ -6,10 +6,12 @@ o<toolprobe1> SUB
 ; #33=0 ; Calculated tool height
 ; #34=#<_metric>
 ; #35=#<_absolute>
+; #36=Reference tool length
 
 M5 M9 ; Turn spindle and coolant off.
 
 G20 ; inches
+G49 ; cancel tool length compensation
 G91 ; incremental mode
 G94 ; units / min feedrate
 
@@ -31,13 +33,19 @@ G90 ; Absolute mode
 
 ; Calculate and save the length of tool 1.
 ; 0 is the distance from home to the nose of spindle touching off tool length sensor.
+; #5403 is the tool offset of the current tool, the reference tool, i.e., tool 99, the spindle nose
+; #36 is the saved length of the reference tool in case current tool is reprobed after switching tool length to its length
 ; #32 is the Z position in current coordinate system in which toolprobe0 was executed at Z=0.
 ; #5063 is Z position in the coordinate system in which G38 was executed.
-#33 = [0 + #32 - #5063]
+; #33 = [0 + #32 - #5063]
+; #33 = [#5403 + #32 + #5063]
+#33 = [#36 + #32 + #5063]
 G10 L1 P#31 Z#33
 G43
 
 (debug, P32 = #32)
+(debug, P36 = #36)
+(debug, P5403 = #5403)
 (debug, P5063 = #5063)
 (debug, Tool #31 length offset set to #33)
 
@@ -54,6 +62,8 @@ o102 if [#35 EQ 1]
 o102 else
   G91
 o102 endif
+
+T1 M6 G43 H1
 
 o<toolprobe1> ENDSUB [1]
 

@@ -1,4 +1,4 @@
-T1 P1 D0.500000 Z+7.250595 ;temp drill 
+T1 P1 D0.500000 Z+4.028117 ;temp drill 
 T2 P2 D2.000000 Z+1.821000 ;2" superfly 
 T3 P3 D1.000000 Z+2.325000 ;1" shearhog short 
 T4 P4 D1.000000 Z-1.000000 ;1" shearhog medium 
@@ -45,7 +45,7 @@ T54 P54 D0.375000 Z+4.363000 ;3/8" drill
 T55 P55 D0.500000 Z+4.863000 ;1/2" drill 
 T71 P71 D0.120000 Z+2.837000 ;m5-0.8 thread mill 
 T98 P98 D0.125000 Z+3.179000 ;temp drill 
-T99 P99 D0.375000 Z+3.818000 ;added 20190713 
+T99 P99 D1.750000 Z+11.279200 ;spindle nose 
 T100 P100 Z+4.776000 ;haimer 
 T121 P121 D0.250000 Z+3.125000 ;1/4 sqr steel em 
 T122 P122 D0.375000 Z+3.568000 ;3/8" square end mill for steel 

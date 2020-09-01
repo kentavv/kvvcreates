@@ -6,6 +6,7 @@ o<toolprobe0> SUB
 #33=0 ; Calculated tool height
 #34=#<_metric>
 #35=#<_absolute>
+; #36=reference tool length
 
 M5 M9 ; Turn spindle and coolant off.
 
@@ -18,12 +19,15 @@ G94 ; units / min feedrate
 G53 G0 Z0
 G53 G0 X-9.5287 Y-1.6061
 
-M6 T#31 ; Load tool, if not already loaded.
+; M6 T#31 ; Load tool, if not already loaded.
+M6 T99 ; Load reference tool, i.e., the spindle nose
 
 #32=#5422 ; save the z-position of the current coordinate system
+#36=#5403 ; save the z-position of the current coordinate system
 
 (debug, P32=P5422 = #5422)
-(debug, Tool #31 current length offset = #5403)
+(debug, Reference tool length offset P35=P5403 = #36)
+; (debug, Tool #31 current length offset = #5403)
 (debug, Manually move within .5in of tool length sensor)
 
 o<toolprobe0> ENDSUB [1]
