@@ -1,16 +1,18 @@
 o<toolprobe0> SUB
 
+; This subroutine initializes variables for using the 
+; tool length sensor.
+
 ; The X and Y values depend on the position of the tool
 ; length sensor relative to home position. Edit these as
 ; needed to center the spindle above the sensor.
-#<_tls_x_pos>=-9.5287
-#<_tls_y_pos>=-1.6061
+#<tls_x_pos>=-9.5287
+#<tls_y_pos>=-1.6061
 
 ; The reference tool, e.g., the spindle nose. Edit as needed.
-#<_tls_ref_tool>=99
+#<tls_ref_tool>=99
 
 ; Define subroutine parameters.
-#<_tls_tool>=#1             ; Tool to measure
 #<_tls_home_z>=0            ; Z-position at home position
 #<_tls_calc_tool_length>=0  ; Calculated tool length
 #<_tls_ref_len>=0           ; Reference-tool length
@@ -29,7 +31,7 @@ M65 P0 ; Turn off air blast
 
 ; Move to centered above the tool length sensor.
 G53 G0 Z0
-G53 G0 X#<_tls_x_pos> Y#<_tls_y_pos>
+G53 G0 X#<tls_x_pos> Y#<tls_y_pos>
 
 #<_tls_home_z>=#5422 ; save the z-position of the current coordinate system
 
@@ -38,11 +40,11 @@ G53 G0 X#<_tls_x_pos> Y#<_tls_y_pos>
 ; Parameter #5403 returns the length of tool not the tool length offset,
 ; which be different, especially if setting the tool length offset to a
 ; different tool than the one that's loaded.
-M6 T#<_tls_ref_tool> G43 H#<_tls_ref_tool>
-#<_tls_ref_len>=#5403
+M6 T#<tls_ref_tool> G43 H#<tls_ref_tool>
+#<tls_ref_len>=#5403
 G49
 
-(debug, Reference tool length offset P35=P5403 = #<_tls_ref_len>)
+(debug, Reference tool length offset P35=P5403 = #<tls_ref_len>)
 (debug, Move tool to within .5in of tool length sensor)
 
 o<toolprobe0> ENDSUB [1]
