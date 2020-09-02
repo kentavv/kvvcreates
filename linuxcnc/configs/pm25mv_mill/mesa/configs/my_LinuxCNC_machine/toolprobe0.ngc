@@ -45,10 +45,10 @@ G53 G0 X#<tls_x_pos> Y#<tls_y_pos>
 ; which be different, especially if setting the tool length offset to a
 ; different tool than the one that's loaded.
 M6 T#<tls_ref_tool> G43 H#<tls_ref_tool>
-#<tls_ref_len>=#5403
+#<_tls_ref_len>=#5403
 G49
 
-(debug, Reference tool length offset P35=P5403 = #<tls_ref_len>)
+(debug, Reference tool length offset: #<_tls_ref_len>)
 (debug, Move tool to within .5in of tool length sensor)
 
 o<toolprobe0> ENDSUB [1]
