@@ -35,11 +35,11 @@ M64 P0 ; Turn on air blast
 ; from specification is 200mm/min.
 G38.2 F[200/25.4] Z-1
 
+M65 P0 ; Turn off air blast
+
 ; Probe away from tool length sensor, slower, in the same direction
 ; that home was probed, to minimize backlash error.
-G38.4 F[20/25.4] Z1
-
-M65 P0 ; Turn off air blast
+G38.4 F[10/25.4] Z1
 
 G90 ; Absolute mode
 
