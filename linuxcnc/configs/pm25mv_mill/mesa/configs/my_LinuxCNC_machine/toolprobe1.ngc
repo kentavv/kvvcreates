@@ -1,14 +1,15 @@
 o<toolprobe1> SUB
 
-; This subroutine performs probes the length of the selected tool.
+; This subroutine probes the length of the tool, passed as parameter #1.
+; The tool length is calculated, saved, and the offset activated.
 
 #<tls_tool>=#1 ; Tool to measure
 
 ; The following are initialized in toolprobe0.ngc
-; #<_tls_home_z>=#5422       ; Z-position at home position
+; #<_tls_home_z>=#5422       ; Machine Z-coordinate at home position
+; #<_tls_ref_len>            ; Reference length (nose of spindle)
 ; #<_tls_s_metric>=#<_metric>
 ; #<_tls_s_absolute>=#<_absolute>
-; #<_tls_ref_len>            ; Reference-tool length
 
 G17 ; XY plane
 G20 ; Inches
@@ -19,7 +20,7 @@ G94 ; Units / min feedrate
 
 G91 ; Incremental mode
 
-M6 T#<tls_tool>
+T#<tls_tool> M6
 
 M5 M9 ; Turn off spindle and coolant.
 M64 P0 ; Turn on air blast
@@ -37,22 +38,30 @@ G38.2 F[200/25.4] Z-1
 
 M65 P0 ; Turn off air blast
 
-; Probe away from tool length sensor, slower, in the same direction
+G4 P0.5 ; Short delay to settle motion. Necessary with path blending?
+
+; Probe away from tool length sensor slowly, in the same direction
 ; that home was probed, to minimize backlash error.
 G38.4 F[10/25.4] Z1
 
 G90 ; Absolute mode
 
-; Calculate and save the length of the selected tool.
+; Calculate absolute probe position.
 ; #5063 is Z position in the coordinate system in which G38 was executed.
-#<tls_tool_length> = [#<_tls_ref_len> + #<_tls_home_z> + #5063]
+; From https://forum.linuxcnc.org/20-g-code/35746-how-to-save-machine-coordinates-with-tool-length-compensation#123021
+#<abs_probed_z_pos> = [#[5203 + [20 * #5220]] + #5063]
+
+; Calculate and save the length of the selected tool. The length is calculated
+; using the probed position of the reference (the spindle nose) and the probed
+; position of the current tool. The difference, in machine coordinates, is the
+; current tool's length.
+; #<tls_tool_length> = [#<_tls_ref_len> + #<_tls_home_z> + #<abs_probed_z_pos>]
+#<tls_tool_length> = [#<_tls_ref_len> + #<abs_probed_z_pos>]
 G10 L1 P#<tls_tool> Z#<tls_tool_length>
+
+; Enable tool length compensation, using new length.
 G43
 
-(debug, P32 = #<_tls_home_z>)
-(debug, P36 = #<_tls_ref_len>)
-(debug, P5403 = #5403)
-(debug, P5063 = #5063)
 (debug, T#<tls_tool> H=#<tls_tool_length>)
 
 G53 G0 Z0
@@ -68,8 +77,6 @@ o102 if [#<_tls_s_absolute> EQ 1]
 o102 else
   G91
 o102 endif
-
-T1 M6 G43 H1
 
 o<toolprobe1> ENDSUB [1]
 

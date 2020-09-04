@@ -1,21 +1,22 @@
 o<toolprobe0> SUB
 
 ; This subroutine initializes variables for using the 
-; tool length sensor.
+; tool length sensor. All coordinates are in machine
+; coodinates.
 
 ; The X and Y values depend on the position of the tool
 ; length sensor relative to home position. Edit these as
-; needed to center the spindle above the sensor.
-#<tls_x_pos>=-9.5287
-#<tls_y_pos>=-1.6061
+; needed to center the spindle above the sensor. These
+; are machine coordinates.
+#<tls_x_pos>=-9.1961
+#<tls_y_pos>=-1.5716
 
 ; The reference tool, e.g., the spindle nose. Edit as needed.
 #<tls_ref_tool>=99
 
 ; Define subroutine parameters.
-#<_tls_home_z>=0            ; Z-position at home position
-#<_tls_calc_tool_length>=0  ; Calculated tool length
-#<_tls_ref_len>=0           ; Reference-tool length
+; #<_tls_home_z>=0            ; Machine Z-coordinate at home position
+#<_tls_ref_len>=0           ; Reference length (nose of spindle)
 
 ; Save modal values to later restore.
 #<_tls_s_metric>=#<_metric>
@@ -37,7 +38,9 @@ M65 P0 ; Turn off air blast
 G53 G0 Z0
 G53 G0 X#<tls_x_pos> Y#<tls_y_pos>
 
-#<_tls_home_z>=#5422 ; save the z-position of the current coordinate system
+; No longer needed
+; #<_tls_home_z>=#5422 ; save the z-position of the current coordinate system
+; #<_tls_home_z>=[#[5203 + [20 * #5220]] + #5422] ; save the calculated absolute z-position
 
 ; Loaded requested tool, and find length of the reference tool.
 ; Want to avoid the extra loading of the reference tool to get length.
