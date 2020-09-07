@@ -44,6 +44,13 @@ G4 P0.5 ; Short delay to settle motion. Necessary with path blending?
 ; that home was probed, to minimize backlash error.
 G38.4 F[10/25.4] Z1
 
+; Back away and then probe towards tool length sensor slowly.
+; G1 F[10/25.4] Z[2/25.4]
+; G38.2 F[10/25.4] Z-1
+
+; If repeating measurement, move only a little away
+; G1 F40 Z.25
+
 G90 ; Absolute mode
 
 ; Calculate absolute probe position.
@@ -63,7 +70,10 @@ G10 L1 P#<tls_tool> Z#<tls_tool_length>
 G43
 
 (debug, T#<tls_tool> H=#<tls_tool_length>)
+; If repeating measurements, is nice to log it.
+; (print, H=#<tls_tool_length>)
 
+; If repeating measurements, disable this.
 G53 G0 Z0
 
 o101 if [#<_tls_s_metric> EQ 1]
