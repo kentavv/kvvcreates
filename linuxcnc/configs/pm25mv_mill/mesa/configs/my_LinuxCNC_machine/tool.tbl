@@ -1,30 +1,30 @@
-T1 P1 D0.500000 Z+0.000937 ;temp drill 
-T2 P2 D2.000000 Z+1.819000 ;2" superfly 
+T1 P1 D0.500000 Z-0.000036 ;temp drill 
+T2 P2 D2.000000 Z+1.818000 ;2" superfly 
 T3 P3 D1.000000 Z+2.325000 ;1" shearhog short 
 T4 P4 D1.000000 Z-1.000000 ;1" shearhog medium 
 T5 P5 D1.000000 Z-1.000000 ;1" shearhog long 
-T6 P6 D1.496000 Z+2.500000 ;38mm, 1.50in, facemill 
+T6 P6 D1.496000 Z+2.499000 ;38mm, 1.50in, facemill 
 T7 P7 D0.062500 Z+2.452000 ;1/16" stub em alum 
 T8 P8 D0.062500 Z+2.456000 ;1/16" reg em alum 
 T9 P9 D0.125000 Z+2.396000 ;1/8" stub em alum 
-T10 P10 D0.125000 Z+2.843000 ;1/8" reg em alum 
+T10 P10 D0.125000 Z+2.842000 ;1/8" reg em alum 
 T11 P11 D0.250000 Z+2.550000 ;1/4" stub em alum 
-T12 P12 D0.250000 Z+2.881000 ;1/4" reg em alum 
-T13 P13 D0.250000 Z+3.374000 ;1/4" long em alum 
+T12 P12 D0.250000 Z+2.879000 ;1/4" reg em alum 
+T13 P13 D0.250000 Z+3.373000 ;1/4" long em alum 
 T14 P14 D0.375000 Z+2.654000 ;3/8" stub em alum 
-T15 P15 D0.375000 Z+3.068000 ;3/8" reg em alum 
+T15 P15 D0.375000 Z+3.067000 ;3/8" reg em alum 
 T16 P16 D0.375000 Z+3.666000 ;3/8" long em alum 
-T17 P17 D0.500000 Z+3.062000 ;1/2" stub em alum 
-T18 P18 D0.500000 Z+3.482000 ;1/2" reg em alum 
-T19 P19 D0.500000 Z+4.339000 ;1/2" long em alum 
-T20 P20 D0.125000 Z+2.537000 ;1/8" reg em steel 
-T21 P21 D0.250000 Z+2.863000 ;1/4" reg em steel 
+T17 P17 D0.500000 Z+3.061000 ;1/2" stub em alum 
+T18 P18 D0.500000 Z+3.481000 ;1/2" reg em alum 
+T19 P19 D0.500000 Z+4.338000 ;1/2" long em alum 
+T20 P20 D0.125000 Z+2.536000 ;1/8" reg em steel 
+T21 P21 D0.250000 Z+2.862000 ;1/4" reg em steel 
 T22 P22 D0.375000 Z+3.097000 ;3/8" reg em steel 
-T23 P23 D0.500000 Z+3.373000 ;1/2" reg em steel 
-T27 P27 D0.250000 Z+3.271000 ;1/4" tas rougher 
+T23 P23 D0.500000 Z+3.372000 ;1/2" reg em steel 
+T27 P27 D0.250000 Z+3.270000 ;1/4" tas rougher 
 T28 P28 D0.375000 Z+3.156000 ;3/8" tas rougher 
-T29 P29 D0.500000 Z+3.502000 ;1/2" tas rougher 
-T30 P30 D0.640000 Z+2.250000 ;16mm short non cc mod em 
+T29 P29 D0.500000 Z+3.501000 ;1/2" tas rougher 
+T30 P30 D0.640000 Z+2.248000 ;16mm short non cc mod em 
 T31 P31 D0.640000 Z-1.000000 ;16mm med non cc mod em 
 T32 P32 D0.640000 Z-1.000000 ;16mm long non cc mod em 
 T33 P33 D0.669291 Z-1.000000 ;17mm short cc mod em 
@@ -35,17 +35,17 @@ T37 P37 D0.629921 Z-1.000000 ;16mm med toroidal mod em
 T38 P38 D0.629921 Z-1.000000 ;16mm long toroidal mod em 
 T39 P39 D0.314961 Z-1.000000 ;8mm med ball mod em 
 T40 P40 D0.314961 Z-1.000000 ;8mm long ball mod em 
-T41 P41 D0.487000 Z+3.398000 ;shars 1/2" insert 
+T41 P41 D0.487000 Z+3.397000 ;shars 1/2" insert 
 T42 P42 D0.250000 Z+5.671000 ;1/4" long end mill 
-T50 P50 D0.250000 Z+3.646000 ;1/4" 90deg spot drill 
-T51 P51 D0.750000 Z+3.447000 ;3/4" 90deg countersink 
+T50 P50 D0.250000 Z+3.645000 ;1/4" 90deg spot drill 
+T51 P51 D0.750000 Z+3.446000 ;3/4" 90deg countersink 
 T52 P52 D0.250000 Z+3.174000 ;1/4" chamfer mill 
 T53 P53 D0.250000 Z+3.639000 ;1/4" drill 
-T54 P54 D0.375000 Z+4.363000 ;3/8" drill 
-T55 P55 D0.500000 Z+4.861000 ;1/2" drill 
+T54 P54 D0.375000 Z+4.362000 ;3/8" drill 
+T55 P55 D0.500000 Z+4.860000 ;1/2" drill 
 T71 P71 D0.120000 Z+2.835000 ;m5-0.8 thread mill 
-T99 P99 D1.750000 Z+11.278500 ;spindle nose 
+T99 P99 D1.750000 Z+11.277244 ;spindle nose 
 T100 P100 Z+4.776000 ;haimer 
-T121 P121 D0.250000 Z+3.124000 ;1/4 sqr steel em 
+T121 P121 D0.250000 Z+3.123000 ;1/4 sqr steel em 
 T122 P122 D0.375000 Z+3.566000 ;3/8" square end mill for steel 
-T67 P67 D0.388000 Z+3.706000 ;1/2 threadmill in er20 
+T67 P67 D0.388000 Z+3.705000 ;1/2 threadmill in er20 
