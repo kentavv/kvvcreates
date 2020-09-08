@@ -140,7 +140,7 @@ net axes-alarm     <=  hm2_7i76e.0.7i76.0.0.input-14-not
 ##
 ## Spindle lock
 ##
-setp debounce.0.delay 10 # 10 * servo-thread period (500us) = 5ms
+setp debounce.0.delay 10 # 10 * servo-thread period (1000us) = 10ms
 net spindle-locked-raw => debounce.0.0.in
 
 # This simple method inhibits the spindle and all motion including programs, mdi commands, and pendant.
@@ -459,7 +459,7 @@ net coolant or2.coolant.out
 
 #  ---probe signal---
 
-setp debounce.2.delay 4  # 4 * servo-thread period (1000us) = 4ms
+setp debounce.2.delay 20  # 20 * servo-thread period (1000us) = 20ms
 net probe-in-raw     =>  debounce.2.0.in
 net probe-in debounce.2.0.out => motion.probe-input
 
