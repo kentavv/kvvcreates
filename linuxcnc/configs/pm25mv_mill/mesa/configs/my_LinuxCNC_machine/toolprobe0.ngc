@@ -8,8 +8,8 @@ o<toolprobe0> SUB
 ; length sensor relative to home position. Edit these as
 ; needed to center the spindle above the sensor. These
 ; are machine coordinates.
-#<tls_x_pos>=-9.1961
-#<tls_y_pos>=-1.5716
+#<tls_x_pos>=-9.2076
+#<tls_y_pos>=-1.5740
 
 ; The reference tool, e.g., the spindle nose. Edit as needed.
 #<tls_ref_tool>=99
