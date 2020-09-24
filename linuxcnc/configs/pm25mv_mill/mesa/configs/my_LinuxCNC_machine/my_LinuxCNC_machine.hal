@@ -371,6 +371,13 @@ setp timedelay.spindle-enable.on-delay 0
 setp timedelay.spindle-enable.off-delay .02
 net spindle-vel-cmd-rps     =>  hm2_7i76e.0.stepgen.04.velocity-cmd
 
+net spindle-1-vel-cmd-rpm-abs     =>  hm2_7i76e.0.7i76.0.0.spinout
+net spindle-1-ccw             =>  hm2_7i76e.0.7i76.0.0.spindir
+net spindle-1-enable => hm2_7i76e.0.7i76.0.0.spinena
+setp hm2_7i76e.0.7i76.0.0.spinout-minlim [SPINDLE_1]MIN_VEL
+setp hm2_7i76e.0.7i76.0.0.spinout-maxlim [SPINDLE_1]MAX_VEL
+setp hm2_7i76e.0.7i76.0.0.spinout-scalemax [SPINDLE_1]SCALE
+
 # ---Encoder feedback signals/setup---
 
 setp    hm2_7i76e.0.encoder.00.counter-mode 0
@@ -398,6 +405,19 @@ net spindle-revs               =>  spindle.0.revs
 net spindle-at-speed           =>  spindle.0.at-speed
 net spindle-vel-fb-rps         =>  spindle.0.speed-in
 net spindle-index-enable      <=>  spindle.0.index-enable
+
+net spindle-1-vel-cmd-rps        <=  spindle.1.speed-out-rps
+net spindle-1-vel-cmd-rps-abs    <=  spindle.1.speed-out-rps-abs
+net spindle-1-vel-cmd-rpm        <=  spindle.1.speed-out
+net spindle-1-vel-cmd-rpm-abs    <=  spindle.1.speed-out-abs
+net spindle-1-enable             <=  spindle.1.on
+net spindle-1-cw                 <=  spindle.1.forward
+net spindle-1-ccw                <=  spindle.1.reverse
+net spindle-1-brake              <=  spindle.1.brake
+net spindle-1-revs               =>  spindle.1.revs
+net spindle-1-at-speed           =>  spindle.1.at-speed
+net spindle-1-vel-fb-rps         =>  spindle.1.speed-in
+net spindle-1-index-enable      <=>  spindle.1.index-enable
 
 # ---Setup spindle at speed signals---
 
