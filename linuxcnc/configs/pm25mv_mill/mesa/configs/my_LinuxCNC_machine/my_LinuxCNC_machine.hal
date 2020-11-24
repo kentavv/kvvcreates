@@ -15,7 +15,7 @@ loadrt pid names=pid.x,pid.y,pid.z,pid.s
 loadrt abs names=abs.spindle
 loadrt lowpass names=lowpass.spindle
 loadrt scale names=scale.spindle,scale.x-vel,scale.y-vel,scale.z-vel
-loadrt near
+loadrt near count=2
 loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.fault
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
 loadrt not names=not.spindle-brake
@@ -40,6 +40,7 @@ addf scale.z-vel              servo-thread
 addf abs.spindle              servo-thread
 addf lowpass.spindle          servo-thread
 addf near.0                   servo-thread
+addf near.1                   servo-thread
 addf or2.coolant              servo-thread
 addf or2.o1                   servo-thread
 addf or2.stop0                servo-thread
@@ -99,6 +100,8 @@ net probe-in-raw     <=  hm2_7i76e.0.7i76.0.0.input-20-not
 # --- PROBE-BLAST ---
 net probe-blast =>     hm2_7i76e.0.7i76.0.0.output-05
 net probe-blast => motion.digital-out-00
+
+net datalog_en => motion.digital-out-01 => dmmserial.logen
 
 # --- CYCLE-START ---
 net run-step-btn     <=  hm2_7i76e.0.7i76.0.0.input-08
@@ -372,7 +375,7 @@ setp timedelay.spindle-enable.off-delay .02
 net spindle-vel-cmd-rps     =>  hm2_7i76e.0.stepgen.04.velocity-cmd
 
 net spindle-1-vel-cmd-rpm-abs     =>  hm2_7i76e.0.7i76.0.0.spinout
-net spindle-1-ccw             =>  hm2_7i76e.0.7i76.0.0.spindir
+net spindle-1-cw             =>  hm2_7i76e.0.7i76.0.0.spindir
 net spindle-1-enable => hm2_7i76e.0.7i76.0.0.spinena
 setp hm2_7i76e.0.7i76.0.0.spinout-minlim [SPINDLE_1]MIN_VEL
 setp hm2_7i76e.0.7i76.0.0.spinout-maxlim [SPINDLE_1]MAX_VEL
