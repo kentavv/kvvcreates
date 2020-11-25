@@ -9,14 +9,14 @@ loadusr -W dmmserial
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
 loadrt hostmot2
-loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_stepgens=5 sserial_port_0=00xxxx" 
+loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_stepgens=5 sserial_port_0=20xxxx" 
 setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
 loadrt pid names=pid.x,pid.y,pid.z,pid.s
 loadrt abs names=abs.spindle
 loadrt lowpass names=lowpass.spindle
 loadrt scale names=scale.spindle,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near count=2
-loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.fault
+loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
 loadrt not names=not.spindle-brake
 loadrt toggle count=1
@@ -44,6 +44,7 @@ addf near.1                   servo-thread
 addf or2.coolant              servo-thread
 addf or2.o1                   servo-thread
 addf or2.stop0                servo-thread
+addf or2.stop1                servo-thread
 addf or2.stop                 servo-thread
 addf or2.fault                servo-thread
 addf estop_latch.fault        servo-thread
@@ -131,10 +132,13 @@ net spindle-locked-raw     <=  hm2_7i76e.0.7i76.0.0.input-12
 net spindle-good     <=  hm2_7i76e.0.7i76.0.0.input-13
 net spindle-alarm     <=  hm2_7i76e.0.7i76.0.0.input-13-not
 
+# --- SPINDLE-1-ALARM ---
+net spindle-1-good     <=  hm2_7i76e.0.7i76.0.0.input-15
+net spindle-1-alarm     <=  hm2_7i76e.0.7i76.0.0.input-15-not
+
 # --- AXES-ALARM ---
 net axes-good     <=  hm2_7i76e.0.7i76.0.0.input-14
 net axes-alarm     <=  hm2_7i76e.0.7i76.0.0.input-14-not
-
 
 
 
@@ -377,9 +381,9 @@ net spindle-vel-cmd-rps     =>  hm2_7i76e.0.stepgen.04.velocity-cmd
 net spindle-1-vel-cmd-rpm-abs     =>  hm2_7i76e.0.7i76.0.0.spinout
 net spindle-1-cw             =>  hm2_7i76e.0.7i76.0.0.spindir
 net spindle-1-enable => hm2_7i76e.0.7i76.0.0.spinena
-setp hm2_7i76e.0.7i76.0.0.spinout-minlim [SPINDLE_1]MIN_VEL
-setp hm2_7i76e.0.7i76.0.0.spinout-maxlim [SPINDLE_1]MAX_VEL
-setp hm2_7i76e.0.7i76.0.0.spinout-scalemax [SPINDLE_1]SCALE
+setp hm2_7i76e.0.7i76.0.0.spinout-minlim [SPINDLE_1]SPINDLE_1_MIN_VEL
+setp hm2_7i76e.0.7i76.0.0.spinout-maxlim [SPINDLE_1]SPINDLE_1_MAX_VEL
+setp hm2_7i76e.0.7i76.0.0.spinout-scalemax [SPINDLE_1]SPINDLE_1_SCALE
 
 # ---Encoder feedback signals/setup---
 
