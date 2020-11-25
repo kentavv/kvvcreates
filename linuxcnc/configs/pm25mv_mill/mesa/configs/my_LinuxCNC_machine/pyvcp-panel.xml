@@ -11,18 +11,18 @@ The contents of this file will not be overwritten when you run stepconf again.
 
 		<label>
 			<text>"Spindle"</text>
-			<font>("Helvetica", 20)</font>
+			<font>("Helvetica", 14)</font>
 		</label>
 
 		<hbox>
 			<label>
 				<text>"  Lock"</text>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 			</label>
 
 			<led>
 				<halpin>"spindle-locked-led"</halpin>
-				<size>30</size>
+				<size>24</size>
 				<on_color>"red"</on_color>
 				<off_color>"green"</off_color>
 			</led>
@@ -31,18 +31,18 @@ The contents of this file will not be overwritten when you run stepconf again.
 		<hbox>
 			<label>
 				<text>"  Target"</text>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 			</label>
 
 			<number>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 				<halpin>"spindle-speed-target"</halpin>
 				<format>"d"</format>
 			</number>
 
 			<led>
 				<halpin>"spindle-at-speed-led"</halpin>
-				<size>30</size>
+				<size>24</size>
 				<on_color>"green"</on_color>
 				<off_color>"red"</off_color>
 			</led>
@@ -51,11 +51,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Actual"</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"spindle-speed-abs"</halpin>
                                 <format>"d"</format>
                         </number>
@@ -64,11 +64,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Pos1: "</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"spindle-position-c"</halpin>
                                 <format>"3.2f"</format>
                         </number>
@@ -77,11 +77,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Pos2: "</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"spindle-position-c2"</halpin>
                                 <format>"3.2f"</format>
                         </number>
@@ -89,17 +89,17 @@ The contents of this file will not be overwritten when you run stepconf again.
 
 		<label>
 			<text>"Spindle Torque"</text>
-			<font>("Helvetica", 20)</font>
+			<font>("Helvetica", 14)</font>
 		</label>
 
                 <hbox>
                         <label>
                                 <text>"  Mean: "</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"spindle-torque1"</halpin>
                                 <format>"+3.2f"</format>
                         </number>
@@ -108,30 +108,68 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Instant: "</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"spindle-torque2"</halpin>
                                 <format>"+3.2f"</format>
                         </number>
                 </hbox>
 
 		<label>
+			<text>"High-speed Spindle"</text>
+			<font>("Helvetica", 14)</font>
+		</label>
+
+		<hbox>
+			<label>
+				<text>"  Target"</text>
+				<font>("Helvetica", 14)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 14)</font>
+				<halpin>"spindle-1-speed-target"</halpin>
+				<format>"d"</format>
+			</number>
+
+			<led>
+				<halpin>"spindle-1-at-speed-led"</halpin>
+				<size>24</size>
+				<on_color>"green"</on_color>
+				<off_color>"red"</off_color>
+			</led>
+		</hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Actual"</text>
+                                <font>("Helvetica", 14)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 14)</font>
+                                <halpin>"spindle-1-speed-abs"</halpin>
+                                <format>"d"</format>
+                        </number>
+                </hbox>
+
+		<label>
 			<text>"Status"</text>
-			<font>("Helvetica", 20)</font>
+			<font>("Helvetica", 14)</font>
 		</label>
 
                 <hbox>
                         <label>
                                 <text>"  Axes"</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <led>
                                 <halpin>"axes-good-led"</halpin>
-                                <size>30</size>
+                                <size>24</size>
                                 <on_color>"green"</on_color>
                                 <off_color>"red"</off_color>
                         </led>
@@ -140,12 +178,26 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Spindle"</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <led>
                                 <halpin>"spindle-good-led"</halpin>
-                                <size>30</size>
+                                <size>24</size>
+                                <on_color>"green"</on_color>
+                                <off_color>"red"</off_color>
+                        </led>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  HS Spindle"</text>
+                                <font>("Helvetica", 14)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"spindle-1-good-led"</halpin>
+                                <size>24</size>
                                 <on_color>"green"</on_color>
                                 <off_color>"red"</off_color>
                         </led>
@@ -154,18 +206,18 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Faulted"</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <led>
                                 <halpin>"fault-led"</halpin>
-                                <size>30</size>
+                                <size>24</size>
                                 <on_color>"red"</on_color>
                                 <off_color>"green"</off_color>
                         </led>
 
                         <button>
-                                <font>("Helvetica",20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <width>3</width>
                                 <halpin>"reset-fault"</halpin>
                                 <text>"Reset"</text>
@@ -174,17 +226,17 @@ The contents of this file will not be overwritten when you run stepconf again.
 
 		<label>
 			<text>"Velocity"</text>
-			<font>("Helvetica", 20)</font>
+			<font>("Helvetica", 14)</font>
 		</label>
 
 		<hbox>
 			<label>
 				<text>"  X: "</text>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 			</label>
 
 			<number>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 				<halpin>"x-velocity-upm"</halpin>
 				<format>"+3.2f"</format>
 			</number>
@@ -193,11 +245,11 @@ The contents of this file will not be overwritten when you run stepconf again.
 		<hbox>
 			<label>
 				<text>"  Y: "</text>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 			</label>
 
 			<number>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 				<halpin>"y-velocity-upm"</halpin>
 				<format>"+3.2f"</format>
 			</number>
@@ -206,11 +258,11 @@ The contents of this file will not be overwritten when you run stepconf again.
 		<hbox>
 			<label>
 				<text>"  Z: "</text>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 			</label>
 
 			<number>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 				<halpin>"z-velocity-upm"</halpin>
 				<format>"+3.2f"</format>
 			</number>
@@ -219,11 +271,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  C: "</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"spindle-speed-c"</halpin>
                                 <format>"+3.2f"</format>
                         </number>
@@ -231,7 +283,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                 <hbox>
 		        <checkbutton>
-				<font>("Helvetica", 20)</font>
+				<font>("Helvetica", 14)</font>
 				<halpin>"datalogger-enabled"</halpin>
 				<text>"Data logger"</text>
 			</checkbutton>
@@ -239,7 +291,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                 <hbox>
                         <button>
-                                <font>("Helvetica",20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"load-haimer"</halpin>
                                 <text>"Load Haimer"</text>
                         </button>
@@ -247,12 +299,12 @@ The contents of this file will not be overwritten when you run stepconf again.
 
 		<label>
 			<text>"Auto Tool Length"</text>
-			<font>("Helvetica", 20)</font>
+			<font>("Helvetica", 14)</font>
 		</label>
 
                 <hbox>
                         <button>
-                                <font>("Helvetica",20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"tool-probe0"</halpin>
                                 <text>"  First step"</text>
                         </button>
@@ -260,7 +312,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                 <hbox>
                         <button>
-                                <font>("Helvetica",20)</font>
+                                <font>("Helvetica", 14)</font>
                                 <halpin>"tool-probe1"</halpin>
                                 <text>"  Second step"</text>
                         </button>
@@ -269,12 +321,12 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Probe"</text>
-                                <font>("Helvetica", 20)</font>
+                                <font>("Helvetica", 14)</font>
                         </label>
 
                         <led>
                                 <halpin>"probe-led"</halpin>
-                                <size>30</size>
+                                <size>24</size>
                                 <on_color>"red"</on_color>
                                 <off_color>"green"</off_color>
                         </led>

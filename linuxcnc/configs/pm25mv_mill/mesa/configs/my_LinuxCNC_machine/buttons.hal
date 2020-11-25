@@ -52,9 +52,12 @@ net stop-btn => or2.stop.in1
 
 setp debounce.1.delay 120 # 120 * servo-thread period (500us) = 60ms
 net spindle-alarm => or2.stop0.in0
-net axes-alarm => or2.stop0.in1
+net spindle-1-alarm => or2.stop0.in1
 
-net motor-alarm-raw or2.stop0.out debounce.1.0.in
+net spindle-alarms or2.stop0.out => or2.stop1.in0
+net axes-alarm => or2.stop1.in1
+
+net motor-alarm-raw or2.stop1.out debounce.1.0.in
 net motor-alarm debounce.1.0.out => => estop_latch.fault.fault-in
 net fault-latch-loopout estop_latch.fault.fault-out  => or2.stop.in0
 

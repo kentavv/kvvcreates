@@ -12,10 +12,10 @@ loadrt hostmot2
 loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_stepgens=5 sserial_port_0=20xxxx" 
 setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
 loadrt pid names=pid.x,pid.y,pid.z,pid.s
-loadrt abs names=abs.spindle
-loadrt lowpass names=lowpass.spindle
-loadrt scale names=scale.spindle,scale.x-vel,scale.y-vel,scale.z-vel
-loadrt near count=2
+loadrt abs names=abs.spindle,abs.spindle1
+loadrt lowpass names=lowpass.spindle,lowpass.spindle1
+loadrt scale names=scale.spindle,scale.spindle1a,scale.spindle1b,scale.x-vel,scale.y-vel,scale.z-vel
+loadrt near names=near.spindle,near.spindle1
 loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
 loadrt not names=not.spindle-brake
@@ -25,8 +25,9 @@ loadrt debounce cfg=1,1,1
 loadrt timedelay names=timedelay.spindle-brake,timedelay.spindle-pid,timedelay.spindle-enable
 loadrt estop_latch names=estop_latch.fault
 loadrt oneshot names=oneshot.fault
+loadrt deadzone names=deadzone.spindle1
 
-addf hm2_7i76e.0.read          servo-thread
+addf hm2_7i76e.0.read         servo-thread
 addf motion-command-handler   servo-thread
 addf motion-controller        servo-thread
 addf pid.x.do-pid-calcs       servo-thread
@@ -34,13 +35,18 @@ addf pid.y.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
 addf pid.s.do-pid-calcs       servo-thread
 addf scale.spindle            servo-thread
+addf scale.spindle1a          servo-thread
+addf scale.spindle1b          servo-thread
 addf scale.x-vel              servo-thread
 addf scale.y-vel              servo-thread
 addf scale.z-vel              servo-thread
 addf abs.spindle              servo-thread
+addf abs.spindle1             servo-thread
 addf lowpass.spindle          servo-thread
-addf near.0                   servo-thread
-addf near.1                   servo-thread
+addf lowpass.spindle1         servo-thread
+addf near.spindle             servo-thread
+addf near.spindle1            servo-thread
+addf deadzone.spindle1        servo-thread
 addf or2.coolant              servo-thread
 addf or2.o1                   servo-thread
 addf or2.stop0                servo-thread
@@ -135,6 +141,9 @@ net spindle-alarm     <=  hm2_7i76e.0.7i76.0.0.input-13-not
 # --- SPINDLE-1-ALARM ---
 net spindle-1-good     <=  hm2_7i76e.0.7i76.0.0.input-15
 net spindle-1-alarm     <=  hm2_7i76e.0.7i76.0.0.input-15-not
+
+# --- SPINDLE-1-FEEDBACK ---
+net spindle-1-vel-fb     <=  hm2_7i76e.0.7i76.0.0.analogin0
 
 # --- AXES-ALARM ---
 net axes-good     <=  hm2_7i76e.0.7i76.0.0.input-14
@@ -428,11 +437,17 @@ net spindle-1-index-enable      <=>  spindle.1.index-enable
 
 # ---Setup spindle at speed signals---
 
-net spindle-vel-cmd-rpm     =>  near.0.in1
-net spindle-fb-rpm-filtered =>  near.0.in2
-net spindle-at-speed        <=  near.0.out
-setp near.0.scale 1.1
-setp near.0.difference 200
+net spindle-vel-cmd-rpm     =>  near.spindle.in1
+net spindle-fb-rpm-filtered =>  near.spindle.in2
+net spindle-at-speed        <=  near.spindle.out
+setp near.spindle.scale 1.1
+setp near.spindle.difference 200
+
+net spindle-1-vel-cmd-rpm     =>  near.spindle1.in1
+net spindle-1-fb-rpm-filtered =>  near.spindle1.in2
+net spindle-1-at-speed        <=  near.spindle1.out
+setp near.spindle1.scale 1.1
+setp near.spindle1.difference 500
 
 #  Use ACTUAL spindle velocity from spindle encoder
 #  spindle-velocity bounces around so we filter it with lowpass
@@ -445,6 +460,24 @@ net spindle-vel-fb-rps        =>     scale.spindle.in
 net spindle-fb-rpm               scale.spindle.out       =>   lowpass.spindle.in
 net spindle-fb-rpm-filtered      lowpass.spindle.out     =>   abs.spindle.in
 net spindle-fb-rpm-filtered-abs  abs.spindle.out
+
+# The high-speed spindle feedback is volts proportional to RPM
+# The fitted line is y = 2162.4 * x + 244.41
+setp     scale.spindle1a.gain 2162.4
+setp     scale.spindle1a.offset 244.41
+setp     scale.spindle1b.gain 60
+setp     lowpass.spindle1.gain 0.05
+setp     deadzone.spindle1.center 0
+setp     deadzone.spindle1.threshhold 0
+net spindle-1-vel-fb        =>     scale.spindle1a.in
+net spindle-1-vel-fb-rpm           scale.spindle1a.out      =>   deadzone.spindle1.in
+net spindle-1-fb-rpm               deadzone.spindle1.out    =>   lowpass.spindle1.in
+net spindle-1-fb-rpm-filtered      lowpass.spindle1.out     =>   abs.spindle1.in
+net spindle-1-fb-rpm-filtered-abs  abs.spindle1.out
+
+net spindle-1-fb-rpm        =>     scale.spindle1b.in
+net spindle-1-fb-rps               scale.spindle1b.out
+
 
 #******************************
 # connect miscellaneous signals
