@@ -25,7 +25,7 @@ loadrt debounce cfg=1,1,1
 loadrt timedelay names=timedelay.spindle-brake,timedelay.spindle-pid,timedelay.spindle-enable
 loadrt estop_latch names=estop_latch.fault
 loadrt oneshot names=oneshot.fault
-loadrt lincurve names=lincurve.spindle1 personality=3
+loadrt lincurve names=lincurve.spindle1,lincurve.spindle1b personality=3,7
 
 addf hm2_7i76e.0.read         servo-thread
 addf motion-command-handler   servo-thread
@@ -34,10 +34,11 @@ addf pid.x.do-pid-calcs       servo-thread
 addf pid.y.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
 addf pid.s.do-pid-calcs       servo-thread
-addf pid.spindle1.do-pid-calcs servo-thread
+#addf pid.spindle1.do-pid-calcs servo-thread
 addf scale.spindle            servo-thread
 addf scale.spindle1           servo-thread
 addf lincurve.spindle1        servo-thread
+addf lincurve.spindle1b       servo-thread
 addf scale.x-vel              servo-thread
 addf scale.y-vel              servo-thread
 addf scale.z-vel              servo-thread
@@ -370,24 +371,24 @@ net spindle-output        <=  pid.s.output
 
 
 
-setp   pid.spindle1.Pgain     [SPINDLE_1]P
-setp   pid.spindle1.Igain     [SPINDLE_1]I
-setp   pid.spindle1.Dgain     [SPINDLE_1]D
-setp   pid.spindle1.bias      [SPINDLE_1]BIAS
-setp   pid.spindle1.FF0       [SPINDLE_1]FF0
-setp   pid.spindle1.FF1       [SPINDLE_1]FF1
-setp   pid.spindle1.FF2       [SPINDLE_1]FF2
-setp   pid.spindle1.deadband  [SPINDLE_1]DEADBAND
-setp   pid.spindle1.maxoutput [SPINDLE_1]MAX_OUTPUT
+#setp   pid.spindle1.Pgain     [SPINDLE_1]P
+#setp   pid.spindle1.Igain     [SPINDLE_1]I
+#setp   pid.spindle1.Dgain     [SPINDLE_1]D
+#setp   pid.spindle1.bias      [SPINDLE_1]BIAS
+#setp   pid.spindle1.FF0       [SPINDLE_1]FF0
+#setp   pid.spindle1.FF1       [SPINDLE_1]FF1
+#setp   pid.spindle1.FF2       [SPINDLE_1]FF2
+#setp   pid.spindle1.deadband  [SPINDLE_1]DEADBAND
+#setp   pid.spindle1.maxoutput [SPINDLE_1]MAX_OUTPUT
 #setp   pid.spindle1.error-previous-target true
 #setp   pid.spindle1.maxerror 500
 
-net spindle-1-index-enable  <=> pid.spindle1.index-enable
-net spindle-1-enable         =>  pid.spindle1.enable
-net spindle-1-vel-cmd-rpm    => pid.spindle1.command
-net spindle-1-fb-rpm-filtered => pid.spindle1.feedback
+#net spindle-1-index-enable  <=> pid.spindle1.index-enable
+#net spindle-1-enable         =>  pid.spindle1.enable
+#net spindle-1-vel-cmd-rpm    => pid.spindle1.command
+#net spindle-1-fb-rpm-filtered => pid.spindle1.feedback
 #net spindle-1-fb-rpm => pid.spindle1.feedback
-net spindle-1-output        <=  pid.spindle1.output
+#net spindle-1-output        <=  pid.spindle1.output
 
 # Step Gen signals/setup
 
@@ -503,6 +504,22 @@ net spindle-1-fb-rpm-filtered-abs  abs.spindle1.out
 net spindle-1-fb-rpm        =>     scale.spindle1.in
 net spindle-1-fb-rps               scale.spindle1.out
 
+setp     lincurve.spindle1b.x-val-00 0
+setp     lincurve.spindle1b.y-val-00 0
+setp     lincurve.spindle1b.x-val-01 9350
+setp     lincurve.spindle1b.y-val-01 9000
+setp     lincurve.spindle1b.x-val-02 12665
+setp     lincurve.spindle1b.y-val-02 12000
+setp     lincurve.spindle1b.x-val-03 15905
+setp     lincurve.spindle1b.y-val-03 15000
+setp     lincurve.spindle1b.x-val-04 19186
+setp     lincurve.spindle1b.y-val-04 18000
+setp     lincurve.spindle1b.x-val-05 22475
+setp     lincurve.spindle1b.y-val-05 21000
+setp     lincurve.spindle1b.x-val-06 23980
+setp     lincurve.spindle1b.y-val-06 24000
+net spindle-1-vel-cmd-rpm    => lincurve.spindle1b.in
+net spindle-1-output        <=  lincurve.spindle1b.out
 
 #******************************
 # connect miscellaneous signals
