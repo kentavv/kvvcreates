@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# Tested on a Fuling DZB312B002.2L2DK VFD
+# May work with any Fuling DZB200 and DZB300 VFD
+
 import sys
 import time
 
