@@ -21,7 +21,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 			</label>
 
 			<led>
-				<halpin>"spindle-locked-led"</halpin>
+				<halpin>"spindle-0-locked-led"</halpin>
 				<size>24</size>
 				<on_color>"red"</on_color>
 				<off_color>"green"</off_color>
@@ -36,12 +36,12 @@ The contents of this file will not be overwritten when you run stepconf again.
 
 			<number>
 				<font>("Helvetica", 14)</font>
-				<halpin>"spindle-speed-target"</halpin>
+				<halpin>"spindle-0-speed-target"</halpin>
 				<format>"d"</format>
 			</number>
 
 			<led>
-				<halpin>"spindle-at-speed-led"</halpin>
+				<halpin>"spindle-0-at-speed-led"</halpin>
 				<size>24</size>
 				<on_color>"green"</on_color>
 				<off_color>"red"</off_color>
@@ -56,7 +56,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                         <number>
                                 <font>("Helvetica", 14)</font>
-                                <halpin>"spindle-speed-abs"</halpin>
+                                <halpin>"spindle-0-speed-abs"</halpin>
                                 <format>"d"</format>
                         </number>
                 </hbox>
@@ -69,7 +69,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                         <number>
                                 <font>("Helvetica", 14)</font>
-                                <halpin>"spindle-position-c"</halpin>
+                                <halpin>"spindle-0-position-c"</halpin>
                                 <format>"3.2f"</format>
                         </number>
                 </hbox>
@@ -82,7 +82,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                         <number>
                                 <font>("Helvetica", 14)</font>
-                                <halpin>"spindle-position-c2"</halpin>
+                                <halpin>"spindle-0-position-c2"</halpin>
                                 <format>"3.2f"</format>
                         </number>
                 </hbox>
@@ -100,7 +100,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                         <number>
                                 <font>("Helvetica", 14)</font>
-                                <halpin>"spindle-torque1"</halpin>
+                                <halpin>"spindle-0-torque1"</halpin>
                                 <format>"+3.2f"</format>
                         </number>
                 </hbox>
@@ -113,7 +113,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                         <number>
                                 <font>("Helvetica", 14)</font>
-                                <halpin>"spindle-torque2"</halpin>
+                                <halpin>"spindle-0-torque2"</halpin>
                                 <format>"+3.2f"</format>
                         </number>
                 </hbox>
@@ -182,7 +182,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                         </label>
 
                         <led>
-                                <halpin>"spindle-good-led"</halpin>
+                                <halpin>"spindle-0-good-led"</halpin>
                                 <size>24</size>
                                 <on_color>"green"</on_color>
                                 <off_color>"red"</off_color>
@@ -276,7 +276,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 
                         <number>
                                 <font>("Helvetica", 14)</font>
-                                <halpin>"spindle-speed-c"</halpin>
+                                <halpin>"spindle-0-speed-c"</halpin>
                                 <format>"+3.2f"</format>
                         </number>
                 </hbox>

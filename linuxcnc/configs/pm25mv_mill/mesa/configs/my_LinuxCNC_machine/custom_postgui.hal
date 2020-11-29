@@ -2,18 +2,18 @@
 # This file will not be overwritten when you run PNCconf again
 # The commands in this file are run after the AXIS GUI (including PyVCP panel) starts
 
-net spindle-vel-cmd-rpm-abs      pyvcp.spindle-speed-target # datalogger.spindle-speed-commanded 
+net spindle-0-vel-cmd-rpm-abs      pyvcp.spindle-0-speed-target # datalogger.spindle-speed-commanded 
 net spindle-1-vel-cmd-rpm-abs    pyvcp.spindle-1-speed-target # datalogger.spindle-speed-commanded 
-net spindle-fb-rpm               pyvcp.spindle-speed-c # datalogger.spindle-speed-actual 
-net spindle-fb-rpm-filtered-abs  pyvcp.spindle-speed-abs
+net spindle-0-fb-rpm               pyvcp.spindle-0-speed-c # datalogger.spindle-speed-actual 
+net spindle-0-fb-rpm-filtered-abs  pyvcp.spindle-0-speed-abs
 net spindle-1-fb-rpm-filtered-abs  pyvcp.spindle-1-speed-abs
 
-net spindle-at-speed    pyvcp.spindle-at-speed-led
+net spindle-0-at-speed    pyvcp.spindle-0-at-speed-led
 net spindle-1-at-speed  pyvcp.spindle-1-at-speed-led
-net spindle-locked      pyvcp.spindle-locked-led
+net spindle-0-locked      pyvcp.spindle-0-locked-led
 
 net axes-good           pyvcp.axes-good-led
-net spindle-good        pyvcp.spindle-good-led
+net spindle-0-good        pyvcp.spindle-0-good-led
 net spindle-1-good      pyvcp.spindle-1-good-led
 net fault-latch-loopout pyvcp.fault-led
 net result-fault        pyvcp.reset-fault
@@ -54,6 +54,6 @@ setp oneshot.fault.width .05
 # setp angpos.0.scale-out     360.0
 # net c-position angpos.0.out-deg pyvcp.spindle-position-c
 
-net torque1 dmmserial.torque1 pyvcp.spindle-torque1
-net torque2 dmmserial.torque2 pyvcp.spindle-torque2
-net c-position2 dmmserial.pos pyvcp.spindle-position-c2
+net torque1 dmmserial.torque1 pyvcp.spindle-0-torque1
+net torque2 dmmserial.torque2 pyvcp.spindle-0-torque2
+net c-position2 dmmserial.pos pyvcp.spindle-0-position-c2

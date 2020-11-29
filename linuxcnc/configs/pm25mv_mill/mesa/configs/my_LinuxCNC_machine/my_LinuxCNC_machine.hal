@@ -12,17 +12,17 @@ loadrt hostmot2
 loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_stepgens=5 sserial_port_0=20xxxx" 
 setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
 loadrt pid names=pid.x,pid.y,pid.z,pid.s,pid.spindle1
-loadrt abs names=abs.spindle,abs.spindle1
-loadrt lowpass names=lowpass.spindle,lowpass.spindle1
-loadrt scale names=scale.spindle,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
-loadrt near names=near.spindle,near.spindle1
+loadrt abs names=abs.spindle0,abs.spindle1
+loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
+loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
+loadrt near names=near.spindle0,near.spindle1
 loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
-loadrt not names=not.spindle-brake
+loadrt not names=not.spindle-0-brake
 loadrt toggle count=1
 loadrt toggle2nist count=1
 loadrt debounce cfg=1,1,1
-loadrt timedelay names=timedelay.spindle-brake,timedelay.spindle-pid,timedelay.spindle-enable
+loadrt timedelay names=timedelay.spindle-0-brake,timedelay.spindle-0-pid,timedelay.spindle-0-enable
 loadrt estop_latch names=estop_latch.fault
 loadrt oneshot names=oneshot.fault
 loadrt lincurve names=lincurve.spindle1,lincurve.spindle1b personality=3,7
@@ -35,18 +35,18 @@ addf pid.y.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
 addf pid.s.do-pid-calcs       servo-thread
 #addf pid.spindle1.do-pid-calcs servo-thread
-addf scale.spindle            servo-thread
+addf scale.spindle0           servo-thread
 addf scale.spindle1           servo-thread
 addf lincurve.spindle1        servo-thread
 addf lincurve.spindle1b       servo-thread
 addf scale.x-vel              servo-thread
 addf scale.y-vel              servo-thread
 addf scale.z-vel              servo-thread
-addf abs.spindle              servo-thread
+addf abs.spindle0             servo-thread
 addf abs.spindle1             servo-thread
-addf lowpass.spindle          servo-thread
+addf lowpass.spindle0         servo-thread
 addf lowpass.spindle1         servo-thread
-addf near.spindle             servo-thread
+addf near.spindle0            servo-thread
 addf near.spindle1            servo-thread
 addf or2.coolant              servo-thread
 addf or2.o1                   servo-thread
@@ -62,15 +62,15 @@ addf and2.a3                  servo-thread
 addf and2.a4                  servo-thread
 addf and2.vc                  servo-thread
 addf and2.motion_lock         servo-thread
-addf not.spindle-brake        servo-thread
+addf not.spindle-0-brake      servo-thread
 addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
 addf debounce.1               servo-thread
 addf debounce.2               servo-thread
-addf timedelay.spindle-brake  servo-thread
-addf timedelay.spindle-pid    servo-thread
-addf timedelay.spindle-enable servo-thread
+addf timedelay.spindle-0-brake  servo-thread
+addf timedelay.spindle-0-pid    servo-thread
+addf timedelay.spindle-0-enable servo-thread
 addf hm2_7i76e.0.write        servo-thread
 setp hm2_7i76e.0.dpll.01.timer-us -50
 setp hm2_7i76e.0.stepgen.timer-number 1
@@ -88,16 +88,16 @@ net coolant  =>     hm2_7i76e.0.7i76.0.0.output-01
 net estop-out  =>     hm2_7i76e.0.7i76.0.0.output-02
 
 # --- SPINDLE-ENABLE ---
-net spindle-enable =>     hm2_7i76e.0.7i76.0.0.output-03
+net spindle-0-enable =>     hm2_7i76e.0.7i76.0.0.output-03
 
 # --- SPINDLE-BRAKE ---
 # TODO Enable the brake, if not enabled manually, once the spindle RPM has below a threshold.
 # TODO On startup, the brake disables and then after the timeout reenables.
-net spindle-brake =>     timedelay.spindle-brake.in
-net spindle-brake-delayed timedelay.spindle-brake.out => not.spindle-brake.in
-setp timedelay.spindle-brake.on-delay 3
-setp timedelay.spindle-brake.off-delay 0
-net spindle-brake-not not.spindle-brake.out => hm2_7i76e.0.7i76.0.0.output-04
+net spindle-0-brake =>     timedelay.spindle-0-brake.in
+net spindle-0-brake-delayed timedelay.spindle-0-brake.out => not.spindle-0-brake.in
+setp timedelay.spindle-0-brake.on-delay 3
+setp timedelay.spindle-0-brake.off-delay 0
+net spindle-0-brake-not not.spindle-0-brake.out => hm2_7i76e.0.7i76.0.0.output-04
 
 # external input signals
 
@@ -133,11 +133,11 @@ net y-home-sw     <=  hm2_7i76e.0.7i76.0.0.input-05-not
 net z-home-sw     <=  hm2_7i76e.0.7i76.0.0.input-06-not
 
 # --- SPINDLE-LOCK ---
-net spindle-locked-raw     <=  hm2_7i76e.0.7i76.0.0.input-12
+net spindle-0-locked-raw     <=  hm2_7i76e.0.7i76.0.0.input-12
 
 # --- SPINDLE-ALARM ---
-net spindle-good     <=  hm2_7i76e.0.7i76.0.0.input-13
-net spindle-alarm     <=  hm2_7i76e.0.7i76.0.0.input-13-not
+net spindle-0-good     <=  hm2_7i76e.0.7i76.0.0.input-13
+net spindle-0-alarm     <=  hm2_7i76e.0.7i76.0.0.input-13-not
 
 # --- SPINDLE-1-ALARM ---
 net spindle-1-good     <=  hm2_7i76e.0.7i76.0.0.input-15
@@ -158,13 +158,13 @@ net axes-alarm     <=  hm2_7i76e.0.7i76.0.0.input-14-not
 ## Spindle lock
 ##
 setp debounce.0.delay 10 # 10 * servo-thread period (1000us) = 10ms
-net spindle-locked-raw => debounce.0.0.in
+net spindle-0-locked-raw => debounce.0.0.in
 
 # This simple method inhibits the spindle and all motion including programs, mdi commands, and pendant.
-#net spindle-locked debounce.0.0.out => spindle.0.inhibit motion.feed-inhibit
+#net spindle-0-locked debounce.0.0.out => spindle.0.inhibit motion.feed-inhibit
 
 # Instead, first inhibit the spindle
-net spindle-locked debounce.0.0.out => spindle.0.inhibit
+net spindle-0-locked debounce.0.0.out => spindle.0.inhibit
 
 # Next, inhibit motion only if a program is running, which includes programs and mdi commands, but allow pendant 
 # motion. Non-motion commands (e.g., g20 and g21) are still executed regardless of motion.feed-inhibit.
@@ -179,7 +179,7 @@ net spindle-locked debounce.0.0.out => spindle.0.inhibit
 #  The program.is-running pin is already attached to the run-on signal in unistep_buttons.
 #net program-running halui.program.is-running => and2.motion_lock.in0
 net run-on                           => and2.motion_lock.in0
-net spindle-locked                   => and2.motion_lock.in1
+net spindle-0-locked                   => and2.motion_lock.in1
 net motion_lock and2.motion_lock.out => motion.feed-inhibit
 
 
@@ -360,14 +360,14 @@ setp   pid.s.maxoutput [SPINDLE_0]MAX_OUTPUT
 setp   pid.s.error-previous-target true
 setp   pid.s.maxerror .0005
 
-net spindle-index-enable  <=> pid.s.index-enable
-net spindle-enable         =>  timedelay.spindle-pid.in
-net spindle-enable-delayed-spindle-pid timedelay.spindle-pid.out => pid.s.enable
-setp timedelay.spindle-pid.on-delay .02
-setp timedelay.spindle-pid.off-delay 0
-net spindle-vel-cmd-rpm    => pid.s.command
-net spindle-vel-fb-rpm     => pid.s.feedback
-net spindle-output        <=  pid.s.output
+net spindle-0-index-enable  <=> pid.s.index-enable
+net spindle-0-enable         =>  timedelay.spindle-0-pid.in
+net spindle-0-enable-delayed-spindle-pid timedelay.spindle-0-pid.out => pid.s.enable
+setp timedelay.spindle-0-pid.on-delay .02
+setp timedelay.spindle-0-pid.off-delay 0
+net spindle-0-vel-cmd-rpm    => pid.s.command
+net spindle-0-vel-fb-rpm     => pid.s.feedback
+net spindle-0-output        <=  pid.s.output
 
 
 
@@ -403,11 +403,11 @@ setp   hm2_7i76e.0.stepgen.04.maxaccel         [SPINDLE_0]MAX_ACCELERATION
 setp   hm2_7i76e.0.stepgen.04.maxvel           [SPINDLE_0]MAX_VELOCITY
 
 # TODO Don't allow the spindle to be enabled while it is coasting, or otherwise rotating.
-net spindle-enable          =>  timedelay.spindle-enable.in
-net spindle-enable-delayed-spindle-enable  timedelay.spindle-enable.out => hm2_7i76e.0.stepgen.04.enable dmmserial.enable
-setp timedelay.spindle-enable.on-delay 0
-setp timedelay.spindle-enable.off-delay .02
-net spindle-vel-cmd-rps     =>  hm2_7i76e.0.stepgen.04.velocity-cmd
+net spindle-0-enable          =>  timedelay.spindle-0-enable.in
+net spindle-0-enable-delayed-spindle-enable  timedelay.spindle-0-enable.out => hm2_7i76e.0.stepgen.04.enable dmmserial.enable
+setp timedelay.spindle-0-enable.on-delay 0
+setp timedelay.spindle-0-enable.off-delay .02
+net spindle-0-vel-cmd-rps     =>  hm2_7i76e.0.stepgen.04.velocity-cmd
 
 # net spindle-1-vel-cmd-rpm-abs     =>  hm2_7i76e.0.7i76.0.0.spinout
 net spindle-1-output     =>  hm2_7i76e.0.7i76.0.0.spinout
@@ -426,24 +426,24 @@ setp    hm2_7i76e.0.encoder.00.index-mask 0
 setp    hm2_7i76e.0.encoder.00.index-mask-invert 0
 setp    hm2_7i76e.0.encoder.00.scale  [SPINDLE_0]ENCODER_SCALE
 
-net spindle-revs             <=   hm2_7i76e.0.encoder.00.position
-net spindle-vel-fb-rps       <=   hm2_7i76e.0.encoder.00.velocity
-net spindle-index-enable     <=>  hm2_7i76e.0.encoder.00.index-enable
+net spindle-0-revs             <=   hm2_7i76e.0.encoder.00.position
+net spindle-0-vel-fb-rps       <=   hm2_7i76e.0.encoder.00.velocity
+net spindle-0-index-enable     <=>  hm2_7i76e.0.encoder.00.index-enable
 
 # ---setup spindle control signals---
 
-net spindle-vel-cmd-rps        <=  spindle.0.speed-out-rps
-net spindle-vel-cmd-rps-abs    <=  spindle.0.speed-out-rps-abs
-net spindle-vel-cmd-rpm        <=  spindle.0.speed-out
-net spindle-vel-cmd-rpm-abs    <=  spindle.0.speed-out-abs
-net spindle-enable             <=  spindle.0.on
-net spindle-cw                 <=  spindle.0.forward
-net spindle-ccw                <=  spindle.0.reverse
-net spindle-brake              <=  spindle.0.brake
-net spindle-revs               =>  spindle.0.revs
-net spindle-at-speed           =>  spindle.0.at-speed
-net spindle-vel-fb-rps         =>  spindle.0.speed-in
-net spindle-index-enable      <=>  spindle.0.index-enable
+net spindle-0-vel-cmd-rps        <=  spindle.0.speed-out-rps
+net spindle-0-vel-cmd-rps-abs    <=  spindle.0.speed-out-rps-abs
+net spindle-0-vel-cmd-rpm        <=  spindle.0.speed-out
+net spindle-0-vel-cmd-rpm-abs    <=  spindle.0.speed-out-abs
+net spindle-0-enable             <=  spindle.0.on
+net spindle-0-cw                 <=  spindle.0.forward
+net spindle-0-ccw                <=  spindle.0.reverse
+net spindle-0-brake              <=  spindle.0.brake
+net spindle-0-revs               =>  spindle.0.revs
+net spindle-0-at-speed           =>  spindle.0.at-speed
+net spindle-0-vel-fb-rps         =>  spindle.0.speed-in
+net spindle-0-index-enable      <=>  spindle.0.index-enable
 
 net spindle-1-vel-cmd-rps        <=  spindle.1.speed-out-rps
 net spindle-1-vel-cmd-rps-abs    <=  spindle.1.speed-out-rps-abs
@@ -460,11 +460,11 @@ net spindle-1-index-enable      <=>  spindle.1.index-enable
 
 # ---Setup spindle at speed signals---
 
-net spindle-vel-cmd-rpm     =>  near.spindle.in1
-net spindle-fb-rpm-filtered =>  near.spindle.in2
-net spindle-at-speed        <=  near.spindle.out
-setp near.spindle.scale 1.1
-setp near.spindle.difference 200
+net spindle-0-vel-cmd-rpm     =>  near.spindle0.in1
+net spindle-0-fb-rpm-filtered =>  near.spindle0.in2
+net spindle-0-at-speed        <=  near.spindle0.out
+setp near.spindle0.scale 1.1
+setp near.spindle0.difference 200
 
 net spindle-1-vel-cmd-rpm     =>  near.spindle1.in1
 net spindle-1-fb-rpm-filtered =>  near.spindle1.in2
@@ -477,12 +477,12 @@ setp near.spindle1.difference 500
 #  spindle-velocity is signed so we use absolute component to remove sign
 #  ACTUAL velocity is in RPS not RPM so we scale it.
 
-setp     scale.spindle.gain 60
-setp     lowpass.spindle.gain 1.000000
-net spindle-vel-fb-rps        =>     scale.spindle.in
-net spindle-fb-rpm               scale.spindle.out       =>   lowpass.spindle.in
-net spindle-fb-rpm-filtered      lowpass.spindle.out     =>   abs.spindle.in
-net spindle-fb-rpm-filtered-abs  abs.spindle.out
+setp     scale.spindle0.gain 60
+setp     lowpass.spindle0.gain 1.000000
+net spindle-0-vel-fb-rps        =>     scale.spindle0.in
+net spindle-0-fb-rpm               scale.spindle0.out       =>   lowpass.spindle0.in
+net spindle-0-fb-rpm-filtered      lowpass.spindle0.out     =>   abs.spindle0.in
+net spindle-0-fb-rpm-filtered-abs  abs.spindle0.out
 
 # The high-speed spindle feedback is volts proportional to RPM
 # The fitted line is y = 2162.4 * x + 244.41
