@@ -1,12 +1,36 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-# Tested on a Fuling DZB312B002.2L2DK VFD
-# May work with any Fuling DZB200 and DZB300 VFD
+# Copyright 2020 Kent A. Vander Velden <kent.vandervelden@gmail.com>
+#
+# If you use this software, please consider contacting me. I'd like to hear
+# about your work.
+#
+# This file is part of fuling_dzb300_vfd_read.py and tested on a Fuling
+# DZB312B002.2L2DK VFD. May work with any Fuling DZB200 and DZB300 VFD.
+#
+#     DMM-Dyn4 is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     DMM-DYN4 is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
 
+from __future__ import print_function
+
+import serial
 import sys
 import time
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+
+# This is the serial number of the RS485 device. The serial number can be
+# found using a combination of 
+#   sudo dmesg
+# and
+#   sudo lsusb -v | egrep -n 'idVendor|idProduct|iManufacturer|iProduct|iSerial|^Bus'
+# after attaching the device.
+f_serial_number = 'AL05ZQ8W'
 
 
 def read_parameters(client, unit):
@@ -93,9 +117,69 @@ def read_op_status(client, unit):
     return d
 
 
-def main(dev_fn, unit):
-    client = ModbusClient(method='rtu', port=dev_fn, timeout=1, baudrate=38400)
-    client.connect()
+def find_device():
+    devs = []
+
+    global serial
+    if serial.VERSION > '2.5':
+        import serial.tools.list_ports
+
+        for dev in serial.tools.list_ports.comports():
+            # 'apply_usb_info', 'description', 'device', 'device_path', 'hwid', 'interface', 'location', 'manufacturer', 'name', 'pid', 'product', 'read_line', 'serial_number', 'subsystem', 'usb_description', 'usb_device_path', 'usb_info', 'usb_interface_path', 'vid'
+            # print(dev, dev.manufacturer, dev.product, dev.device, dev.serial_number)
+            # if dev.description == 'FT230X Basic UART' and dev.manufacturer == 'FTDI' and dev.product == 'FT230X Basic UART':
+            # if dev.manufacturer == 'FTDI' and dev.product == 'FT230X Basic UART':
+            # if dev.manufacturer == 'FTDI' and dev.product == 'FT232R USB UART':
+            if dev.manufacturer == 'FTDI' and dev.serial_number == f_serial_number:
+                devs += [dev.device]
+    else:
+        # LinuxCNC 2.7.15 is still tied to Python2
+        import glob
+        devs = glob.glob('/dev/ttyUSB*')
+
+    if not devs:
+        print('No known serial devices found.')
+        return ''
+
+    if len(devs) > 1:
+        print('More than one serial devices found...')
+        for dev in devs:
+            print(dev)
+        print('Selecting first serial device.')
+
+    print('Using device at:', devs[0])
+    return devs[0]
+
+
+def serial_loop(client):
+    unit = 0x1
+
+    while True:
+        lst = read_op_status(client, unit)
+        print(time.time(), lst)
+
+
+def main():
+    try:
+        while True:
+            dev_fn = find_device()
+            if dev_fn:
+#                try:
+                    client = ModbusClient(method='rtu', port=dev_fn, timeout=1, baudrate=38400)
+                    client.connect()
+
+                    serial_loop(client)
+#                except DMMTimeout:
+#                    print('Timedout')
+#                    # raise
+#                except serial.serialutil.SerialException as e:
+#                    # SerialException: could not open port /dev/ttyUSB1: [Errno 2] No such file or directory: '/dev/ttyUSB1'
+#                    # SerialException: device reports readiness to read but returned no data (device disconnected?)
+#                    print('SerialException:', e)
+            print('Kicked out... resting before retrying.')
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
 
     #for i in [0x1000, 0x1001, 0x2000,
     #          0x3000, 0x3001, 0x3002, 0x3003,
@@ -119,12 +203,7 @@ def main(dev_fn, unit):
 
     # read_parameters(client, unit)
     # read_status(client, unit)
-    while True:
-        lst = read_op_status(client, unit)
-        print(time.time(), lst)
 
 
 if __name__ == "__main__":
-    dev_fn = '/dev/ttyUSB1'
-    unit = 0x1
-    main(dev_fn, unit)
+    main()
