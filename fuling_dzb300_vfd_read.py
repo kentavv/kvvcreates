@@ -21,8 +21,14 @@ from __future__ import print_function
 import serial
 import sys
 import time
+import random
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+
+import hal, time
+
+use_linuxcnc = True
+log_fn = 'fuling.log'
 
 # This is the serial number of the RS485 device. The serial number can be
 # found using a combination of 
@@ -83,7 +89,7 @@ def read_op_status(client, unit):
         else:
           return rr.registers
 
-    d = {}
+    d = {'time': time.time()}
 
     # TODO Consider reading current op less frequently to prioritize 
     #  reading of the status (0x3000)
@@ -97,6 +103,7 @@ def read_op_status(client, unit):
 
     # Don't read the trailing unused registers
     lst = h(0x3000, 8)
+
     d['setting_frequency'] = lst[0]
     d['running_frequency'] = lst[1]
     d['output_current'] = lst[2]
@@ -151,15 +158,59 @@ def find_device():
     return devs[0]
 
 
-def serial_loop(client):
+def serial_loop(client, h):
     unit = 0x1
 
-    while True:
-        lst = read_op_status(client, unit)
-        print(time.time(), lst)
+    header = ['time', 'output_power', 'setting_frequency', 'fault', 'running_frequency', 'running_speed', 'dc_bus_voltage', 'output_torque', 'output_voltage', 'output_current', 'op']
+
+    with open(log_fn, 'a') as f:
+        s = ','.join(header)
+        # print(s)
+        print(s, file=f)
+
+        while True:
+            d = read_op_status(client, unit)
+            try:
+                h['power'] = float(d['output_power'])
+                h['bus_voltage'] = float(d['dc_bus_voltage']) / 10.
+                h['current'] = float(d['output_current']) / 10.
+                h['torque'] = float(d['output_torque'])
+                h['voltage'] = float(d['output_voltage'])
+            except ValueError:
+                print('Unable to convert', d)
+                h['power'] = -1
+                h['bus_voltage'] = -1
+                h['current'] = -1
+                h['torque'] = -1
+                h['voltage'] = -1
+
+            s = ','.join([str(d[k]) for k in header])
+            # print(s)
+            print(s, file=f)
 
 
 def main():
+    if use_linuxcnc:
+        h = hal.component("fuling")
+        h.newpin("in", hal.HAL_FLOAT, hal.HAL_IN)
+        h.newpin("enable", hal.HAL_BIT, hal.HAL_IN)
+        h.newpin("logen", hal.HAL_BIT, hal.HAL_IN)
+        h.newpin("power", hal.HAL_FLOAT, hal.HAL_OUT)
+        h.newpin("bus_voltage", hal.HAL_FLOAT, hal.HAL_OUT)
+        h.newpin("current", hal.HAL_FLOAT, hal.HAL_OUT)
+        h.newpin("torque", hal.HAL_FLOAT, hal.HAL_OUT)
+        h.newpin("voltage", hal.HAL_FLOAT, hal.HAL_OUT)
+        h.ready()
+    else:
+        h = { 'in': 0.,
+              'enable': True,
+              'logen': True,
+              'power': 0.,
+              'bus_voltage': 0.,
+              'current': 0.,
+              'torque': 0.,
+              'voltage': 0. }
+
     try:
         while True:
             dev_fn = find_device()
@@ -168,7 +219,7 @@ def main():
                     client = ModbusClient(method='rtu', port=dev_fn, timeout=1, baudrate=38400)
                     client.connect()
 
-                    serial_loop(client)
+                    serial_loop(client, h)
 #                except DMMTimeout:
 #                    print('Timedout')
 #                    # raise
