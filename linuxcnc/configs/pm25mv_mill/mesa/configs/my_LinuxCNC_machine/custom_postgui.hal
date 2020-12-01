@@ -57,3 +57,9 @@ setp oneshot.fault.width .05
 net torque1 dmmserial.torque1 pyvcp.spindle-0-torque1
 net torque2 dmmserial.torque2 pyvcp.spindle-0-torque2
 net c-position2 dmmserial.pos pyvcp.spindle-0-position-c2
+
+net fuling-power fuling.power pyvcp.spindle-1-power
+net fuling-bus-voltage fuling.bus_voltage pyvcp.spindle-1-bus-voltage
+net fuling-current fuling.current pyvcp.spindle-1-current
+net fuling-torque fuling.torque pyvcp.spindle-1-torque
+net fuling-voltage fuling.voltage pyvcp.spindle-1-voltage

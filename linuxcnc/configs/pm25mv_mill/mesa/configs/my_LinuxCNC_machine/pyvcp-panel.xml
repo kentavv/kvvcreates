@@ -156,6 +156,71 @@ The contents of this file will not be overwritten when you run stepconf again.
                         </number>
                 </hbox>
 
+                <hbox>
+                        <label>
+                                <text>"  Power: "</text>
+                                <font>("Helvetica", 10)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 10)</font>
+                                <halpin>"spindle-1-power"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  BusVolt: "</text>
+                                <font>("Helvetica", 10)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 10)</font>
+                                <halpin>"spindle-1-bus-voltage"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Current: "</text>
+                                <font>("Helvetica", 10)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 10)</font>
+                                <halpin>"spindle-1-current"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Torque: "</text>
+                                <font>("Helvetica", 10)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 10)</font>
+                                <halpin>"spindle-1-torque"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Voltage: "</text>
+                                <font>("Helvetica", 10)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 10)</font>
+                                <halpin>"spindle-1-voltage"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+
 		<label>
 			<text>"Status"</text>
 			<font>("Helvetica", 14)</font>
