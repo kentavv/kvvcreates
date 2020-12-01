@@ -18,8 +18,8 @@ loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
 loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near names=near.spindle0,near.spindle1
 loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault
-loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock
-loadrt not names=not.spindle-0-brake
+loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock,and2.spindle-0-brake
+loadrt not names=not.spindle-0-brake,not.tool-change-request
 loadrt toggle count=1
 loadrt toggle2nist count=1
 loadrt debounce cfg=1,1,1
@@ -63,7 +63,9 @@ addf and2.a3                  servo-thread
 addf and2.a4                  servo-thread
 addf and2.vc                  servo-thread
 addf and2.motion_lock         servo-thread
+addf and2.spindle-0-brake     servo-thread
 addf not.spindle-0-brake      servo-thread
+addf not.tool-change-request  servo-thread
 addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
@@ -94,11 +96,15 @@ net spindle-0-enable =>     hm2_7i76e.0.7i76.0.0.output-03
 # --- SPINDLE-BRAKE ---
 # TODO Enable the brake, if not enabled manually, once the spindle RPM has below a threshold.
 # TODO On startup, the brake disables and then after the timeout reenables.
-net spindle-0-brake =>     timedelay.spindle-0-brake.in
+net spindle-0-brake =>     and2.spindle-0-brake.in0
+net tool-change-request =>     not.tool-change-request.in
+net tool-change-request-not not.tool-change-request.out =>    and2.spindle-0-brake.in1
+net spindle-0-brake2 and2.spindle-0-brake.out =>     timedelay.spindle-0-brake.in
 net spindle-0-brake-delayed timedelay.spindle-0-brake.out => not.spindle-0-brake.in
 setp timedelay.spindle-0-brake.on-delay 3
 setp timedelay.spindle-0-brake.off-delay 0
 net spindle-0-brake-not not.spindle-0-brake.out => hm2_7i76e.0.7i76.0.0.output-04
+
 
 # external input signals
 
