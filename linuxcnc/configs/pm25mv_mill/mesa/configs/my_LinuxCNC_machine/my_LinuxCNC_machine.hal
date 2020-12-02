@@ -225,25 +225,25 @@ net x-output        <=  pid.x.output
 
 # Step Gen signals/setup
 
-setp   hm2_7i76e.0.stepgen.00.dirsetup        [JOINT_0]DIRSETUP
-setp   hm2_7i76e.0.stepgen.00.dirhold         [JOINT_0]DIRHOLD
-setp   hm2_7i76e.0.stepgen.00.steplen         [JOINT_0]STEPLEN
-setp   hm2_7i76e.0.stepgen.00.stepspace       [JOINT_0]STEPSPACE
-setp   hm2_7i76e.0.stepgen.00.position-scale  [JOINT_0]STEP_SCALE
-setp   hm2_7i76e.0.stepgen.00.step_type        0
-setp   hm2_7i76e.0.stepgen.00.control-type     1
-setp   hm2_7i76e.0.stepgen.00.maxaccel         [JOINT_0]STEPGEN_MAXACCEL
-setp   hm2_7i76e.0.stepgen.00.maxvel           [JOINT_0]STEPGEN_MAXVEL
+setp   hm2_7i76e.0.stepgen.03.dirsetup        [JOINT_0]DIRSETUP
+setp   hm2_7i76e.0.stepgen.03.dirhold         [JOINT_0]DIRHOLD
+setp   hm2_7i76e.0.stepgen.03.steplen         [JOINT_0]STEPLEN
+setp   hm2_7i76e.0.stepgen.03.stepspace       [JOINT_0]STEPSPACE
+setp   hm2_7i76e.0.stepgen.03.position-scale  [JOINT_0]STEP_SCALE
+setp   hm2_7i76e.0.stepgen.03.step_type        0
+setp   hm2_7i76e.0.stepgen.03.control-type     1
+setp   hm2_7i76e.0.stepgen.03.maxaccel         [JOINT_0]STEPGEN_MAXACCEL
+setp   hm2_7i76e.0.stepgen.03.maxvel           [JOINT_0]STEPGEN_MAXVEL
 
 # ---closedloop stepper signals---
 
 net x-pos-cmd    <= joint.0.motor-pos-cmd
 net x-vel-cmd    <= joint.0.vel-cmd
-net x-output     <= hm2_7i76e.0.stepgen.00.velocity-cmd
-net x-pos-fb     <= hm2_7i76e.0.stepgen.00.position-fb
+net x-output     <= hm2_7i76e.0.stepgen.03.velocity-cmd
+net x-pos-fb     <= hm2_7i76e.0.stepgen.03.position-fb
 net x-pos-fb     => joint.0.motor-pos-fb
 net x-enable     <= joint.0.amp-enable-out
-net x-enable     => hm2_7i76e.0.stepgen.00.enable
+net x-enable     => hm2_7i76e.0.stepgen.03.enable
 
 # ---setup home / limit switch signals---
 
