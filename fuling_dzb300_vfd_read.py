@@ -91,12 +91,14 @@ def read_op_status(client, unit):
 
     d = {'time': time.time()}
 
+    # d['op'] = h(0x1000, 1)[0]
+
     # TODO Consider reading current op less frequently to prioritize 
     #  reading of the status (0x3000)
-    d['op'] = h(0x1001, 1)[0]
+    d['state'] = h(0x1001, 1)[0]
 
     # Only read the fault explanation if there is a fault
-    if d['op'] == 0x4:
+    if d['state'] == 0x4:
         d['fault'] = h(0x5000, 1)[0]
     else:
         d['fault'] = ''
@@ -120,6 +122,14 @@ def read_op_status(client, unit):
     # d['ci_value'] = lst[13]
     # d['current_segment_of_multi-speed_control'] = lst[14]
     # d['reserved1'] = lst[15]
+
+    # d['mb_fault'] = h(0x5001, 1)[0]
+
+    for k in ['setting_frequency', 'running_frequency', 'output_current', 'dc_bus_voltage']:
+        try:
+            d[k] = float(d[k]) / 10.
+        except ValueError:
+            pass
 
     return d
 
@@ -150,18 +160,69 @@ def find_device():
 
     if len(devs) > 1:
         print('More than one serial devices found...')
-        for dev in devs:
-            print(dev)
+        for i, dev in enumerate(devs):
+            print('Device', i, dev)
         print('Selecting first serial device.')
 
-    print('Using device at:', devs[0])
-    return devs[0]
+    dev = devs[0]
+    print('Using device at:', dev)
+    return dev
 
 
 def serial_loop(client, h):
     unit = 0x1
 
-    header = ['time', 'output_power', 'setting_frequency', 'fault', 'running_frequency', 'running_speed', 'dc_bus_voltage', 'output_torque', 'output_voltage', 'output_current', 'op']
+    header = ['time', 'output_power', 'setting_frequency', 'fault', 'running_frequency', 'running_speed', 'dc_bus_voltage', 'output_torque', 'output_voltage', 'output_current', 'state']
+
+    d_cmd = { 1: 'Forward running',
+              2: 'Reverse running',
+              3: 'Forward jogging',
+              4: 'Reverse jogging',
+              5: 'Stop',
+              6: 'Free stop (emergency stop)',
+              7: 'Fault reset',
+              8: 'Jogging stop' }
+
+    d_state = { 1: 'Forward running',
+                2: 'Reverse running',
+                3: 'Inverter standby',
+                4: 'Fault' }
+
+    d_mb_fault = { 0: 'No fault',
+                   1: 'Password error',
+                   2: 'Command code error',
+                   3: 'CRC error',
+                   4: 'Illegal address',
+                   5: 'Illegal data',
+                   6: 'Parameter change invalid',
+                   7: 'System locked',
+                   8: 'Inverter busy (EEPROM is storing)' }
+
+    d_fault = { 0: 'No fault',
+                1: 'IGBT U phase protection (E009)',
+                2: 'IGBT V phase protection (E019)',
+                3: 'IGBT W phase protection (E029)',
+                4: 'Acceleration over-current (E004)',
+                5: 'Deceleration over-current (E005)',
+                6: 'Constant speed over-current (E006)',
+                7: 'Acceleration over-voltage (E002)',
+                8: 'Deceleration over-voltage (E00A)',
+                9: 'Constant speed over-voltage (E003)',
+                10: 'Bus under-voltage fault (E001)',
+                11: 'Motor overload (E007)',
+                12: 'Inverter overload (E008)',
+                13: 'Input side phase failure (E012)',
+                14: 'Output side phase failure (E013)',
+                15: 'Diode module overheat fault (E00E)',
+                16: 'IGBT module overheat fault (E01E)',
+                17: 'External fault (E017)',
+                18: 'Communication fault (E018)',
+                19: 'Current detect error (E015)',
+                20: 'Motor self-learning error (E016)',
+                21: 'EEPROM operation error (E00F)',
+                22: 'PID feedback disconnect error (E02E)',
+                23: 'Braking unit error (E01A)',
+                24: 'Reserved' }
 
     with open(log_fn, 'a') as f:
         s = ','.join(header)
@@ -172,8 +233,8 @@ def serial_loop(client, h):
             d = read_op_status(client, unit)
             try:
                 h['power'] = float(d['output_power'])
-                h['bus_voltage'] = float(d['dc_bus_voltage']) / 10.
-                h['current'] = float(d['output_current']) / 10.
+                h['bus_voltage'] = float(d['dc_bus_voltage'])
+                h['current'] = float(d['output_current'])
                 h['torque'] = float(d['output_torque'])
                 h['voltage'] = float(d['output_voltage'])
             except ValueError:
