@@ -51,7 +51,7 @@ net step-sig halui.program.step <= and2.a4.out
 net stop-btn => or2.stop.in1
 
 setp debounce.1.delay 120 # 120 * servo-thread period (500us) = 60ms
-net spindle-alarm => or2.stop0.in0
+net spindle-0-alarm => or2.stop0.in0
 net spindle-1-alarm => or2.stop0.in1
 
 net spindle-alarms or2.stop0.out => or2.stop1.in0
