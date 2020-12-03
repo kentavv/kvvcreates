@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+
+# Copyright 2020 Kent A. Vander Velden <kent.vandervelden@gmail.com>
+#
+# If you use this software, please consider contacting me. I'd like to hear
+# about your work.
+#
+# This file is part of HAL-Chronos.
+#
+#     HAL-Chronos is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     HAL-Chronos is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with HAL-Chronos.  If not, see <https://www.gnu.org/licenses/>.
+
+from __future__ import print_function
+
+import sys
+import time
+import requests
+
+import hal
+
+use_linuxcnc = True
+
+
+def loop(h, f, ip='192.168.1.116'):
+    cmds = { 'dir_listing': 'http://{}/cgi-bin/storageInfo?mmcblk1p1'.format(ip),
+             'start_recording': 'http://{}/control/startRecording'.format(ip),
+             'stop_recording': 'http://{}/control/stopRecording'.format(ip) }
+
+    penable = False
+    while True:
+        enable = h['enable']
+        if penable != enable:
+             try:
+                 print('{:.6f},{}'.format(time.time(), enable * 1), file=f)
+                 if h['enable']:
+                     post = requests.post(cmds['start_recording'], json = {})
+                 else:
+                     post = requests.post(cmds['stop_recording'])
+
+                     post = requests.get(cmds['dir_listing'])
+                     print(time.time(), 'chronos contents:', post.json())
+             except requests.exceptions.ConnectionError:
+                 print('Warning: Chronos camera not responding, disabling')
+                 print('{:.6f},{}'.format(time.time(), -1), file=f)
+
+             f.flush()
+             penable = enable
+
+        time.sleep(.01)
+
+
+def main():
+    if use_linuxcnc:
+       h = hal.component("chronos_camera")
+       h.newpin("enable", hal.HAL_BIT, hal.HAL_IN)
+       h.ready()
+    else:
+       h = { 'enable': False }
+
+    try:
+        fn = 'chronos.log'
+        with open(fn, 'a') as f:
+            loop(h, f)
+    except KeyboardInterrupt:
+        pass
+
+
+if __name__ == "__main__":
+    main()
