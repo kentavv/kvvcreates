@@ -25,16 +25,26 @@
 # $ adduser kent dialout
 # $ apt remove modemmanager
 
-
 from __future__ import print_function
 
 import sys
 import time
 import serial
+import requests
 
 import numpy as np
 
-import hal, time
+import hal
+
+use_linuxcnc = True
+
+# This is the serial number of the RS485 device. The serial number can be
+# found using a combination of
+#   sudo dmesg
+# and
+#   sudo lsusb -v | egrep -n 'idVendor|idProduct|iManufacturer|iProduct|iSerial|^Bus'
+# after attaching the device.
+f_serial_number = 'DN01VAMA'
 
 
 def sign_extend(value, bits):
@@ -86,12 +96,14 @@ class DMMExceptionUnexpectedFunc(DMMException):
 
 class DMMDrive:
     def __init__(self, serial_dev, drive_id):
+        self.serial_buf = b''
         self.serial = serial.Serial(serial_dev,
                                     38400,
                                     timeout=None,
                                     parity=serial.PARITY_NONE,
                                     stopbits=serial.STOPBITS_ONE,
                                     bytesize=serial.EIGHTBITS)
+        self.serial.set_low_latency_mode(True)
         self.drive_id = drive_id
 
         # print(dir(self.serial))
@@ -111,6 +123,22 @@ class DMMDrive:
     def __exit__(self, type, value, traceback):
         self.serial.close()
 
+    def buf_read(self):
+        if False:
+            return self.serial.read(1)
+        else:
+            # print('bb', self.serial.in_waiting, len(self.serial_buf))
+            if self.serial.in_waiting > 0 or not self.serial_buf:
+                self.serial_buf += self.serial.read(self.serial.in_waiting or 1)
+
+            x = b''
+            if self.serial_buf:
+                x = self.serial_buf[0]
+                self.serial_buf = self.serial_buf[1:]
+
+            return x
+
+        
     def flush(self):
         if serial.VERSION > '2.5':
             self.serial.reset_input_buffer()
@@ -118,7 +146,7 @@ class DMMDrive:
             self.serial.flushInput()
 
         self.serial.timeout = .05
-        while len(self.serial.read(1)) > 0:
+        while self.buf_read():
             pass
 
     @staticmethod
@@ -126,7 +154,7 @@ class DMMDrive:
         if not (0x10 <= func_id <= 0x1b or func_id == 0x1e):
             raise DMMExceptionUnknownFunctionID(func_id)
 
-    def general_read2(self, func_id2):
+    def general_read2(self, func_id2, flush=True):
         packet = [0x00 | self.drive_id,
                   0x80 | (0 << 5) | func_id2,
                   0x80]
@@ -137,6 +165,8 @@ class DMMDrive:
 
         packet = bytearray(packet)
         n = self.serial.write(packet)
+        if flush:
+            self.serial.flush()
 
         if n != len(packet):
             raise DMMExceptionTruncatedWrite(n, len(packet))
@@ -230,9 +260,29 @@ class DMMDrive:
         self.general_read2(self.host_fids['Read_Drive_Config'])
         return self.check_response(self.dyn_fids['Is_Config'])
 
+    aaa = True
+    def read_batch(self):
+            fids = [self.dyn_fids['Is_AbsPos32'], self.dyn_fids['Is_TrqCurrent']]
+
+            n = 15 # at lowest speed
+            n = 10 # works at highest speed with single read
+            n = 5  # works at highest speed with two reads
+            st = time.time()
+            if self.aaa:
+              self.general_read_batch(fids, n, False)
+              self.serial.flush()
+        #      aaa = False
+            arr = [[self.check_response(fid) for fid in fids] for i in range(n)]
+            # print('xx', len(arr), '{:.6f}'.format(time.time() - st)) 
+            # print(arr)
+            if not self.aaa:
+              self.general_read_batch(fids, n, False)
+            # self.serial.flush()
+            return arr
+
     def read_AbsPos32(self):
-        self.general_read(self.dyn_fids['Is_AbsPos32'])
-        return self.check_response(self.dyn_fids['Is_AbsPos32'])
+            self.general_read(self.dyn_fids['Is_AbsPos32'])
+            return self.check_response(self.dyn_fids['Is_AbsPos32'])
 
     def read_TrqCurrent(self):
         self.general_read(self.dyn_fids['Is_TrqCurrent'])
@@ -266,6 +316,7 @@ class DMMDrive:
 
         packet = bytearray(packet)
         n = self.serial.write(packet)
+        self.serial.flush()
 
         if n != len(packet):
             raise DMMExceptionTruncatedWrite(n, len(packet))
@@ -280,23 +331,48 @@ class DMMDrive:
 
         return v
 
-    def general_read(self, func_id):
+    def general_read(self, func_id, flush=True):
         self.verify_func_id(func_id)
-
-        packet = [0x00 | self.drive_id,
+        packet = []
+        for i in range(10):
+         packet += [0x00 | self.drive_id,
                   0x80 | (0 << 5) | 0x0e,
                   0x80 | (func_id & 0x7f)]
-        packet += [0x80 | (sum(packet) & 0x7f)]
+         packet += [0x80 | (sum(packet[-3:]) & 0x7f)]
 
         if self.debug:
             print([hex(x) for x in packet])
 
         packet = bytearray(packet)
         n = self.serial.write(packet)
+        if flush:
+            self.serial.flush()
 
         if n != len(packet):
             raise DMMExceptionTruncatedWrite(n, len(packet))
 
+    def general_read_batch(self, func_ids, batch_size, flush=True):
+        for func_id in func_ids:
+         self.verify_func_id(func_id)
+        packet = []
+        for i in range(batch_size):
+         for func_id in func_ids:
+           packet += [0x00 | self.drive_id,
+                  0x80 | (0 << 5) | 0x0e,
+                  0x80 | (func_id & 0x7f)]
+           packet += [0x80 | (sum(packet[-3:]) & 0x7f)]
+
+        if self.debug:
+            print([hex(x) for x in packet])
+
+        packet = bytearray(packet)
+        n = self.serial.write(packet)
+        if flush:
+            self.serial.flush()
+
+        if n != len(packet):
+            raise DMMExceptionTruncatedWrite(n, len(packet))
+  
     def read_response(self):
         if self.debug:
             print('read response')
@@ -307,20 +383,26 @@ class DMMDrive:
         first_byte = False
         expected_len = 0
         timed_out = False
+        t0 = time.time()
+        # print('--------------')
         while True:
-            x = self.serial.read(1)
-            if len(x) == 0:
+            #print(time.time() - t0)
+            x = self.buf_read()
+            if x == b'':
                 # timeout occured
                 timed_out = True
                 break
             x = ord(x)
-            first_byte = (x & 0x80) == 0
-            if first_byte:
-                if self.debug:
-                    print('first byte')
-                first_byte = True
-                expected_len = 0
-                arr = []
+            if not first_byte:
+                first_byte = (x & 0x80) == 0
+                if first_byte:
+                    if self.debug:
+                        print('first byte')
+                    first_byte = True
+                    expected_len = 0
+                    arr = []
+                else:
+                    continue
 
             arr += [x]
             if len(arr) == 2:
@@ -332,6 +414,7 @@ class DMMDrive:
 
             if len(arr) == expected_len:
                 break
+        # print('cc', time.time() - t0, len(arr))
 
         if timed_out:
             raise DMMTimeout()
@@ -567,6 +650,7 @@ class DMMDrive:
 
         packet = bytearray(packet)
         n = self.serial.write(packet)
+        self.serial.flush()
 
         if n != len(packet):
             raise DMMExceptionTruncatedWrite(n, len(packet))
@@ -626,7 +710,9 @@ def find_device():
         import serial.tools.list_ports
 
         for dev in serial.tools.list_ports.comports():
-            if dev.description == 'FT230X Basic UART' and dev.manufacturer == 'FTDI' and dev.product == 'FT230X Basic UART':
+            # if dev.description == 'FT230X Basic UART' and dev.manufacturer == 'FTDI' and dev.product == 'FT230X Basic UART':
+            # if dev.manufacturer == 'FTDI' and dev.product == 'FT230X Basic UART':
+            if dev.manufacturer == 'FTDI' and dev.serial_number == f_serial_number:
                 devs += [dev.device]
     else:
         # LinuxCNC 2.7.15 is still tied to Python2
@@ -643,103 +729,101 @@ def find_device():
             print(dev)
         print('Selecting first serial device.')
 
-    print('Using device at:', devs[0])
-    return devs[0]
+    dev = devs[0]
+    print('Using device at:', dev)
+    return dev
 
 
 def serial_loop(dev_fn, h):
-    a = False
-    with DMMDrive(dev_fn, 0) as dmm:
-     v_prev = None
-     while True:
-      time.sleep(.01)
+  with DMMDrive(dev_fn, 0) as dmm:
+      # d = {}
+      # d['Status'] = dmm.read_Status()
+      # d['MainGain'] = dmm.read_MainGain()
+      # d['SpeedGain'] = dmm.read_SpeedGain()
+      # d['IntGain'] = dmm.read_IntGain()
+      # d['TrqCons'] = dmm.read_TrqCons()
+      # d['HighSpeed'] = dmm.read_HighSpeed()
+      # d['HighAccel'] = dmm.read_HighAccel()
+      # d['Pos_OnRange'] = dmm.read_Pos_OnRange()
+      # d['GearNumber'] = dmm.read_GearNumber()
+      # d['Status'] = dmm.read_Status()
+      # d['Config'] = dmm.read_Config()
+      # d['AbsPos32'] = dmm.read_AbsPos32()
+      # d['TrqCurrent'] = dmm.read_TrqCurrent()
+      # d['Speed'] = dmm.measure_speed()
+      # d['ITrqCurrent'] = dmm.integrate_TrqCurrent()
 
-      if True:
-        abs_pos = abs(dmm.read_AbsPos32())
-        abs_pos_1t = (abs_pos % (2**16)) / (2.**16) * 360.
-        h['pos'] = abs_pos_1t
-        print(abs_pos_1t, abs_pos / (2.**16), abs_pos)
+      # Constant for DMM 86M-DHT, the 750kW 5000 RPM servo, expressed in N*m/Arms
+      torque_constant = 0.335
+      mode = 'batch'
 
-      if not h['enable']:
-        if v_prev is not None:
-          dmm.set_speed(0)
+      fn = 'dyn4.log'
+      with open(fn, 'a') as f:
           v_prev = None
-       # TOOD Currently, the Mesa card send A/B phase to control speed and direction
-       #  Unless the Dyn4 is in serial mode, it may not matter if speed is set by software.
-       #  Only calculate torque if servo has been enabled at least once.
-        if a:
-         h['torque1'], h['torque2'] = dmm.update_TrqCurrent()
+          arr = []
+          max_dt = 1.
+          plogen = False
+          st = time.time()
 
-        continue
+          while True:
+              st = time.time()
+              if mode == 'batch':
+                  batch = dmm.read_batch()
+                  et = time.time()
+                  n = len(batch)
+                  for i, (pos, trq) in enumerate(batch):
+                      t = st + (et - st) / (n - 1.) * i
+                      print(trq, torque_constant, trq * torque_constant)
+                      trq *= torque_constant
+                      arr += [(t, pos, trq)]
+                      print('{:.6f}'.format(t), pos, trq, h['logen'] * 1, file=f, sep=',')
+              else:
+                  pos = dmm.read_AbsPos32()
+                  trq, trq2 = self.read_TrqCurrent()
+                  et = time.time()
 
-      a = True
-      h['torque1'], h['torque2'] = dmm.update_TrqCurrent()
+                  trq *= torque_constant
+                  trq2 *= torque_constant
 
-      # print(h)
-      # print(h['in'], h['enable'])
-      v = -int(round(h['in']))
-      if v != v_prev:
-         v_prev = v 
-#         dmm.set_speed(v)
+                  arr += [(st, pos, trq)]
+                  print('{:.6f}'.format(st), pos, trq, h['logen'] * 1, file=f, sep=',')
 
-      # print('v:', v)
-      if v is None:
-        continue
+              # print('Turnaround: {:.6f}'.format(et - st))
+              arr = [v for v in arr if (st - v[0]) <= max_dt]
 
-      #with DMMDrive('/dev/ttyUSB0', 0) as dmm:
-      if True:
-        # print(dmm)
-        # print(dir(dmm))
+              abs_pos = abs(pos)
+              abs_pos_1t = (abs_pos % (2**16)) / (2.**16) * 360.
+              h['pos'] = abs_pos_1t
 
-        d = {}
-        d['Status'] = dmm.read_Status()
+              # This is similar to dmm.read_TrqCurrent(), but having the code here
+              # lets us experiment with batching or similar calls.
+              trq = [abs(v[2]) for v in arr]
+              h['torque1'] = np.median(trq)
+              h['torque2'] = max(trq)
 
-        d['MainGain'] = dmm.read_MainGain()
-        d['SpeedGain'] = dmm.read_SpeedGain()
-        d['IntGain'] = dmm.read_IntGain()
-        d['TrqCons'] = dmm.read_TrqCons()
-        d['HighSpeed'] = dmm.read_HighSpeed()
-        d['HighAccel'] = dmm.read_HighAccel()
-        d['Pos_OnRange'] = dmm.read_Pos_OnRange()
-        d['GearNumber'] = dmm.read_GearNumber()
-        d['Status'] = dmm.read_Status()
-        d['Config'] = dmm.read_Config()
-        d['AbsPos32'] = dmm.read_AbsPos32()
-        d['TrqCurrent'] = dmm.read_TrqCurrent()
-
-        if False:
-            dmm.set_speed(50)
-
-            time.sleep(.5)
-            d['Speed'] = dmm.measure_speed()
-
-            print(d)
-
-            while True:
-                time.sleep(.5)
-                print(dmm.measure_speed())
-
-                dmm.integrate_TrqCurrent()
-
-        else:
-#            while 1:
-#                time.sleep(.1)
-#                if h['enable']:
-            dmm.set_speed(v)
+              plogen = h['logen'] 
+              # f.flush()
 
 
 def main():
-    h = hal.component("dmmserial")
-    h.newpin("in", hal.HAL_FLOAT, hal.HAL_IN)
-    h.newpin("enable", hal.HAL_BIT, hal.HAL_IN)
-    h.newpin("out", hal.HAL_FLOAT, hal.HAL_OUT)
-    h.newpin("torque1", hal.HAL_FLOAT, hal.HAL_OUT)
-    h.newpin("torque2", hal.HAL_FLOAT, hal.HAL_OUT)
-    h.newpin("pos", hal.HAL_FLOAT, hal.HAL_OUT)
-    h.ready()
+    if use_linuxcnc:
+       h = hal.component("dmmserial")
+       h.newpin("enable", hal.HAL_BIT, hal.HAL_IN)
+       h.newpin("logen", hal.HAL_BIT, hal.HAL_IN)
+       h.newpin("torque1", hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin("torque2", hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin("pos", hal.HAL_FLOAT, hal.HAL_OUT)
+       h.ready()
+    else:
+       h = { 'in': 0.,
+             'enable': True,
+             'logen': True,
+             'torque1': 0.,
+             'torque2': 0.,
+             'pos': 0. }
 
     # while True:
-    #     time.sleep(1)
+    #      time.sleep(1)
 
     try:
         while True:
