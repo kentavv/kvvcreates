@@ -172,7 +172,7 @@ def find_device():
 def serial_loop(client, h):
     unit = 0x1
 
-    header = ['time', 'output_power', 'setting_frequency', 'fault', 'running_frequency', 'running_speed', 'dc_bus_voltage', 'output_torque', 'output_voltage', 'output_current', 'state']
+    header = ['time', 'output_power', 'setting_frequency', 'fault', 'running_frequency', 'running_speed', 'dc_bus_voltage', 'output_torque', 'output_voltage', 'output_current', 'logen', 'state']
 
     d_cmd = { 1: 'Forward running',
               2: 'Reverse running',
@@ -231,6 +231,7 @@ def serial_loop(client, h):
 
         while True:
             d = read_op_status(client, unit)
+            d['logen'] = h['logen'] * 1
             try:
                 h['power'] = float(d['output_power'])
                 h['bus_voltage'] = float(d['dc_bus_voltage'])
