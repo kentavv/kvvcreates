@@ -7,9 +7,10 @@ o<toolprobe0> SUB
 ; The X and Y values depend on the position of the tool
 ; length sensor relative to home position. Edit these as
 ; needed to center the spindle above the sensor. These
-; are machine coordinates.
-#<tls_x_pos>=-8.9664
-#<tls_y_pos>=-1.5881
+; are machine coordinates. The G92 offset is added, if active,
+; to center the high-speed spindle above the probe.
+#<tls_x_pos>=[-8.9664 + #5211 * #5210]
+#<tls_y_pos>=[-1.5881 + #5212 * #5210]
 
 ; The reference tool, e.g., the spindle nose. Edit as needed.
 #<tls_ref_tool>=99
