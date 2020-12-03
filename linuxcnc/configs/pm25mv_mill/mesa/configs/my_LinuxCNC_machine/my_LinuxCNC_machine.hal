@@ -6,6 +6,7 @@
 loadusr -W datalogger
 loadusr -W dmmserial
 loadusr -W fuling
+loadusr -W chronos_camera
 
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
@@ -116,7 +117,8 @@ net probe-in-raw     <=  hm2_7i76e.0.7i76.0.0.input-20-not
 net probe-blast =>     hm2_7i76e.0.7i76.0.0.output-05
 net probe-blast => motion.digital-out-00
 
-net datalog_en => motion.digital-out-01 => dmmserial.logen
+net datalogger-enable datalogger.enable chronos_camera.enable dmmserial.logen fuling.logen
+#net datalogger-enable datalogger.enable motion.digital-out-01 dmmserial.logen chronos_camera.enable
 
 # --- CYCLE-START ---
 net run-step-btn     <=  hm2_7i76e.0.7i76.0.0.input-08

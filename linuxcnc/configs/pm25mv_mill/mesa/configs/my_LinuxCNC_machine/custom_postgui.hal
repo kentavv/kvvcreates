@@ -36,7 +36,8 @@ net x-velocity-upm scale.x-vel.out pyvcp.x-velocity-upm datalogger.xvel
 net y-velocity-upm scale.y-vel.out pyvcp.y-velocity-upm datalogger.yvel
 net z-velocity-upm scale.z-vel.out pyvcp.z-velocity-upm datalogger.zvel
 
-net datalogger-enabled datalogger.enabled pyvcp.datalogger-enabled
+net datalogger-enable pyvcp.datalogger-enable
+#net datalogger-enabled datalogger.enable pyvcp.datalogger-enable
 #net datalogger-enabled ppmc.0.encoder.03.index-enable pyvcp.datalogger-enabled
 
 net load-haimer halui.mdi-command-00 <= pyvcp.load-haimer
