@@ -101,20 +101,20 @@ The contents of this file will not be overwritten when you run stepconf again.
                         <number>
                                 <font>("Helvetica", 14)</font>
                                 <halpin>"spindle-0-torque1"</halpin>
-                                <format>"+3.2f"</format>
+                                <format>"3.2f"</format>
                         </number>
                 </hbox>
 
                 <hbox>
                         <label>
-                                <text>"  Instant: "</text>
+                                <text>"  Max 1s: "</text>
                                 <font>("Helvetica", 14)</font>
                         </label>
 
                         <number>
                                 <font>("Helvetica", 14)</font>
                                 <halpin>"spindle-0-torque2"</halpin>
-                                <format>"+3.2f"</format>
+                                <format>"3.2f"</format>
                         </number>
                 </hbox>
 
@@ -165,7 +165,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                         <number>
                                 <font>("Helvetica", 10)</font>
                                 <halpin>"spindle-1-power"</halpin>
-                                <format>"+3.1f"</format>
+                                <format>"3.1f"</format>
                         </number>
                 </hbox>
 
@@ -178,7 +178,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                         <number>
                                 <font>("Helvetica", 10)</font>
                                 <halpin>"spindle-1-bus-voltage"</halpin>
-                                <format>"+3.1f"</format>
+                                <format>"3.1f"</format>
                         </number>
                 </hbox>
 
@@ -191,7 +191,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                         <number>
                                 <font>("Helvetica", 10)</font>
                                 <halpin>"spindle-1-current"</halpin>
-                                <format>"+3.1f"</format>
+                                <format>"3.1f"</format>
                         </number>
                 </hbox>
 
@@ -204,7 +204,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                         <number>
                                 <font>("Helvetica", 10)</font>
                                 <halpin>"spindle-1-torque"</halpin>
-                                <format>"+3.1f"</format>
+                                <format>"3.1f"</format>
                         </number>
                 </hbox>
 
@@ -217,7 +217,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                         <number>
                                 <font>("Helvetica", 10)</font>
                                 <halpin>"spindle-1-voltage"</halpin>
-                                <format>"+3.1f"</format>
+                                <format>"3.1f"</format>
                         </number>
                 </hbox>
 
@@ -349,7 +349,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
 		        <checkbutton>
 				<font>("Helvetica", 14)</font>
-				<halpin>"datalogger-enabled"</halpin>
+				<halpin>"datalogger-enable"</halpin>
 				<text>"Data logger"</text>
 			</checkbutton>
 		</hbox>
