@@ -42,7 +42,7 @@ print(','.join(['datetime', 'dt'] + params + ['current [A]']), file=f)
 h = hal.component("datalogger")
 print(dir(h))
 
-h.newpin("enabled", hal.HAL_BIT, hal.HAL_IN)
+h.newpin("enable", hal.HAL_BIT, hal.HAL_IN)
 h.newpin("xpos", hal.HAL_FLOAT, hal.HAL_IN)
 h.newpin("ypos", hal.HAL_FLOAT, hal.HAL_IN)
 h.newpin("zpos", hal.HAL_FLOAT, hal.HAL_IN)
@@ -88,16 +88,16 @@ try:
     do_once = False
     while True:
         time.sleep(.005)
-        if h['enabled']:
+        if h['enable']:
             dt = datetime.datetime.now()
             t = (dt - st).total_seconds()
             rv = sample()
             row = [str(dt), str(t)] + [str(h[x]) for x in params] + [str(x) for x in rv]
             print(','.join(row), file=f)
-            f.flush()
+            # f.flush()
             do_once = True
         elif do_once:
             do_once = False
-            f.flush()
+            # f.flush()
 except KeyboardInterrupt:
     raise SystemExit
