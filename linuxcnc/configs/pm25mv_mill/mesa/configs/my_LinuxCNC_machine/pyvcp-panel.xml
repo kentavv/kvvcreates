@@ -88,35 +88,55 @@ The contents of this file will not be overwritten when you run stepconf again.
                 </hbox>
 
 		<label>
-			<text>"Spindle Torque"</text>
+			<text>"Spindle Load"</text>
 			<font>("Helvetica", 14)</font>
 		</label>
 
                 <hbox>
                         <label>
-                                <text>"  Mean: "</text>
-                                <font>("Helvetica", 14)</font>
+                                <text>"  Mean (1s), Peak (1s)"</text>
+                                <font>("Helvetica", 10)</font>
+                        </label>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>" %Rated: "</text>
+                                <font>("Helvetica", 12)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 14)</font>
-                                <halpin>"spindle-0-torque1"</halpin>
-                                <format>"3.2f"</format>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-per-rated-mean"</halpin>
+                                <format>"3.0f"</format>
+                        </number>
+
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-per-rated-peak"</halpin>
+                                <format>"3.0f"</format>
                         </number>
                 </hbox>
 
                 <hbox>
                         <label>
-                                <text>"  Max 1s: "</text>
-                                <font>("Helvetica", 14)</font>
+                                <text>" %Peak: "</text>
+                                <font>("Helvetica", 12)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 14)</font>
-                                <halpin>"spindle-0-torque2"</halpin>
-                                <format>"3.2f"</format>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-per-peak-mean"</halpin>
+                                <format>"3.0f"</format>
+                        </number>
+
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-per-peak-peak"</halpin>
+                                <format>"3.0f"</format>
                         </number>
                 </hbox>
+
 
 		<label>
 			<text>"High-speed Spindle"</text>

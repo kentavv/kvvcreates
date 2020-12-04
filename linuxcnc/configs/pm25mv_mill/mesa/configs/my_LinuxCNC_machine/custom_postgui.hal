@@ -55,10 +55,15 @@ setp oneshot.fault.width .05
 # setp angpos.0.scale-out     360.0
 # net c-position angpos.0.out-deg pyvcp.spindle-position-c
 
-net torque1 dmmserial.torque1 pyvcp.spindle-0-torque1
-net torque2 dmmserial.torque2 pyvcp.spindle-0-torque2
+#net torque1 dmmserial.torque1 pyvcp.spindle-0-torque1
+#net torque2 dmmserial.torque2 pyvcp.spindle-0-torque2
 net c-position2 dmmserial.pos pyvcp.spindle-0-position-c2
 
+net spindle-0-per-rated-mean dmmserial.per-rated-mean pyvcp.spindle-0-per-rated-mean
+net spindle-0-per-rated-peak dmmserial.per-rated-peak pyvcp.spindle-0-per-rated-peak
+net spindle-0-per-peak-mean dmmserial.per-peak-mean pyvcp.spindle-0-per-peak-mean
+net spindle-0-per-peak-peak dmmserial.per-peak-peak pyvcp.spindle-0-per-peak-peak
+ 
 net fuling-power fuling.power pyvcp.spindle-1-power
 net fuling-bus-voltage fuling.bus_voltage pyvcp.spindle-1-bus-voltage
 net fuling-current fuling.current pyvcp.spindle-1-current
