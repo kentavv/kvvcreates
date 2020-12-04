@@ -753,8 +753,11 @@ def serial_loop(dev_fn, h):
       # d['Speed'] = dmm.measure_speed()
       # d['ITrqCurrent'] = dmm.integrate_TrqCurrent()
 
-      # Constant for DMM 86M-DHT, the 750kW 5000 RPM servo, expressed in N*m/Arms
-      torque_constant = 0.335
+      # Constant for DMM 86M-DHT, expressed in N*m/Arms
+      # The DMM 86M-DHT is a 750kW 5000 RPM servo.
+      # Normal operating values of TrqCurrent are [-700, 700] which represent
+      # full-range swings up to maximum output current of +/-21.5A.
+      torque_constant = 0.335 * 21.5 / 700.
       mode = 'batch'
 
       fn = 'dyn4.log'
@@ -773,17 +776,12 @@ def serial_loop(dev_fn, h):
                   n = len(batch)
                   for i, (pos, trq) in enumerate(batch):
                       t = st + (et - st) / (n - 1.) * i
-                      print(trq, torque_constant, trq * torque_constant)
-                      trq *= torque_constant
                       arr += [(t, pos, trq)]
                       print('{:.6f}'.format(t), pos, trq, h['logen'] * 1, file=f, sep=',')
               else:
                   pos = dmm.read_AbsPos32()
                   trq, trq2 = self.read_TrqCurrent()
                   et = time.time()
-
-                  trq *= torque_constant
-                  trq2 *= torque_constant
 
                   arr += [(st, pos, trq)]
                   print('{:.6f}'.format(st), pos, trq, h['logen'] * 1, file=f, sep=',')
@@ -798,8 +796,15 @@ def serial_loop(dev_fn, h):
               # This is similar to dmm.read_TrqCurrent(), but having the code here
               # lets us experiment with batching or similar calls.
               trq = [abs(v[2]) for v in arr]
-              h['torque1'] = np.median(trq)
-              h['torque2'] = max(trq)
+              h['torque1'] = np.median(trq) * torque_constant
+              h['torque2'] = max(trq) * torque_constant
+
+              a, b = np.median(trq), max(trq)
+              h['per-peak-mean'] = a / 700. * 100.
+              h['per-peak-peak'] = b / 700. * 100.
+              # Peak is roughly 3x rated
+              h['per-rated-mean'] = h['per-peak-mean'] * 3
+              h['per-rated-peak'] = h['per-peak-peak'] * 3
 
               plogen = h['logen'] 
               # f.flush()
@@ -807,12 +812,16 @@ def serial_loop(dev_fn, h):
 
 def main():
     if use_linuxcnc:
-       h = hal.component("dmmserial")
-       h.newpin("enable", hal.HAL_BIT, hal.HAL_IN)
-       h.newpin("logen", hal.HAL_BIT, hal.HAL_IN)
-       h.newpin("torque1", hal.HAL_FLOAT, hal.HAL_OUT)
-       h.newpin("torque2", hal.HAL_FLOAT, hal.HAL_OUT)
-       h.newpin("pos", hal.HAL_FLOAT, hal.HAL_OUT)
+       h = hal.component('dmmserial')
+       h.newpin('enable', hal.HAL_BIT, hal.HAL_IN)
+       h.newpin('logen', hal.HAL_BIT, hal.HAL_IN)
+       h.newpin('torque1', hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin('torque2', hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin('per-peak-mean', hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin('per-peak-peak', hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin('per-rated-mean', hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin('per-rated-peak', hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin('pos', hal.HAL_FLOAT, hal.HAL_OUT)
        h.ready()
     else:
        h = { 'in': 0.,
@@ -820,6 +829,10 @@ def main():
              'logen': True,
              'torque1': 0.,
              'torque2': 0.,
+             'per-peak-mean': 0.,
+             'per-peak-peak': 0.,
+             'per-rated-mean': 0.,
+             'per-rated-peak': 0.,
              'pos': 0. }
 
     # while True:
