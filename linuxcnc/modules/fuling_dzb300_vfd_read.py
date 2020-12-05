@@ -85,9 +85,9 @@ def read_op_status(client, unit):
         time.sleep(.01)
         rr = client.read_holding_registers(s, n, unit=unit)
         if rr.isError():
-          return ['-'] * n
+            return ['-'] * n
         else:
-          return rr.registers
+            return rr.registers
 
     d = {'time': time.time()}
 
@@ -239,7 +239,7 @@ def serial_loop(client, h):
                 h['torque'] = float(d['output_torque'])
                 h['voltage'] = float(d['output_voltage'])
             except ValueError:
-                print('Unable to convert', d)
+                # print('Unable to convert', d)
                 h['power'] = -1
                 h['bus_voltage'] = -1
                 h['current'] = -1
