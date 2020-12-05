@@ -58,7 +58,7 @@ net spindle-alarms or2.stop0.out => or2.stop1.in0
 net axes-alarm => or2.stop1.in1
 
 net motor-alarm-raw or2.stop1.out debounce.1.0.in
-net motor-alarm debounce.1.0.out => => estop_latch.fault.fault-in
+net motor-alarm debounce.1.0.out => estop_latch.fault.fault-in
 net fault-latch-loopout estop_latch.fault.fault-out  => or2.stop.in0
 
 #setp estop_latch.fault.ok-in 1
