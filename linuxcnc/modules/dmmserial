@@ -730,7 +730,8 @@ def find_device():
         print('Selecting first serial device.')
 
     dev = devs[0]
-    print('Using device at:', dev)
+    # print('Using device at:', dev)
+
     return dev
 
 
@@ -845,13 +846,14 @@ def main():
                 try:
                     serial_loop(dev_fn, h)
                 except DMMTimeout:
-                    print('Timedout')
+                    # print('Timedout')
                     # raise
+                    pass
                 except serial.serialutil.SerialException as e:
                     # SerialException: could not open port /dev/ttyUSB1: [Errno 2] No such file or directory: '/dev/ttyUSB1'
                     # SerialException: device reports readiness to read but returned no data (device disconnected?)
                     print('SerialException:', e)
-            print('Kicked out... resting before retrying.')
+            # print('Kicked out... resting before retrying.')
             time.sleep(1)
     except KeyboardInterrupt:
         pass
