@@ -47,9 +47,14 @@ net tool-probe1 halui.mdi-command-02 <= pyvcp.tool-probe1
 #net stop-request or2.stop.out halui.program.stop
 # The following adds to halui.program.stop to prevent program execution but requires changes 
 # to Axis detailed in https://forum.linuxcnc.org/21-axis/27585-enable-disable-run-button
-net run-disabled or2.stop.out oneshot.fault.in axisui.run-disable
+net run-disabled or2.stop.out oneshot.fault.in axisui.run-disable or2.hscam-stop.in0
 net stop-requested oneshot.fault.out halui.program.stop 
 setp oneshot.fault.width .05
+
+net machine-is-enabled not.hscam-stop.in
+net hs-cam-me-not not.hscam-stop.out or2.hscam-stop.in1
+net hs-cam-stop or2.hscam-stop.out chronos_camera.trigger-stop
+net hscam-recording chronos_camera.recording pyvcp.hscam-recording
 
 # setp angpos.0.scale-in    1
 # setp angpos.0.scale-out     360.0
