@@ -32,40 +32,65 @@ use_linuxcnc = True
 
 
 def loop(h, f, ip='192.168.1.116'):
-    cmds = { 'dir_listing': 'http://{}/cgi-bin/storageInfo?mmcblk1p1'.format(ip),
-             'start_recording': 'http://{}/control/startRecording'.format(ip),
-             'stop_recording': 'http://{}/control/stopRecording'.format(ip) }
+    cmds = { 'dir-listing': 'http://{}/cgi-bin/storageInfo?mmcblk1p1'.format(ip),
+             'start-recording': 'http://{}/control/startRecording'.format(ip),
+             'stop-recording': 'http://{}/control/stopRecording'.format(ip) }
 
-    penable = False
+    recording = False
+    pcmd = None
     while True:
-        enable = h['enable']
-        if penable != enable:
-             try:
-                 print('{:.6f},{}'.format(time.time(), enable * 1), file=f)
-                 if h['enable']:
-                     post = requests.post(cmds['start_recording'], json = {})
-                 else:
-                     post = requests.post(cmds['stop_recording'])
+        cmd = None
 
-                     post = requests.get(cmds['dir_listing'])
+        enable = h['enable']
+        if h['trigger-stop']:
+            if recording:
+                cmd = 'stop'
+        else:
+            if enable:
+                cmd = 'enable'
+            else:
+                cmd = 'disable'
+
+        if cmd and pcmd != cmd:
+             print('{:.6f},{}'.format(time.time(), cmd), file=f)
+             if cmd == 'stop':
+                 # Continue recording 100ms after trigger
+                 time.sleep(.100)
+                 print('{:.6f},{}'.format(time.time(), 'fullstop'), file=f)
+             try:
+                 if cmd == 'enable':
+                     post = requests.post(cmds['start-recording'], json = {})
+                     recording = True
+                 elif cmd in ('stop', 'disable'):
+                     post = requests.post(cmds['stop-recording'])
+                     recording = False
+
+                     post = requests.get(cmds['dir-listing'])
                      print(time.time(), 'chronos contents:', post.json())
+                 h['recording'] = recording
              except requests.exceptions.ConnectionError:
+                 h['recording'] = False
                  print('Warning: Chronos camera not responding, disabling')
-                 print('{:.6f},{}'.format(time.time(), -1), file=f)
+                 print('{:.6f},{}'.format(time.time(), 'error'), file=f)
 
              f.flush()
-             penable = enable
+             pcmd = cmd
 
         time.sleep(.01)
 
 
 def main():
     if use_linuxcnc:
-       h = hal.component("chronos_camera")
-       h.newpin("enable", hal.HAL_BIT, hal.HAL_IN)
+       h = hal.component('chronos_camera')
+       h.newpin('enable', hal.HAL_BIT, hal.HAL_IN)
+       h.newpin('trigger-stop', hal.HAL_BIT, hal.HAL_IN)
+       h.newpin('recording', hal.HAL_BIT, hal.HAL_OUT)
+       h['recording'] = False
        h.ready()
     else:
-       h = { 'enable': False }
+       h = { 'enable': False,
+             'trigger-stop': False,
+             'recording': False }
 
     try:
         fn = 'chronos.log'
