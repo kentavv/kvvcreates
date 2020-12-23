@@ -1,4 +1,4 @@
-T1 P1 Z4.45009 D0.5 ;temp drill 
+T1 P1 Z1.62397 D0.5 ;temp drill 
 T2 P2 Z1.818 D2 ;2" superfly 
 T3 P3 Z2.325 D1 ;1" shearhog short 
 T4 P4 Z-1 D1 ;1" shearhog medium 
@@ -51,3 +51,4 @@ T122 P122 Z3.566 D0.375 ;3/8" square end mill for steel
 T67 P67 Z3.705 D0.388 ;1/2 threadmill in er20 
 T73 P73 Z3.316 D0.235 ;m8-1.25 thread mill 
 T72 P72 Z3.057 D0.17 ;m6-1.0 thread mill 
+T150 P150 Z1.62397 D0.325 ;added 20201129 
