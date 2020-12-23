@@ -51,6 +51,10 @@ h.newpin("yvel", hal.HAL_FLOAT, hal.HAL_IN)
 h.newpin("zvel", hal.HAL_FLOAT, hal.HAL_IN)
 h.newpin("spindle-speed-commanded", hal.HAL_FLOAT, hal.HAL_IN)
 h.newpin("spindle-speed-actual", hal.HAL_FLOAT, hal.HAL_IN)
+h.newpin("hour", hal.HAL_FLOAT, hal.HAL_OUT)
+h.newpin("minute", hal.HAL_FLOAT, hal.HAL_OUT)
+h.newpin("second", hal.HAL_FLOAT, hal.HAL_OUT)
+h.newpin("millisecond", hal.HAL_FLOAT, hal.HAL_OUT)
 
 
 instr = None
@@ -88,6 +92,11 @@ try:
     do_once = False
     while True:
         time.sleep(.005)
+        t = datetime.datetime.now()
+        h['hour'] = t.hour
+        h['minute'] = t.minute
+        h['second'] = t.second
+        h['millisecond'] = t.microsecond / 1000.
         if h['enable']:
             dt = datetime.datetime.now()
             t = (dt - st).total_seconds()

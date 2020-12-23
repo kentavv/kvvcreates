@@ -6,6 +6,41 @@ The contents of this file will not be overwritten when you run stepconf again.
 -->
 	<vbox>
 
+		<hbox>
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"now-hour"</halpin>
+                                <format>"02d"</format>
+                        </number>
+                        <label>
+                                <text>":"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"now-minute"</halpin>
+                                <format>"02d"</format>
+                        </number>
+                        <label>
+                                <text>":"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"now-second"</halpin>
+                                <format>"02d"</format>
+                        </number>
+                        <label>
+                                <text>"."</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"now-millisecond"</halpin>
+                                <format>"03d"</format>
+                        </number>
+		</hbox>
+
 		<relief>RIDGE</relief>
 		<bd>3</bd>
 

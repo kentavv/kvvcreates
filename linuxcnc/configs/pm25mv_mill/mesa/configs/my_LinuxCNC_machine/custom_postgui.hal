@@ -74,3 +74,8 @@ net fuling-bus-voltage fuling.bus_voltage pyvcp.spindle-1-bus-voltage
 net fuling-current fuling.current pyvcp.spindle-1-current
 net fuling-torque fuling.torque pyvcp.spindle-1-torque
 net fuling-voltage fuling.voltage pyvcp.spindle-1-voltage
+
+net now-hour datalogger.hour pyvcp.now-hour
+net now-minute datalogger.minute pyvcp.now-minute
+net now-second datalogger.second pyvcp.now-second
+net now-millisecond datalogger.millisecond pyvcp.now-millisecond
