@@ -5,6 +5,8 @@ Include your PyVCP panel here.
 The contents of this file will not be overwritten when you run stepconf again.
 -->
 	<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
 
 		<hbox>
                         <u32>
@@ -41,11 +43,13 @@ The contents of this file will not be overwritten when you run stepconf again.
                         </u32>
 		</hbox>
 
+<hbox>
+<vbox>
 		<relief>RIDGE</relief>
 		<bd>3</bd>
 
 		<label>
-			<text>"Spindle"</text>
+			<text>"Main Spindle"</text>
 			<font>("Helvetica", 14)</font>
 		</label>
 
@@ -123,7 +127,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                 </hbox>
 
 		<label>
-			<text>"Spindle Load"</text>
+			<text>"Load"</text>
 			<font>("Helvetica", 14)</font>
 		</label>
 
@@ -172,23 +176,54 @@ The contents of this file will not be overwritten when you run stepconf again.
                         </number>
                 </hbox>
 
+		<label>
+			<text>"Adaptive feed"</text>
+			<font>("Helvetica", 12)</font>
+		</label>
+
                 <hbox>
                         <label>
                                 <text>" Max load: "</text>
                                 <font>("Helvetica", 12)</font>
                         </label>
 
-<spinbox>
-    <halpin>"spindle-0-max-load"</halpin>
-    <min_>0</min_>
-    <max_>100</max_>
-    <initval>100</initval>
-    <resolution>5</resolution>
-    <format>"3.0f"</format>
-    <font>("Arial",12)</font>
-    <width>"5"</width>
-</spinbox>
+                       <spinbox>
+                                <halpin>"spindle-0-max-load"</halpin>
+                                <min_>0</min_>
+                                <max_>100</max_>
+                                <initval>100</initval>
+                                <resolution>5</resolution>
+                                <format>"3.0f"</format>
+                                <font>("Arial",12)</font>
+                                <width>"5"</width>
+                       </spinbox>
                 </hbox>
+
+                <hbox>
+                        <label>
+                                <text>" Value: "</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"adaptive-feed"</halpin>
+                                <format>".3f"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <checkbutton>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-stallwatch"</halpin>
+                                <text>"Stall Watch"</text>
+                        </checkbutton>
+                </hbox>
+
+</vbox>
+<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
+
 
 		<label>
 			<text>"High-speed Spindle"</text>
@@ -231,11 +266,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Power: "</text>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                                 <halpin>"spindle-1-power"</halpin>
                                 <format>"3.1f"</format>
                         </number>
@@ -244,11 +279,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  BusVolt: "</text>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                                 <halpin>"spindle-1-bus-voltage"</halpin>
                                 <format>"3.1f"</format>
                         </number>
@@ -257,11 +292,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Current: "</text>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                                 <halpin>"spindle-1-current"</halpin>
                                 <format>"3.1f"</format>
                         </number>
@@ -270,11 +305,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Torque: "</text>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                                 <halpin>"spindle-1-torque"</halpin>
                                 <format>"3.1f"</format>
                         </number>
@@ -283,15 +318,59 @@ The contents of this file will not be overwritten when you run stepconf again.
                 <hbox>
                         <label>
                                 <text>"  Voltage: "</text>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                         </label>
 
                         <number>
-                                <font>("Helvetica", 10)</font>
+                                <font>("Helvetica", 12)</font>
                                 <halpin>"spindle-1-voltage"</halpin>
                                 <format>"3.1f"</format>
                         </number>
                 </hbox>
+
+                <label>
+                        <text>"Adaptive feed"</text>
+                        <font>("Helvetica", 12)</font>
+                </label>
+
+                <hbox>
+                        <label>
+                                <text>" Max load: "</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+                       <spinbox>
+                                <halpin>"spindle-1-max-load"</halpin>
+                                <min_>0</min_>
+                                <max_>100</max_>
+                                <initval>100</initval>
+                                <resolution>5</resolution>
+                                <format>"3.0f"</format>
+                                <font>("Arial",12)</font>
+                                <width>"5"</width>
+                       </spinbox>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>" Value: "</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"adaptive-feed-1"</halpin>
+                                <format>".3f"</format>
+                        </number>
+                </hbox>
+
+</vbox>
+</hbox>
+
+<hbox>
+<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
+
 
 		<label>
 			<text>"Status"</text>
@@ -360,10 +439,16 @@ The contents of this file will not be overwritten when you run stepconf again.
                                 <text>"Reset"</text>
                         </button>
                 </hbox>
+</vbox>
+<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
+
 
 		<label>
 			<text>"Velocity"</text>
 			<font>("Helvetica", 14)</font>
+                        <width>"15"</width>
 		</label>
 
 		<hbox>
@@ -417,18 +502,30 @@ The contents of this file will not be overwritten when you run stepconf again.
                                 <format>"+3.2f"</format>
                         </number>
                 </hbox>
+</vbox>
+</hbox>
 
+<vbox>
+                <relief>RIDGE</relief>
+                <bd>3</bd>
+
+                <label>
+                        <text>"Recording"</text>
+                        <font>("Helvetica", 14)</font>
+                </label>
+
+<hbox>
                 <hbox>
 		        <checkbutton>
 				<font>("Helvetica", 12)</font>
 				<halpin>"datalogger-enable"</halpin>
-				<text>"Data logger"</text>
+				<text>"Data logger    "</text>
 			</checkbutton>
 		</hbox>
 
                 <hbox>
                         <label>
-                                <text>"HSCam Recording"</text>
+                                <text>"High-speed cam"</text>
                                 <font>("Helvetica", 12)</font>
                         </label>
 
@@ -439,6 +536,18 @@ The contents of this file will not be overwritten when you run stepconf again.
                                 <off_color>"red"</off_color>
                         </led>
                 </hbox>
+</hbox>
+</vbox>
+
+<vbox>
+                <relief>RIDGE</relief>
+                <bd>3</bd>
+
+                <label>
+                        <text>"Tools"</text>
+                        <font>("Helvetica", 14)</font>
+                </label>
+
 
                 <hbox>
                         <button>
@@ -447,6 +556,11 @@ The contents of this file will not be overwritten when you run stepconf again.
                                 <text>"Load Haimer"</text>
                         </button>
                 </hbox>
+</vbox>
+
+<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
 
 		<label>
 			<text>"Auto Tool Length"</text>
@@ -459,17 +573,13 @@ The contents of this file will not be overwritten when you run stepconf again.
                                 <halpin>"tool-probe0"</halpin>
                                 <text>"  First step"</text>
                         </button>
-                </hbox>
 
-                <hbox>
                         <button>
                                 <font>("Helvetica", 12)</font>
                                 <halpin>"tool-probe1"</halpin>
                                 <text>"  Second step"</text>
                         </button>
-                </hbox>
 
-                <hbox>
                         <label>
                                 <text>"  Probe"</text>
                                 <font>("Helvetica", 12)</font>
@@ -482,6 +592,7 @@ The contents of this file will not be overwritten when you run stepconf again.
                                 <off_color>"green"</off_color>
                         </led>
 		</hbox>
+</vbox>
 
 	</vbox>
 </pyvcp>
