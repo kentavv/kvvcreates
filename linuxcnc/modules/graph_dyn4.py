@@ -36,6 +36,14 @@ fig, ax = plt.subplots(1, 1)
 ax.set_xlim(0, max_t)
 ax.set_ylim(0, 1000)
 ax.hold(True)
+ax.set_ylabel('Load')
+ax.set_xlabel('Time')
+
+ax2 = ax.twinx()
+ax2.set_xlim(0, max_t)
+ax2.set_ylim(0, 1)
+ax.hold(True)
+ax2.set_ylabel('Adaptive feed')
 
 plt.show(False)
 plt.draw()
@@ -80,6 +88,7 @@ y = []
 y2 = []
 y3 = []
 y4 = []
+y5 = []
 # err_lst = []
 p_err = None
 term_p = 0
@@ -89,6 +98,7 @@ points = ax.plot(x, y, 'b+', animated=False)[0]
 points2 = ax.plot(x, y2, 'g-', animated=False)[0]
 points3 = ax.plot(x, y3, 'r-', animated=False)[0]
 points4 = ax.plot(x, y4, 'y-', animated=False)[0]
+points5 = ax2.plot(x, y5, 'y-', animated=False)[0]
 d = [[0, 0]]
 lt = 0
 for ln in f:
@@ -102,12 +112,13 @@ for ln in f:
     cur_t = t
     t = int(abs(t) * 1000 / 20)
     trq = float(trq) 
+    af = float(adaptive_feed) 
     en = en == '1'
 
     if t == d[-1][0]:
         d[-1][1] = max(d[-1][1], trq)
     else:
-       d += [[t, trq]]
+       d += [[t, trq, af]]
     
     d = [d_ for d_ in d if d[-1][0] - d_[0] <= max_t * 20]
 
@@ -117,6 +128,7 @@ for ln in f:
 
         x = [max_t - (d[-1][0] - d_[0]) / 20. for d_ in d]
         y = [d_[1] for d_ in d]
+        y5 = [d_[2] for d_ in d]
 
         # Calculate moving average using a uniform filter, with the center shifted
         # half of the window size.
@@ -153,6 +165,7 @@ for ln in f:
         points2.set_data(x, y2)
         points3.set_data(x, y3)
         # points4.set_data(x, y4)
+        points5.set_data(x, y5)
         # min_line.set_ydata(np.amin(y))
         max_line.set_ydata(np.amax(y))
         if True:
