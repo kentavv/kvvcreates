@@ -13,7 +13,7 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JO
 loadrt hostmot2
 loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_stepgens=5 sserial_port_0=20xxxx" 
 setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
-loadrt pid names=pid.x,pid.y,pid.z,pid.s,pid.spindle1,pid.spindle0load
+loadrt pid names=pid.x,pid.y,pid.z,pid.s,pid.spindle1,pid.spindle-0-adaptive
 loadrt abs names=abs.spindle0,abs.spindle1
 loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
 loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
@@ -28,7 +28,9 @@ loadrt timedelay names=timedelay.spindle-0-brake,timedelay.spindle-0-pid,timedel
 loadrt estop_latch names=estop_latch.fault
 loadrt oneshot names=oneshot.fault
 loadrt lincurve names=lincurve.spindle1,lincurve.spindle1b personality=3,7
-loadrt limit1 names=limit1.spindle-0-load
+loadrt limit1 names=limit1.spindle-0-adaptive
+loadrt mux2 names=mux2.adaptive-feed
+loadrt constant names=constant.constant-1
 
 addf hm2_7i76e.0.read         servo-thread
 addf motion-command-handler   servo-thread
@@ -38,8 +40,10 @@ addf pid.y.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
 addf pid.s.do-pid-calcs       servo-thread
 #addf pid.spindle1.do-pid-calcs servo-thread
-addf pid.spindle0load.do-pid-calcs servo-thread
-addf limit1.spindle-0-load    servo-thread
+addf pid.spindle-0-adaptive.do-pid-calcs servo-thread
+addf limit1.spindle-0-adaptive servo-thread
+addf mux2.adaptive-feed       servo-thread
+addf constant.constant-1      servo-thread
 addf scale.spindle0           servo-thread
 addf scale.spindle1           servo-thread
 addf lincurve.spindle1        servo-thread
@@ -384,27 +388,33 @@ net spindle-0-vel-fb-rpm     => pid.s.feedback
 net spindle-0-output        <=  pid.s.output
 
 
-setp   pid.spindle0load.Pgain     1
-setp   pid.spindle0load.Igain     0
-setp   pid.spindle0load.Dgain     0
-setp   pid.spindle0load.bias      0
-setp   pid.spindle0load.FF0       0
-setp   pid.spindle0load.FF1       0
-setp   pid.spindle0load.FF2       0
-setp   pid.spindle0load.deadband  0
-setp   pid.spindle0load.maxoutput 1
-setp   pid.spindle0load.error-previous-target true
-setp   pid.spindle0load.maxerror 500
+setp   pid.spindle-0-adaptive.Pgain     1
+setp   pid.spindle-0-adaptive.Igain     0
+setp   pid.spindle-0-adaptive.Dgain     0
+setp   pid.spindle-0-adaptive.bias      0
+setp   pid.spindle-0-adaptive.FF0       0
+setp   pid.spindle-0-adaptive.FF1       0
+setp   pid.spindle-0-adaptive.FF2       0
+setp   pid.spindle-0-adaptive.deadband  0
+setp   pid.spindle-0-adaptive.maxoutput 1
+setp   pid.spindle-0-adaptive.error-previous-target true
+setp   pid.spindle-0-adaptive.maxerror 100
 
-net spindle-0-index-enable  <=> pid.spindle0load.index-enable
-net spindle-0-enable         =>  pid.spindle0load.enable
-net spindle-0-max-load    => pid.spindle0load.command
-#net spindle-1-fb-rpm-filtered => pid.spindle0load.feedback
-net spindle-0-per-peak-mean => pid.spindle0load.feedback
-net spindle-0-load-output        <=  pid.spindle0load.output => limit1.spindle-0-load.in
-setp limit1.spindle-0-load.min 0
-setp limit1.spindle-0-load.max 1
-net spindle-0-adaptive-feed limit1.spindle-0-load.out => motion.adaptive-feed
+#net spindle-0-index-enable  <=> pid.spindle-0-adaptive.index-enable
+net spindle-0-enable         =>  pid.spindle-0-adaptive.enable
+net spindle-0-max-load       => pid.spindle-0-adaptive.command
+#net spindle-1-fb-rpm-filtered => pid.spindle-0-adaptive.feedback
+net spindle-0-per-peak-mean  => pid.spindle-0-adaptive.feedback
+
+net spindle-0-load-output        <=  pid.spindle-0-adaptive.output => limit1.spindle-0-adaptive.in
+setp limit1.spindle-0-adaptive.min 0
+setp limit1.spindle-0-adaptive.max 1
+
+setp constant.constant-1.value 1.0
+net constant-1                    constant.constant-1.out => mux2.adaptive-feed.in0
+net spindle-0-adaptive-feed limit1.spindle-0-adaptive.out => mux2.adaptive-feed.in1
+net spindle-0-enable                                      => mux2.adaptive-feed.sel
+net adaptive-feed                  mux2.adaptive-feed.out => motion.adaptive-feed
 
 #setp   pid.spindle1.Pgain     [SPINDLE_1]P
 #setp   pid.spindle1.Igain     [SPINDLE_1]I
