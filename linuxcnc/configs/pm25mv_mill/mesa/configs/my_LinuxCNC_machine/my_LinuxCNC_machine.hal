@@ -19,7 +19,7 @@ loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
 loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near names=near.spindle0,near.spindle1
 loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault,or2.hscam-stop,or2.pause
-loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock,and2.spindle-0-brake,and2.trq-pause,and2.stallwatch
+loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock,and2.spindle-0-brake,and2.trq-pause,and2.stallwatch,and2.stallwatch-pause
 loadrt not names=not.spindle-0-brake,not.tool-change-request,not.hscam-stop
 loadrt toggle count=1
 loadrt toggle2nist count=1
@@ -76,6 +76,7 @@ addf and2.vc                  servo-thread
 addf and2.motion_lock         servo-thread
 addf and2.spindle-0-brake     servo-thread
 addf and2.stallwatch          servo-thread
+addf and2.stallwatch-pause    servo-thread
 addf not.spindle-0-brake      servo-thread
 addf not.tool-change-request  servo-thread
 addf not.hscam-stop           servo-thread
@@ -422,7 +423,7 @@ net adaptive-feed                  mux2.adaptive-feed.out => motion.adaptive-fee
 net spindle-0-torque-warning dmmserial.torque-warning => and2.stallwatch.in0
 net spindle-0-torque-threshold => dmmserial.torque-threshold
 net spindle-0-stallwatch and2.stallwatch.in1
-net spindle-0-torque-stallwatch and2.stallwatch.out => or2.pause.in0
+net spindle-0-torque-stallwatch and2.stallwatch.out
 
 #setp   pid.spindle1.Pgain     [SPINDLE_1]P
 #setp   pid.spindle1.Igain     [SPINDLE_1]I

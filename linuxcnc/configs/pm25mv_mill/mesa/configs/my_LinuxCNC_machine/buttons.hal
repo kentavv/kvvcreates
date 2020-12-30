@@ -27,12 +27,14 @@
 # Pause/Resume Section
 net pause-resume-btn                          => and2.a1.in0 and2.a2.in0
 net pause-on         halui.program.is-paused  => toggle2nist.0.is-on and2.a1.in1 and2.a4.in1
-net run-on           halui.program.is-running => and2.a2.in1
+net run-on           halui.program.is-running => and2.a2.in1 and2.stallwatch-pause.in1
 net pause-sig        and2.a1.out              => or2.o1.in0
 net resume-sig       and2.a2.out              => or2.o1.in1
 net toggle-ok        or2.o1.out               => toggle.0.in
 net togglesig        toggle.0.out             => toggle2nist.0.in
 net toggleon         toggle2nist.0.on         => or2.pause.in1
+net spindle-0-torque-stallwatch               => and2.stallwatch-pause.in0
+net stallwatch-pause and2.stallwatch-pause.out => or2.pause.in0
 net pause-in         or2.pause.out            => halui.program.pause
 net toggleoff        toggle2nist.0.off        => halui.program.resume
 
