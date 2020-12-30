@@ -420,6 +420,7 @@ net spindle-0-enable                                      => mux2.adaptive-feed.
 net adaptive-feed                  mux2.adaptive-feed.out => motion.adaptive-feed dmmserial.adaptive-feed
 
 net spindle-0-torque-warning dmmserial.torque-warning => and2.stallwatch.in0
+net spindle-0-torque-threshold => dmmserial.torque-threshold
 net spindle-0-stallwatch and2.stallwatch.in1
 net spindle-0-torque-stallwatch and2.stallwatch.out => or2.pause.in0
 

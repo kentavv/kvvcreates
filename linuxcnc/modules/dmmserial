@@ -775,6 +775,8 @@ def serial_loop(dev_fn, h, f):
           trq_window_limit = 4
 
           while True:
+              trq_threshold = h['torque-threshold']
+
               st = time.time()
               if mode == 'batch':
                   batch = dmm.read_batch()
@@ -789,7 +791,7 @@ def serial_loop(dev_fn, h, f):
                       trq_warning = len(trq_t) >= trq_window_limit
                       if trq_warning:
                           print(','.join(['({:.4f} {})'.format(et - x[0], x[1]) for x in trq_t]))
-                      print('{:.6f}'.format(t), pos, trq, h['logen'] * 1, trq_warning, h['adaptive-feed'], file=f, sep=',')
+                      print('{:.6f}'.format(t), pos, trq, h['logen'] * 1, trq_warning * 1, h['adaptive-feed'], file=f, sep=',')
               else:
                   pos = dmm.read_AbsPos32()
                   trq, trq2 = self.read_TrqCurrent()
@@ -800,7 +802,8 @@ def serial_loop(dev_fn, h, f):
                       trq_t += [(t, trq)]
                   trq_t = [x for x in trq_t if et - x[0] < trq_t_window]
                   trq_warning = len(trq_t) >= trq_window_limit
-                  print('{:.6f}'.format(st), pos, trq, h['logen'] * 1, trq_warning, h['adaptive-feed'], file=f, sep=',')
+                  print('{:.6f}'.format(st), pos, trq, h['logen'] * 1, trq_warning * 1, h['adaptive-feed'], file=f, sep=',')
+              f.flush()
 
               # print('Turnaround: {:.6f}'.format(et - st))
               arr = [v for v in arr if (st - v[0]) <= max_dt]
@@ -841,6 +844,7 @@ def main():
        h.newpin('per-rated-peak', hal.HAL_FLOAT, hal.HAL_OUT)
        h.newpin('pos', hal.HAL_FLOAT, hal.HAL_OUT)
        h.newpin('torque-warning', hal.HAL_BIT, hal.HAL_OUT)
+       h.newpin('torque-threshold', hal.HAL_FLOAT, hal.HAL_IN)
 
        # adaptive_feed_enabled is only available in linuxcnc.stat?
        # adaptive-feed is only available in motion.adaptive-feed?
