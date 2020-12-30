@@ -735,7 +735,7 @@ def find_device():
     return dev
 
 
-def serial_loop(dev_fn, h, restart):
+def serial_loop(dev_fn, h, f):
   with DMMDrive(dev_fn, 0) as dmm:
       # d = {}
       # d['Status'] = dmm.read_Status()
@@ -761,18 +761,18 @@ def serial_loop(dev_fn, h, restart):
       torque_constant = 0.335 * 21.5 / 700.
       mode = 'batch'
 
-      fn = 'dyn4.log'
-      with open(fn, 'a') as f:
+      if True:
           v_prev = None
           arr = []
           max_dt = 1.
           plogen = False
           st = time.time()
 
-          if restart:
-              print('# Restart {:.6f}'.format(st), file=f)
-          else:
-              print('# Startup {:.6f}'.format(st), file=f)
+          trq_threshold = 500
+          trq_t_window = .05
+          trq_t = []
+          trq_warning = False
+          trq_window_limit = 4
 
           while True:
               st = time.time()
@@ -783,14 +783,24 @@ def serial_loop(dev_fn, h, restart):
                   for i, (pos, trq) in enumerate(batch):
                       t = st + (et - st) / (n - 1.) * i
                       arr += [(t, pos, trq)]
-                      print('{:.6f}'.format(t), pos, trq, h['logen'] * 1, file=f, sep=',')
+                      if abs(trq) > trq_threshold:
+                          trq_t += [(t, trq)]
+                      trq_t = [x for x in trq_t if et - x[0] < trq_t_window]
+                      trq_warning = len(trq_t) >= trq_window_limit
+                      if trq_warning:
+                          print(','.join(['({:.4f} {})'.format(et - x[0], x[1]) for x in trq_t]))
+                      print('{:.6f}'.format(t), pos, trq, h['logen'] * 1, trq_warning, h['adaptive-feed'], file=f, sep=',')
               else:
                   pos = dmm.read_AbsPos32()
                   trq, trq2 = self.read_TrqCurrent()
                   et = time.time()
 
                   arr += [(st, pos, trq)]
-                  print('{:.6f}'.format(st), pos, trq, h['logen'] * 1, file=f, sep=',')
+                  if abs(trq) > trq_threshold:
+                      trq_t += [(t, trq)]
+                  trq_t = [x for x in trq_t if et - x[0] < trq_t_window]
+                  trq_warning = len(trq_t) >= trq_window_limit
+                  print('{:.6f}'.format(st), pos, trq, h['logen'] * 1, trq_warning, h['adaptive-feed'], file=f, sep=',')
 
               # print('Turnaround: {:.6f}'.format(et - st))
               arr = [v for v in arr if (st - v[0]) <= max_dt]
@@ -812,6 +822,8 @@ def serial_loop(dev_fn, h, restart):
               h['per-rated-mean'] = h['per-peak-mean'] * 3
               h['per-rated-peak'] = h['per-peak-peak'] * 3
 
+              h['torque-warning'] = trq_warning
+
               plogen = h['logen'] 
               # f.flush()
 
@@ -828,6 +840,12 @@ def main():
        h.newpin('per-rated-mean', hal.HAL_FLOAT, hal.HAL_OUT)
        h.newpin('per-rated-peak', hal.HAL_FLOAT, hal.HAL_OUT)
        h.newpin('pos', hal.HAL_FLOAT, hal.HAL_OUT)
+       h.newpin('torque-warning', hal.HAL_BIT, hal.HAL_OUT)
+
+       # adaptive_feed_enabled is only available in linuxcnc.stat?
+       # adaptive-feed is only available in motion.adaptive-feed?
+       h.newpin('adaptive-feed', hal.HAL_FLOAT, hal.HAL_IN)
+
        h.ready()
     else:
        h = { 'in': 0.,
@@ -845,13 +863,14 @@ def main():
     #      time.sleep(1)
 
     try:
-        restart = False
+      fn = 'dyn4.log'
+      with open(fn, 'a') as f:
+        print('# Startup {:.6f}'.format(time.time()), file=f)
         while True:
             dev_fn = find_device()
             if dev_fn:
                 try:
-                    serial_loop(dev_fn, h, restart)
-                    restart = True
+                    serial_loop(dev_fn, h, f)
                 except DMMTimeout:
                     # print('Timedout')
                     # raise
@@ -862,6 +881,7 @@ def main():
                     print('SerialException:', e)
             # print('Kicked out... resting before retrying.')
             time.sleep(1)
+            print('# Restart {:.6f}'.format(time.time()), file=f)
     except KeyboardInterrupt:
         pass
 
