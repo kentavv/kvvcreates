@@ -69,6 +69,8 @@ net spindle-0-per-rated-peak dmmserial.per-rated-peak pyvcp.spindle-0-per-rated-
 net spindle-0-per-peak-mean dmmserial.per-peak-mean pyvcp.spindle-0-per-peak-mean
 net spindle-0-per-peak-peak dmmserial.per-peak-peak pyvcp.spindle-0-per-peak-peak
 
+net spindle-0-stallwatch pyvcp.spindle-0-stallwatch
+net spindle-0-torque-warning pyvcp.spindle-0-torque-warning
 net spindle-0-max-load pyvcp.spindle-0-max-load
 net adaptive-feed pyvcp.adaptive-feed pyvcp.adaptive-feed-1
  

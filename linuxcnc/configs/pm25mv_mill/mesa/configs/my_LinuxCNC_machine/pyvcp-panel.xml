@@ -176,6 +176,22 @@ The contents of this file will not be overwritten when you run stepconf again.
                         </number>
                 </hbox>
 
+                <hbox>
+                        <checkbutton>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-stallwatch"</halpin>
+                                <text>"Stall Watch"</text>
+                                <initval>1</initval>
+                        </checkbutton>
+
+                        <led>
+                                <halpin>"spindle-0-torque-warning"</halpin>
+                                <size>22</size>
+                                <on_color>"red"</on_color>
+                                <off_color>"green"</off_color>
+                        </led>
+                </hbox>
+
 		<label>
 			<text>"Adaptive feed"</text>
 			<font>("Helvetica", 12)</font>
@@ -209,14 +225,6 @@ The contents of this file will not be overwritten when you run stepconf again.
                                 <halpin>"adaptive-feed"</halpin>
                                 <format>".3f"</format>
                         </number>
-                </hbox>
-
-                <hbox>
-                        <checkbutton>
-                                <font>("Helvetica", 12)</font>
-                                <halpin>"spindle-0-stallwatch"</halpin>
-                                <text>"Stall Watch"</text>
-                        </checkbutton>
                 </hbox>
 
 </vbox>
