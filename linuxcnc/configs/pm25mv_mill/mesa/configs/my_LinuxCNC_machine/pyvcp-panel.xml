@@ -172,6 +172,23 @@ The contents of this file will not be overwritten when you run stepconf again.
                         </number>
                 </hbox>
 
+                <hbox>
+                        <label>
+                                <text>" Max load: "</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+<spinbox>
+    <halpin>"spindle-0-max-load"</halpin>
+    <min_>0</min_>
+    <max_>100</max_>
+    <initval>100</initval>
+    <resolution>5</resolution>
+    <format>"3.0f"</format>
+    <font>("Arial",12)</font>
+    <width>"5"</width>
+</spinbox>
+                </hbox>
 
 		<label>
 			<text>"High-speed Spindle"</text>

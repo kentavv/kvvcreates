@@ -79,3 +79,5 @@ net now-hour datalogger.hour pyvcp.now-hour
 net now-minute datalogger.minute pyvcp.now-minute
 net now-second datalogger.second pyvcp.now-second
 net now-millisecond datalogger.millisecond pyvcp.now-millisecond
+
+net spindle-0-max-load pyvcp.spindle-0-max-load
