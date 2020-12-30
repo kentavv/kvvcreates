@@ -735,7 +735,7 @@ def find_device():
     return dev
 
 
-def serial_loop(dev_fn, h):
+def serial_loop(dev_fn, h, restart):
   with DMMDrive(dev_fn, 0) as dmm:
       # d = {}
       # d['Status'] = dmm.read_Status()
@@ -768,6 +768,11 @@ def serial_loop(dev_fn, h):
           max_dt = 1.
           plogen = False
           st = time.time()
+
+          if restart:
+              print('# Restart {:.6f}'.format(st), file=f)
+          else:
+              print('# Startup {:.6f}'.format(st), file=f)
 
           while True:
               st = time.time()
@@ -840,11 +845,13 @@ def main():
     #      time.sleep(1)
 
     try:
+        restart = False
         while True:
             dev_fn = find_device()
             if dev_fn:
                 try:
-                    serial_loop(dev_fn, h)
+                    serial_loop(dev_fn, h, restart)
+                    restart = True
                 except DMMTimeout:
                     # print('Timedout')
                     # raise
