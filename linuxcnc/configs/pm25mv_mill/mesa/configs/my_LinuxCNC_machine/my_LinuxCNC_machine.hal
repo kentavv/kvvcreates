@@ -18,7 +18,7 @@ loadrt abs names=abs.spindle0,abs.spindle1
 loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
 loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near names=near.spindle0,near.spindle1
-loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault,or2.hscam-stop,or2.pause
+loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault,or2.hscam-stop,or2.pause,or2.spindle-is-on
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock,and2.spindle-0-brake,and2.trq-pause,and2.stallwatch,and2.stallwatch-pause
 loadrt not names=not.spindle-0-brake,not.tool-change-request,not.hscam-stop
 loadrt toggle count=1
@@ -65,6 +65,7 @@ addf or2.stop                 servo-thread
 addf or2.fault                servo-thread
 addf or2.hscam-stop           servo-thread
 addf or2.pause                servo-thread
+addf or2.spindle-is-on        servo-thread
 addf estop_latch.fault        servo-thread
 addf oneshot.fault            servo-thread
 addf and2.a1                  servo-thread
@@ -601,9 +602,14 @@ net jog-selected-neg      halui.axis.selected.minus
 net spindle-manual-cw     halui.spindle.0.forward
 net spindle-manual-ccw    halui.spindle.0.reverse
 net spindle-manual-stop   halui.spindle.0.stop
+net spindle-manual-stop   halui.spindle.1.stop
 net machine-is-on         halui.machine.is-on
 net jog-speed             halui.axis.jog-speed
 net MDI-mode              halui.mode.is-mdi
+
+net spindle-0-is-on halui.spindle.0.is-on or2.spindle-is-on.in0
+net spindle-1-is-on halui.spindle.1.is-on or2.spindle-is-on.in1
+net spindle-is-on or2.spindle-is-on.out
 
 #  ---coolant signals---
 

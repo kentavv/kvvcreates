@@ -107,9 +107,12 @@ net y-go-to-zero vc-p4s.y-go-to-zero  => halui.mdi-command-09
 net z-go-to-zero vc-p4s.z-go-to-zero  => halui.mdi-command-10
 
 # 12---SPINDLE
-net spindle.is-on halui.spindle.0.is-on =>  vc-p4s.spindle.is-on
-net spindle.start  vc-p4s.spindle.start  => halui.spindle.0.start
+#net spindle.is-on halui.spindle.0.is-on =>  vc-p4s.spindle.is-on
+#net spindle.start  vc-p4s.spindle.start  => halui.spindle.0.start
 #net spindle.stop  vc-p4s.spindle.stop  => halui.spindle.0.stop
+net spindle-is-on vc-p4s.spindle.is-on
+net spindle-manual-cw vc-p4s.spindle.start
+net spindle-manual-stop vc-p4s.spindle.stop
 
 # 13---E-STOP
 net estop vc-p4s.estop.activate => halui.estop.activate
@@ -118,8 +121,9 @@ net estop-is-activated halui.estop.is-activated => vc-p4s.estop.is-activated
 
 # 14---MACHINE
 #net machine-on  vc-p4s.machine.on  => halui.machine.on
+#net machine-is-on halui.machine.is-on => vc-p4s.machine.ison
+net machine-on  vc-p4s.machine.on  => halui.machine.on
 net machine-off vc-p4s.machine.off => halui.machine.off
-#net machine-ison halui.machine.is-on => vc-p4s.machine.ison
 net machine-is-on => vc-p4s.machine.ison
 
 ##### P4-S PENDANT SETTINGS #####
@@ -137,7 +141,4 @@ setp stepsize-6 	0
 setp stepsize-7 	0
 setp stepsize-8 	0
 setp stepsize-9 	0
-
-
-
 
