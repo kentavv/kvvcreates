@@ -22,6 +22,9 @@ f 1   ; default slow feed
 
 t100 m6 g43 h100 ; typically use the Haimer first
 
+s100  $0 ; default speeds for both spindles
+s9000 $1 ; set mostly for the pendent, which will use the last set speeds
+
 m2    ; end program
 
 %
