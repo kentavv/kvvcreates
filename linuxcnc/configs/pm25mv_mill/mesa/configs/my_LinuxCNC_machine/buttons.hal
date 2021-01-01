@@ -35,23 +35,35 @@ net togglesig        toggle.0.out             => toggle2nist.0.in
 net toggleon         toggle2nist.0.on         => or2.pause.in1
 net spindle-0-torque-stallwatch               => and2.stallwatch-pause.in0
 net stallwatch-pause and2.stallwatch-pause.out => or2.pause.in0
-net pause-in         or2.pause.out            => halui.program.pause
-net toggleoff        toggle2nist.0.off        => halui.program.resume
+
+
+net pause1a          or2.pause.out            => or2.pause2.in0
+net                  pendent-pause            => or2.pause2.in1
+net pause-in         or2.pause2.out           => halui.program.pause
+
+net resume1a         toggle2nist.0.off        => or2.resume2.in0
+net                  pendent-resume           => or2.resume2.in1
+net toggleoff        or2.resume2.out          => halui.program.resume
 
 
 # Run/Step Section
 #net run-step-btn and2.a3.in0 and2.a4.in0 <= hm2_7i76e.0.7i76.0.0.input-07 #(this is your input)
-net run-step-btn and2.a3.in0 and2.a4.in0
+net run-step-btn or2.run2.in0
+net pendent-run or2.run2.in1
+net run-step-btn2 or2.run2.out and2.a3.in0 and2.a4.in0
 net idle-on and2.a3.in1 <= halui.program.is-idle
 # net pause.on and 2.3.in1 <= halui.program.is-paused
 # and2.3.in1 was added in the net pause-on statement in Pause/Resume Section
-net run-sig halui.mode.auto halui.program.run <= and2.a3.out
+net run-sig and2.a3.out => halui.mode.auto halui.program.run
 net step-sig halui.program.step <= and2.a4.out
 
 # Stop Section
 #net stop-btn <= hm2_7i76e.0.7i76.0.0.input-09-not => halui.program.stop
 #net stop-btn => halui.program.stop
 net stop-btn => or2.stop.in1
+
+net stop-btn-all or2.stop.out or2.stop2.in0
+net pendent-stop or2.stop2.in1
 
 setp debounce.1.delay 120 # 120 * servo-thread period (500us) = 60ms
 net spindle-0-alarm => or2.stop0.in0

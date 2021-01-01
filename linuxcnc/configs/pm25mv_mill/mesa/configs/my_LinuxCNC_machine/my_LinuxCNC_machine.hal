@@ -18,7 +18,7 @@ loadrt abs names=abs.spindle0,abs.spindle1
 loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
 loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near names=near.spindle0,near.spindle1
-loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault,or2.hscam-stop,or2.pause,or2.spindle-is-on
+loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault,or2.hscam-stop,or2.pause,or2.spindle-is-on,or2.pause2,or2.resume2,or2.run2,or2.stop2
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock,and2.spindle-0-brake,and2.trq-pause,and2.stallwatch,and2.stallwatch-pause
 loadrt not names=not.spindle-0-brake,not.tool-change-request,not.hscam-stop
 loadrt toggle count=1
@@ -66,6 +66,10 @@ addf or2.fault                servo-thread
 addf or2.hscam-stop           servo-thread
 addf or2.pause                servo-thread
 addf or2.spindle-is-on        servo-thread
+addf or2.pause2               servo-thread
+addf or2.resume2              servo-thread
+addf or2.run2                 servo-thread
+addf or2.stop2                servo-thread
 addf estop_latch.fault        servo-thread
 addf oneshot.fault            servo-thread
 addf and2.a1                  servo-thread
