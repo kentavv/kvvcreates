@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+import sys
 import os
 import time
 
@@ -30,11 +31,11 @@ plt.rcParams.update({
 
 plt.rcParams['toolbar'] = 'None' 
 
-max_t = 10
+max_t = 2
 
 fig, ax = plt.subplots(1, 1)
 ax.set_xlim(0, max_t)
-ax.set_ylim(0, 1000)
+ax.set_ylim(-1000, 1000)
 ax.hold(True)
 ax.set_ylabel('Load')
 ax.set_xlabel('Time')
@@ -81,8 +82,18 @@ def follow(f):
         else:
             yield ln
 
-f = open('dyn4.log')
-f = follow(f)
+fn = sys.argv[1]
+st = 0
+if fn == 'follow':
+    fn = sys.argv[2]
+    f = open(fn)
+    f = follow(f)
+elif fn == 'time':
+    st = float(sys.argv[2])
+    fn = sys.argv[3]
+    f = open(fn)
+else:
+    f = open(fn)
 x = []
 y = []
 y2 = []
@@ -101,16 +112,24 @@ points4 = ax.plot(x, y4, 'y-', animated=False)[0]
 points5 = ax2.plot(x, y5, 'y-', animated=False)[0]
 d = [[0, 0]]
 lt = 0
-for ln in f:
+for ln_n, ln in enumerate(f):
+    #if ln_n < 18000:
+    #    continue
+    #if ln_n < 9500:
+    #    continue
     ln = ln.rstrip()
+    print(ln_n, ln)
 
     try:
         t, pos, trq, en, trq_warning, adaptive_feed = ln.split(',')
     except ValueError:
         continue
     t = float(t)
+    if st is not None and t < st:
+        continue
     cur_t = t
-    t = int(abs(t) * 1000 / 20)
+    #t = int(abs(t) * 1000 / 20)
+    t = abs(t)
     trq = float(trq) 
     af = float(adaptive_feed) 
     en = en == '1'
@@ -123,41 +142,45 @@ for ln in f:
     d = [d_ for d_ in d if d[-1][0] - d_[0] <= max_t * 20]
 
     #cur_t = time.time()
-    if cur_t - lt > .5:
+    if cur_t - lt > .05:
+#        print(d)
         lt = cur_t
 
-        x = [max_t - (d[-1][0] - d_[0]) / 20. for d_ in d]
+        #x = [max_t - (d[-1][0] - d_[0]) / 20. for d_ in d]
+        x = [max_t - (d[-1][0] - d_[0]) for d_ in d]
         y = [d_[1] for d_ in d]
         y5 = [d_[2] for d_ in d]
 
         # Calculate moving average using a uniform filter, with the center shifted
         # half of the window size.
         N = 21
+        #N = 311
         y2 = scipy.ndimage.uniform_filter1d(y, mode='nearest', size=N, origin=N//2)
+        y3 = scipy.ndimage.uniform_filter1d(np.abs(y), mode='nearest', size=N, origin=N//2)
         N = 5
-        y3 = scipy.ndimage.maximum_filter1d(y, mode='nearest', size=N, origin=N//2)
+        #y3 = scipy.ndimage.maximum_filter1d(y, mode='nearest', size=N, origin=N//2)
         # y4 = scipy.ndimage.minimum_filter1d(y, mode='nearest', size=N, origin=N//2)
 
-        if len(y2) >= 2:
-            dt = y[-1] - y[-2]
-            cur_load = y2[-1]
-            err = cur_load - target_load
-            # err_lst += [err]
-
-            if p_err is not None:
-                term_p = kp * err
-                term_i += ki * dt * err
-                term_d = kd * (err - p_err) / dt
-                pid_i_raw = term_p + term_i + term_d
-                pid_i = pid_i_raw
-                if pid_i < -max_i:
-                    pid_i = -max_i
-                elif pid_i > max_i:
-                    pid_i = max_i
-
-                print(dt, cur_load, target_load, err, term_p, term_i, term_d, pid_i_raw, pid_i)
-
-            p_err = err
+#        if len(y2) >= 2:
+#            dt = y[-1] - y[-2]
+#            cur_load = y2[-1]
+#            err = cur_load - target_load
+#            # err_lst += [err]
+#
+#            if p_err is not None:
+#                term_p = kp * err
+#                term_i += ki * dt * err
+#                term_d = kd * (err - p_err) / dt
+#                pid_i_raw = term_p + term_i + term_d
+#                pid_i = pid_i_raw
+#                if pid_i < -max_i:
+#                    pid_i = -max_i
+#                elif pid_i > max_i:
+#                    pid_i = max_i
+#
+#                print(dt, cur_load, target_load, err, term_p, term_i, term_d, pid_i_raw, pid_i)
+#
+#            p_err = err
 
         #print(x, y)
         points.set_data(x, y)
@@ -175,8 +198,9 @@ for ln in f:
             ax.draw_artist(points)
             fig.canvas.blit(ax.bbox)
         # plt.pause(0.02)
-        print('draw')
+#        print('draw')
         plt.pause(0.1)
 
         #print(t, trq, en)
 
+plt.show()
