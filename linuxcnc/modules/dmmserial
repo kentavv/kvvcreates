@@ -27,6 +27,7 @@
 
 from __future__ import print_function
 
+import os
 import sys
 import time
 import serial
@@ -868,6 +869,9 @@ def main():
 
     try:
       fn = 'dyn4.log'
+      if os.path.exists(fn):
+          fn2 = fn + '.' + str(time.time())
+          os.rename(fn, fn2)
       with open(fn, 'a') as f:
         print('# Startup {:.6f}'.format(time.time()), file=f)
         while True:
