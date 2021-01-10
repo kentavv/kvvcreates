@@ -13,7 +13,7 @@ net spindle-1-at-speed  pyvcp.spindle-1-at-speed-led
 net spindle-0-locked      pyvcp.spindle-0-locked-led
 
 net axes-good           pyvcp.axes-good-led
-net spindle-0-good        pyvcp.spindle-0-good-led
+net spindle-0-good      pyvcp.spindle-0-good-led
 net spindle-1-good      pyvcp.spindle-1-good-led
 net fault-latch-loopout pyvcp.fault-led
 net result-fault        pyvcp.reset-fault
