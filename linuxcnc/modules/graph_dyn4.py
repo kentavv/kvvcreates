@@ -42,7 +42,7 @@ ax.set_xlabel('Time')
 
 ax2 = ax.twinx()
 ax2.set_xlim(0, max_t)
-ax2.set_ylim(0, 1)
+ax2.set_ylim(-.01, 1.01)
 ax.hold(True)
 ax2.set_ylabel('Adaptive feed')
 
@@ -112,13 +112,21 @@ points4 = ax.plot(x, y4, 'y-', animated=False)[0]
 points5 = ax2.plot(x, y5, 'y-', animated=False)[0]
 d = [[0, 0]]
 lt = 0
+p_ti = time.time()
+c_update = 0
+lt_update = 0
+first_t = None
+first_draw = None
 for ln_n, ln in enumerate(f):
+    # if ln_n % 50 != 0:
+    #     continue
+
     #if ln_n < 18000:
     #    continue
     #if ln_n < 9500:
     #    continue
     ln = ln.rstrip()
-    print(ln_n, ln)
+    # print(ln_n, ln)
 
     try:
         t, pos, trq, en, trq_warning, adaptive_feed = ln.split(',')
@@ -127,6 +135,14 @@ for ln_n, ln in enumerate(f):
     t = float(t)
     if st is not None and t < st:
         continue
+
+    if first_t is None:
+        first_t = t
+
+    c_ti = time.time()
+    #print(c_ti - p_ti)
+    p_ti = c_ti
+
     cur_t = t
     #t = int(abs(t) * 1000 / 20)
     t = abs(t)
@@ -143,6 +159,27 @@ for ln_n, ln in enumerate(f):
 
     #cur_t = time.time()
     if cur_t - lt > .05:
+        if first_draw is None:
+            first_draw = time.time()
+        else:
+            lg_dt = cur_t - first_t
+            up_dt = time.time() - first_draw
+            w = lg_dt * 4 - up_dt
+            #print(lg_dt, up_dt, lg_dt / up_dt, lg_dt * 2, up_dt, w)
+            if w > 0:
+                time.sleep(w)
+            elif w < 0:
+                print('lag', ln_n, lg_dt, up_dt, lg_dt / up_dt, lg_dt * 4, up_dt, w)
+
+#        c_update = time.time()
+#        dt_update1 = c_update - lt_update
+#        dt_update2 = (cur_t - lt)*4 - dt_update1
+#        print(c_update, lt_update, dt_update1, dt_update2)
+#        if lt_update > 0 and dt_update2 > 0:
+#            time.sleep(dt_update2)
+#
+#        lt_update = c_update
+
 #        print(d)
         lt = cur_t
 
@@ -197,9 +234,9 @@ for ln_n, ln in enumerate(f):
             fig.canvas.restore_region(background)
             ax.draw_artist(points)
             fig.canvas.blit(ax.bbox)
-        # plt.pause(0.02)
+        plt.pause(0.005)
 #        print('draw')
-        plt.pause(0.1)
+        # plt.pause(0.1)
 
         #print(t, trq, en)
 
