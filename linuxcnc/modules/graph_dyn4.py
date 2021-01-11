@@ -88,10 +88,12 @@ if fn == 'follow':
     fn = sys.argv[2]
     f = open(fn)
     f = follow(f)
+    mode = 'follow'
 elif fn == 'time':
     st = float(sys.argv[2])
     fn = sys.argv[3]
     f = open(fn)
+    mode = 'playback'
 else:
     f = open(fn)
 x = []
@@ -117,6 +119,9 @@ c_update = 0
 lt_update = 0
 first_t = None
 first_draw = None
+follow_skip = 0
+follow_max_lag = .020
+
 for ln_n, ln in enumerate(f):
     # if ln_n % 50 != 0:
     #     continue
@@ -143,6 +148,12 @@ for ln_n, ln in enumerate(f):
     #print(c_ti - p_ti)
     p_ti = c_ti
 
+    # When following, we skip lines until the log time is within range of
+    # the current time.
+    if mode == 'follow' and c_ti - t > follow_max_lag:
+        follow_skip += 1
+        continue
+
     cur_t = t
     #t = int(abs(t) * 1000 / 20)
     t = abs(t)
@@ -159,17 +170,23 @@ for ln_n, ln in enumerate(f):
 
     #cur_t = time.time()
     if cur_t - lt > .05:
-        if first_draw is None:
-            first_draw = time.time()
-        else:
-            lg_dt = cur_t - first_t
-            up_dt = time.time() - first_draw
-            w = lg_dt * 4 - up_dt
-            #print(lg_dt, up_dt, lg_dt / up_dt, lg_dt * 2, up_dt, w)
-            if w > 0:
-                time.sleep(w)
-            elif w < 0:
-                print('lag', ln_n, lg_dt, up_dt, lg_dt / up_dt, lg_dt * 4, up_dt, w)
+        if mode == 'follow':
+            up_dt = c_ti - t
+            print('lag', up_dt, follow_skip)
+            follow_skip = 0
+        elif mode == 'playback':
+            if first_draw is None:
+                first_draw = time.time()
+            else:
+                # When playing back, all values are drawn, but drawing is about 4x slower than realtime
+                lg_mult = 4
+                lg_dt = cur_t - first_t
+                up_dt = time.time() - first_draw
+                w = lg_dt * lg_mult - up_dt
+                if w > 0:
+                    time.sleep(w)
+                elif w < 0:
+                    print('lag', ln_n, lg_dt, up_dt, lg_dt / up_dt, lg_dt * lg_mult, up_dt, w)
 
 #        c_update = time.time()
 #        dt_update1 = c_update - lt_update
