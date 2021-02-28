@@ -56,9 +56,11 @@ net hs-cam-me-not not.hscam-stop.out or2.hscam-stop.in1
 net hs-cam-stop or2.hscam-stop.out chronos_camera.trigger-stop
 net hscam-recording chronos_camera.recording pyvcp.hscam-recording
 
-# setp angpos.0.scale-in    1
-# setp angpos.0.scale-out     360.0
-# net c-position angpos.0.out-deg pyvcp.spindle-position-c
+net spindle-0-revs angpos.spindle0.in
+setp angpos.spindle0.circum      1.0
+setp angpos.spindle0.scale-in    1
+setp angpos.spindle0.scale-out     360.0
+net c-position angpos.spindle0.out-deg pyvcp.spindle-0-position-c
 
 #net torque1 dmmserial.torque1 pyvcp.spindle-0-torque1
 #net torque2 dmmserial.torque2 pyvcp.spindle-0-torque2

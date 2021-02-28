@@ -31,6 +31,7 @@ loadrt lincurve names=lincurve.spindle1,lincurve.spindle1b personality=3,7
 loadrt limit1 names=limit1.spindle-0-adaptive
 loadrt mux2 names=mux2.adaptive-feed
 loadrt constant names=constant.constant-1
+loadrt angpos names=angpos.spindle0
 
 addf hm2_7i76e.0.read         servo-thread
 addf motion-command-handler   servo-thread
@@ -57,6 +58,7 @@ addf lowpass.spindle0         servo-thread
 addf lowpass.spindle1         servo-thread
 addf near.spindle0            servo-thread
 addf near.spindle1            servo-thread
+addf angpos.spindle0          servo-thread
 addf or2.coolant              servo-thread
 addf or2.o1                   servo-thread
 addf or2.stop0                servo-thread
@@ -397,7 +399,7 @@ net spindle-0-vel-fb-rpm     => pid.s.feedback
 net spindle-0-output        <=  pid.s.output
 
 
-setp   pid.spindle-0-adaptive.Pgain     1
+setp   pid.spindle-0-adaptive.Pgain     .2
 setp   pid.spindle-0-adaptive.Igain     0
 setp   pid.spindle-0-adaptive.Dgain     0
 setp   pid.spindle-0-adaptive.bias      0
@@ -424,6 +426,9 @@ net constant-1                    constant.constant-1.out => mux2.adaptive-feed.
 net spindle-0-adaptive-feed limit1.spindle-0-adaptive.out => mux2.adaptive-feed.in1
 net spindle-0-enable                                      => mux2.adaptive-feed.sel
 net adaptive-feed                  mux2.adaptive-feed.out => motion.adaptive-feed dmmserial.adaptive-feed
+
+setp dmmserial.trq-t-window .050
+setp dmmserial.trq-window-limit 10
 
 net spindle-0-torque-warning dmmserial.torque-warning => and2.stallwatch.in0
 net spindle-0-torque-threshold => dmmserial.torque-threshold
