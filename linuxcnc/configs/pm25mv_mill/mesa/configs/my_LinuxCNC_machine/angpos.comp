@@ -1,0 +1,33 @@
+component angpos "Return the absolute angular position given the angular distance, circumferance, and optional scale";
+pin in float in;
+param rw float circum;
+param rw float scale_in = 1.;
+param rw float scale_out = 1.;
+pin out float out_deg;
+function _;
+license "GPL"; // indicates GPL v2 or later
+;;
+
+/* Find the angular distance of any partial traverse by taking the remainder 
+ * from dividing the total angular distance by the the circumference.
+ * (This implementation of the modulo operator uses truncated division and
+ * preserves the sign of the total angular distance in the remainder.)
+ */
+double in0 = in * scale_in;
+double partial = in0 - (int)((in0 / circum) * circum);
+
+/* The partial distance will be in the range (-circum, circum).
+ * If positive, the partial distance is the angular position.
+ * If negative, find the absolute angular position by adding
+ * circum to the partial distance.
+ * E.g., (-1) + 360 = 359, (-359) + 360 = 1, (-360) + 360 = 0
+ */
+double pos;
+if(partial < 0) {
+  pos = partial + circum;
+} else {
+  pos = partial;
+}
+
+/* Scale the output to desired units. */
+out_deg = pos * scale_out;

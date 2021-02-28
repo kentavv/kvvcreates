@@ -1,0 +1,9 @@
+component mod "Calculate the modulus";
+pin in float in;
+param rw float modulus;
+param rw float scale = 1.;
+pin out float out;
+function _;
+license "GPL"; // indicates GPL v2 or later
+;;
+out = (in - (int)(in / modulus) * modulus) * scale;
