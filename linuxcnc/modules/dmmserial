@@ -24,6 +24,10 @@
 # Add yourself to the dialout group and remove modemmanager.
 # $ adduser kent dialout
 # $ apt remove modemmanager
+#
+# If you see errors about missing attributes in PySerial, try installing
+# a recent PySerial locally with
+# $ pip install --upgrade --user pyserial
 
 from __future__ import print_function
 
@@ -778,6 +782,9 @@ def serial_loop(dev_fn, h, f):
           while True:
               trq_threshold = h['torque-threshold']
 
+              trq_t_window = h['trq-t-window']
+              trq_window_limit = h['trq-window-limit']
+
               st = time.time()
               if mode == 'batch':
                   batch = dmm.read_batch()
@@ -807,7 +814,8 @@ def serial_loop(dev_fn, h, f):
               f.flush()
 
               # print('Turnaround: {:.6f}'.format(et - st))
-              arr = [v for v in arr if (st - v[0]) <= max_dt]
+              #arr = [v for v in arr if (st - v[0]) <= max_dt]
+              arr = [v for v in arr if (st - v[0]) <= trq_t_window]
 
               abs_pos = abs(pos)
               abs_pos_1t = (abs_pos % (2**16)) / (2.**16) * 360.
@@ -846,6 +854,9 @@ def main():
        h.newpin('pos', hal.HAL_FLOAT, hal.HAL_OUT)
        h.newpin('torque-warning', hal.HAL_BIT, hal.HAL_OUT)
        h.newpin('torque-threshold', hal.HAL_FLOAT, hal.HAL_IN)
+
+       h.newpin('trq-t-window', hal.HAL_FLOAT, hal.HAL_IN)
+       h.newpin('trq-window-limit', hal.HAL_FLOAT, hal.HAL_IN)
 
        # adaptive_feed_enabled is only available in linuxcnc.stat?
        # adaptive-feed is only available in motion.adaptive-feed?
@@ -887,6 +898,8 @@ def main():
                     # SerialException: could not open port /dev/ttyUSB1: [Errno 2] No such file or directory: '/dev/ttyUSB1'
                     # SerialException: device reports readiness to read but returned no data (device disconnected?)
                     print('SerialException:', e)
+                except Exception as e:
+                    print('Exception:', e)
             # print('Kicked out... resting before retrying.')
             time.sleep(1)
             print('# Restart {:.6f}'.format(time.time()), file=f)

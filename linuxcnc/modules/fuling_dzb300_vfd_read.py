@@ -16,6 +16,12 @@
 #     DMM-DYN4 is distributed in the hope that it will be useful,
 #     but WITHOUT ANY WARRANTY; without even the implied warranty of
 
+#
+# If you see an error in dmesg like
+#   usbfs: interface 0 claimed by ftdi_sio while 'brltty' sets config #1
+# you may need to remove brltty
+# $ sudo apt remove brltty
+
 from __future__ import print_function
 
 import serial
