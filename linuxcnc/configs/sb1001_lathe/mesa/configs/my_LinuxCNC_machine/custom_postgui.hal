@@ -1,2 +1,57 @@
 # Include your custom_postgui HAL commands here
 # This file will not be overwritten when you run PNCconf again
+# The commands in this file are run after the AXIS GUI (including PyVCP panel) starts
+
+net spindle-vel-cmd-rpm-abs      pyvcp.spindle-0-speed-target # datalogger.spindle-speed-commanded 
+net spindle-fb-rpm               pyvcp.spindle-0-speed-c # datalogger.spindle-speed-actual 
+net spindle-fb-rpm-abs-filtered  pyvcp.spindle-0-speed-abs
+
+net spindle-at-speed    pyvcp.spindle-0-at-speed-led
+
+net axes-good           pyvcp.axes-good-led
+net spindle-good        pyvcp.spindle-0-good-led
+net fault-latch-loopout pyvcp.fault-led
+net result-fault        pyvcp.reset-fault
+
+#net probe-in            pyvcp.probe-led
+
+#loadrt scale names=scale.x-vel,scale.y-vel,scale.z-vel
+#addf scale.x-vel servo-thread
+#addf scale.y-vel servo-thread
+#addf scale.z-vel servo-thread
+
+setp scale.x-vel.gain 60
+setp scale.z-vel.gain 60
+
+net x-vel-cmd scale.x-vel.in
+net z-vel-cmd scale.z-vel.in
+net x-velocity-upm scale.x-vel.out pyvcp.x-velocity-upm datalogger.xvel
+net z-velocity-upm scale.z-vel.out pyvcp.z-velocity-upm datalogger.zvel
+
+net datalogger-enable pyvcp.datalogger-enable
+#net datalogger-enabled datalogger.enable pyvcp.datalogger-enable
+#net datalogger-enabled ppmc.0.encoder.03.index-enable pyvcp.datalogger-enabled
+
+#net stop-request or2.stop.out halui.program.stop
+# The following adds to halui.program.stop to prevent program execution but requires changes 
+# to Axis detailed in https://forum.linuxcnc.org/21-axis/27585-enable-disable-run-button
+net run-disabled or2.stop2.out oneshot.fault.in axisui.run-disable or2.hscam-stop.in0
+net stop-requested oneshot.fault.out halui.program.stop 
+setp oneshot.fault.width .05
+
+net machine-is-enabled not.hscam-stop.in
+net hs-cam-me-not not.hscam-stop.out or2.hscam-stop.in1
+net hs-cam-stop or2.hscam-stop.out chronos_camera.trigger-stop
+net hscam-recording chronos_camera.recording pyvcp.hscam-recording
+
+net spindle-revs angpos.spindle0.in
+setp angpos.spindle0.circum      1.0
+setp angpos.spindle0.scale-in    1
+setp angpos.spindle0.scale-out     360.0
+net c-position angpos.spindle0.out-deg pyvcp.spindle-0-position-c
+
+net now-hour datalogger.hour pyvcp.now-hour
+net now-minute datalogger.minute pyvcp.now-minute
+net now-second datalogger.second pyvcp.now-second
+net now-millisecond datalogger.millisecond pyvcp.now-millisecond
+
