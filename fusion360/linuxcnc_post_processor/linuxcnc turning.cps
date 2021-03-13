@@ -173,7 +173,7 @@ var coolants = [
   {id: COOLANT_OFF, off: 9}
 ];
 
-var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-/\"";
+var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-/\":";
 var maxToolNum = 199;
 
 var gFormat = createFormat({prefix:"G", decimals:1});
@@ -441,7 +441,6 @@ function onOpen() {
     }
   }
 
-  
     writeComment("Post processor: " + postDescription);
   
   // dump tool information
