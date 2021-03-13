@@ -1,11 +1,11 @@
 /**
-  Copyright (C) 2012-2018 by Autodesk, Inc.
+  Copyright (C) 2012-2021 by Autodesk, Inc.
   All rights reserved.
 
   LinuxCNC Lathe post processor configuration.
 
-  $Revision: 42523 df92de274276ef478cb8088daaa654e37cfab65f $
-  $Date: 2019-09-20 13:29:14 $
+  $Revision: 43182 08c79bb5b30997ccb5fb33ab8e7c8c26981be334 $
+  $Date: 2021-02-18 16:25:13 $
   
   FORKID {D3E630A8-AFCC-46E6-BEF1-6AD5A6FA5483}
   
@@ -15,14 +15,18 @@
   https://cam.autodesk.com/hsmposts?
 */
 
-description = "LinuxCNC Turning (KVV 20191030)";
+description = "LinuxCNC Turning (KVV 20210313)";
 vendor = "LinuxCNC";
 vendorUrl = "http://www.linuxcnc.org";
-legal = "Copyright (C) 2012-2018 by Autodesk, Inc.";
-certificationLevel = 2;
-minimumRevision = 40783;
-
 longDescription = "Turning post for LinuxCNC. Use Turret 0 for Positional Turret, Turret 101 for QCTP on X- Post, Turret 102 for QCTP on X+ Post, Turret 103 for Gang Tooling on X- Post, Turret 104 for Gang Tooling on X+ Tool Post.";
+postDescription = description;
+
+var outputG43OnSeparateLine = false;
+
+// >>>>> INCLUDED FROM ../common/linuxcnc turning.cps
+legal = "Copyright (C) 2012-2021 by Autodesk, Inc.";
+certificationLevel = 2;
+minimumRevision = 45702;
 
 extension = "ngc";
 programNameIsInteger = false;
@@ -35,49 +39,145 @@ minimumChordLength = spatial(0.25, MM);
 minimumCircularRadius = spatial(0.01, MM);
 maximumCircularRadius = spatial(1000, MM);
 minimumCircularSweep = toRad(0.01);
-maximumCircularSweep = toRad(359);
-allowHelicalMoves = true;
-allowedCircularPlanes = undefined; // allow any circular motion
+maximumCircularSweep = toRad(180);
+allowHelicalMoves = false;
+allowedCircularPlanes = 1 << PLANE_ZX; // allow ZX plane only
 
 // user-defined properties
 properties = {
-  writeMachine: true, // write machine
-  writeTools: true, // writes the tools
-  // preloadTool: false, // preloads next tool on tool change if any
-  showSequenceNumbers: true, // show sequence numbers
-  sequenceNumberStart: 10, // first sequence number
-  sequenceNumberIncrement: 5, // increment for sequence numbers
-  optionalStop: true, // optional stop
-  separateWordsWithSpace: true, // specifies that the words should be separated with a white space
-  useRadius: false, // specifies that arcs should be output using the radius (R word) instead of the I, J, and K words.
-  maximumSpindleSpeed: 3500, // specifies the maximum spindle speed, 5C high speed 3500rpm, D1-4 low speed 2500rpm
-  showNotes: false, // specifies that operation notes should be output.
-  g53HomePositionX: 0, // home position for X-axis
-  g53HomePositionZ: 0 // home position for Z-axis
+  writeMachine: {
+    title: "Write machine",
+    description: "Output the machine settings in the header of the code.",
+    group: 0,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  writeTools: {
+    title: "Write tool list",
+    description: "Output a tool list in the header of the code.",
+    group: 0,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  showSequenceNumbers: {
+    title: "Use sequence numbers",
+    description: "Use sequence numbers for each block of outputted code.",
+    group: 1,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  sequenceNumberStart: {
+    title: "Start sequence number",
+    description: "The number at which to start the sequence numbers.",
+    group: 1,
+    type: "integer",
+    value: 10,
+    scope: "post"
+  },
+  sequenceNumberIncrement: {
+    title: "Sequence number increment",
+    description: "The amount by which the sequence number is incremented by in each block.",
+    group: 1,
+    type: "integer",
+    value: 1,
+    scope: "post"
+  },
+  optionalStop: {
+    title: "Optional stop",
+    description: "Outputs optional stop code during when necessary in the code.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  separateWordsWithSpace: {
+    title: "Separate words with space",
+    description: "Adds spaces between words if 'yes' is selected.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  useRadius: {
+    title: "Radius arcs",
+    description: "If yes is selected, arcs are outputted using radius values rather than IJK.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  maximumSpindleSpeed: {
+    title: "Max spindle speed",
+    description: "Defines the maximum spindle speed allowed by your machines.",
+    type: "integer",
+    range: [0, 999999999],
+    value: 3500,
+    scope: "post"
+  },
+  showNotes: {
+    title: "Show notes",
+    description: "Writes operation notes as comments in the outputted code.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  useCycles: {
+    title: "Use canned cycles",
+    description: "Enable to output canned cycles.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  g53HomePositionX: {
+    title: "G53 home position X",
+    description: "G53 X-axis home position.",
+    type: "number",
+    value: 0,
+    scope: "post"
+  },
+  g53HomePositionZ: {
+    title: "G53 home position Z",
+    description: "G53 Z-axis home position.",
+    type: "number",
+    value: 0,
+    scope: "post"
+  },
+  threadTaperType: {
+    title: "Thread taper type",
+    description: "Specifies which ends of the thread get the taper. L0 for no taper, L1 for entry taper, L2 for exit taper, or L3 for both.",
+    type: "enum",
+    values: [
+      {title: "No taper(L0)", id: "L0"},
+      {title: "Entry taper(L1)", id: "L1"},
+      {title: "Exit taper(L2)", id: "L2"},
+      {title: "Entry and exit taper(L3)", id: "L3"}
+    ],
+    value: "L0",
+    scope: "post"
+  }
 };
 
-// user-defined property definitions
-propertyDefinitions = {
-  writeMachine: {title:"Write machine", description:"Output the machine settings in the header of the code.", group:0, type:"boolean"},
-  writeTools: {title:"Write tool list", description:"Output a tool list in the header of the code.", group:0, type:"boolean"},
-  //preloadTool: {title:"Preload tool", description:"Preloads the next tool at a tool change (if any).", type:"boolean"},
-  showSequenceNumbers: {title:"Use sequence numbers", description:"Use sequence numbers for each block of outputted code.", group:1, type:"boolean"},
-  sequenceNumberStart: {title:"Start sequence number", description:"The number at which to start the sequence numbers.", group:1, type:"integer"},
-  sequenceNumberIncrement: {title:"Sequence number increment", description:"The amount by which the sequence number is incremented by in each block.", group:1, type:"integer"},
-  optionalStop: {title:"Optional stop", description:"Outputs optional stop code during when necessary in the code.", type:"boolean"},
-  separateWordsWithSpace: {title:"Separate words with space", description:"Adds spaces between words if 'yes' is selected.", type:"boolean"},
-  useRadius: {title:"Radius arcs", description:"If yes is selected, arcs are outputted using radius values rather than IJK.", type:"boolean"},
-  maximumSpindleSpeed: {title:"Max spindle speed", description:"Defines the maximum spindle speed allowed by your machines.", type:"integer", range:[0, 999999999]},
-  showNotes: {title:"Show notes", description:"Writes operation notes as comments in the outputted code.", type:"boolean"},
-  g53HomePositionX: {title:"G53 home position X", description:"G53 X-axis home position.", type:"number"},
-  g53HomePositionZ: {title:"G53 home position Z", description:"G53 Z-axis home position.", type:"number"}
-};
+var singleLineCoolant = false; // specifies to output multiple coolant codes in one line rather than in separate lines
+// samples:
+// {id: COOLANT_THROUGH_TOOL, on: 88, off: 89}
+// {id: COOLANT_THROUGH_TOOL, on: [8, 88], off: [9, 89]}
+var coolants = [
+  {id: COOLANT_FLOOD, on: 8},
+  {id: COOLANT_MIST, on: 7},
+  {id: COOLANT_THROUGH_TOOL},
+  {id: COOLANT_AIR},
+  {id: COOLANT_AIR_THROUGH_TOOL},
+  {id: COOLANT_SUCTION},
+  {id: COOLANT_FLOOD_MIST},
+  {id: COOLANT_FLOOD_THROUGH_TOOL},
+  {id: COOLANT_OFF, off: 9}
+];
 
 var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-/\"";
 var maxToolNum = 199;
 
 var gFormat = createFormat({prefix:"G", decimals:1});
-var mFormat = createFormat({prefix:"M", decimals:1, zeropad:true});
+var mFormat = createFormat({prefix:"M", decimals:1});
 
 var spatialFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true});
 var xFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true, scale:2}); // diameter mode
@@ -85,16 +185,19 @@ var yFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true});
 var zFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true});
 var rFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true}); // radius
 var feedFormat = createFormat({decimals:(unit == MM ? 4 : 5), forceDecimal:true});
+var pitchFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true});
 var toolFormat = createFormat({decimals:0});
 var rpmFormat = createFormat({decimals:0});
 var secFormat = createFormat({decimals:3, forceDecimal:true}); // seconds - range 0.001-99999.999
 var milliFormat = createFormat({decimals:0}); // milliseconds // range 1-9999
 var taperFormat = createFormat({decimals:1, scale:DEG});
+var peckFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true});
 
 var xOutput = createVariable({prefix:"X"}, xFormat);
 var yOutput = createVariable({prefix:"Y"}, yFormat);
 var zOutput = createVariable({prefix:"Z"}, zFormat);
 var feedOutput = createVariable({prefix:"F"}, feedFormat);
+var pitchOutput = createVariable({prefix:"K", force:true}, pitchFormat);
 var sOutput = createVariable({prefix:"S", force:true}, rpmFormat);
 
 // circular output
@@ -102,6 +205,7 @@ var kOutput = createReferenceVariable({prefix:"K"}, zFormat);
 var iOutput = createReferenceVariable({prefix:"I"}, rFormat); // radius mode
 
 var g92ROutput = createVariable({prefix:"R"}, zFormat); // no scaling
+var peckOutput = createVariable({prefix:"Q", force:true}, peckFormat);
 
 var gMotionModal = createModal({}, gFormat); // modal group 1 // G0-G3, ...
 var gPlaneModal = createModal({onchange:function () {gMotionModal.reset();}}, gFormat); // modal group 2 // G17-19
@@ -200,58 +304,36 @@ function getCode(code) {
     return gSpindleModeModal.format(96);
   case "CONSTANT_SURFACE_SPEED_OFF":
     return gSpindleModeModal.format(97);
-    /*
-  case "MAINSPINDLE_AIR_BLAST_ON":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "MAINSPINDLE_AIR_BLAST_OFF":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "SUBSPINDLE_AIR_BLAST_ON":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "SUBSPINDLE_AIR_BLAST_OFF":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "CLAMP_PRIMARY_CHUCK":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "UNCLAMP_PRIMARY_CHUCK":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "CLAMP_SECONDARY_CHUCK":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "UNCLAMP_SECONDARY_CHUCK":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "SPINDLE_SYNCHRONIZATION_ON":
-    machineState.spindleSynchronizationIsActive = true;
-    return gSynchronizedSpindleModal.format(SPECIFY YOUR CODE HERE);
-  case "SPINDLE_SYNCHRONIZATION_OFF":
-    machineState.spindleSynchronizationIsActive = false;
-    return gSynchronizedSpindleModal.format(SPECIFY YOUR CODE HERE);
-  case "START_CHIP_TRANSPORT":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "STOP_CHIP_TRANSPORT":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "OPEN_DOOR":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "CLOSE_DOOR":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-*/
-  case "COOLANT_FLOOD_ON":
-    return mFormat.format(8);
-  case "COOLANT_FLOOD_OFF":
-    return mFormat.format(9);
-    /*
-  case "COOLANT_AIR_ON":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "COOLANT_AIR_OFF":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "COOLANT_THROUGH_TOOL_ON":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-  case "COOLANT_THROUGH_TOOL_OFF":
-    return mFormat.format(SPECIFY YOUR CODE HERE);
-*/
-  case "COOLANT_MIST_ON":
-    return mFormat.format(7);
-  case "COOLANT_MIST_OFF":
-    return mFormat.format(9);
-  case "COOLANT_OFF":
-    return mFormat.format(9);
+  // case "MAINSPINDLE_AIR_BLAST_ON":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "MAINSPINDLE_AIR_BLAST_OFF":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "SUBSPINDLE_AIR_BLAST_ON":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "SUBSPINDLE_AIR_BLAST_OFF":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "CLAMP_PRIMARY_CHUCK":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "UNCLAMP_PRIMARY_CHUCK":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "CLAMP_SECONDARY_CHUCK":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "UNCLAMP_SECONDARY_CHUCK":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "SPINDLE_SYNCHRONIZATION_ON":
+  //   machineState.spindleSynchronizationIsActive = true;
+  //   return gSynchronizedSpindleModal.format(SPECIFY YOUR CODE HERE);
+  // case "SPINDLE_SYNCHRONIZATION_OFF":
+  //   machineState.spindleSynchronizationIsActive = false;
+  //   return gSynchronizedSpindleModal.format(SPECIFY YOUR CODE HERE);
+  // case "START_CHIP_TRANSPORT":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "STOP_CHIP_TRANSPORT":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "OPEN_DOOR":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
+  // case "CLOSE_DOOR":
+  //   return mFormat.format(SPECIFY YOUR CODE HERE);
   default:
     error(localize("Command " + code + " is not defined."));
     return 0;
@@ -262,7 +344,7 @@ function getCode(code) {
   Writes the specified block.
 */
 function writeBlock() {
-  if (properties.showSequenceNumbers) {
+  if (getProperty("showSequenceNumbers")) {
     if (optionalSection) {
       var text = formatWords(arguments);
       if (text) {
@@ -271,7 +353,7 @@ function writeBlock() {
     } else {
       writeWords2("N" + sequenceNumber, arguments);
     }
-    sequenceNumber += properties.sequenceNumberIncrement;
+    sequenceNumber += getProperty("sequenceNumberIncrement");
   } else {
     if (optionalSection) {
       writeWords2("/", arguments);
@@ -285,11 +367,11 @@ function writeBlock() {
   Writes the specified optional block.
 */
 function writeOptionalBlock() {
-  if (properties.showSequenceNumbers) {
+  if (getProperty("showSequenceNumbers")) {
     var words = formatWords(arguments);
     if (words) {
       writeWords("/", "N" + sequenceNumber, words);
-      sequenceNumber += properties.sequenceNumberIncrement;
+      sequenceNumber += getProperty("sequenceNumberIncrement");
     }
   } else {
     writeWords2("/", arguments);
@@ -297,7 +379,7 @@ function writeOptionalBlock() {
 }
 
 function formatComment(text) {
-  return "(" + filterText(String(text).toUpperCase(), permittedCommentChars).replace(/[\(\)]/g, "") + ")";
+  return "(" + filterText(String(text).toUpperCase(), permittedCommentChars) + ")";
 }
 
 /**
@@ -321,17 +403,17 @@ function writeToolDescription(tool) {
 }
 
 function onOpen() {
-  if (properties.useRadius) {
+  if (getProperty("useRadius")) {
     maximumCircularSweep = toRad(90); // avoid potential center calculation errors for CNC
   }
 
   yOutput.disable();
   
-  if (!properties.separateWordsWithSpace) {
+  if (!getProperty("separateWordsWithSpace")) {
     setWordSeparator("");
   }
 
-  sequenceNumber = properties.sequenceNumberStart;
+  sequenceNumber = getProperty("sequenceNumberStart");
   writeln("%");
 
   if (programName) {
@@ -346,7 +428,7 @@ function onOpen() {
   var model = machineConfiguration.getModel();
   var description = machineConfiguration.getDescription();
 
-  if (properties.writeMachine && (vendor || model || description)) {
+  if (getProperty("writeMachine") && (vendor || model || description)) {
     writeComment(localize("Machine"));
     if (vendor) {
       writeComment("  " + localize("vendor") + ": " + vendor);
@@ -359,9 +441,12 @@ function onOpen() {
     }
   }
 
+  
+    writeComment("Post processor: " + postDescription);
+  
   // dump tool information
-  if (properties.writeTools) {
-    zRanges = {};
+  if (getProperty("writeTools")) {
+    var zRanges = {};
     if (is3D()) {
       var numberOfSections = getNumberOfSections();
       for (var i = 0; i < numberOfSections; ++i) {
@@ -375,21 +460,12 @@ function onOpen() {
         }
       }
     }
-
+  
     var tools = getToolTable();
     if (tools.getNumberOfTools() > 0) {
       for (var i = 0; i < tools.getNumberOfTools(); ++i) {
         var tool = tools.getTool(i);
         writeToolDescription(tool);
-      }
-    }
-  }
-
-  if ((getNumberOfSections() > 0) && (getSection(0).workOffset == 0)) {
-    for (var i = 0; i < getNumberOfSections(); ++i) {
-      if (getSection(i).workOffset > 0) {
-        error(localize("Using multiple work offsets is not possible if the initial work offset is 0."));
-        return;
       }
     }
   }
@@ -407,7 +483,6 @@ function onOpen() {
   // writeBlock(gFormat.format(61)); // exact path mode
   writeBlock(gFormat.format(64) + " p.001 q.001"); // path blending, with tolerance and naive cam detector
 
-
   switch (unit) {
   case IN:
     writeBlock(gUnitModal.format(20));
@@ -417,7 +492,16 @@ function onOpen() {
     break;
   }
 
-  // properties.maximumSpindleSpeed // not supported
+  if ((getNumberOfSections() > 0) && (getSection(0).workOffset == 0)) {
+    for (var i = 0; i < getNumberOfSections(); ++i) {
+      if (getSection(i).workOffset > 0) {
+        error(localize("Using multiple work offsets is not possible if the initial work offset is 0."));
+        return;
+      }
+    }
+  }
+
+  // getProperty("maximumSpindleSpeed") // not supported
   onCommand(COMMAND_START_CHIP_TRANSPORT);
 }
 
@@ -595,11 +679,11 @@ function onSection() {
     }
   }
 
-  if (properties.writeTools) {
+  if (getProperty("writeTools")) {
     writeToolDescription(tool);
   }
   
-  if (properties.showNotes && hasParameter("notes")) {
+  if (getProperty("showNotes") && hasParameter("notes")) {
     var notes = getParameter("notes");
     if (notes) {
       var lines = String(notes).split("\n");
@@ -614,7 +698,7 @@ function onSection() {
     }
   }
 
-  if (!isFirstSection() && properties.optionalStop) {
+  if (!isFirstSection() && getProperty("optionalStop")) {
     onCommand(COMMAND_COOLANT_OFF);
     onCommand(COMMAND_STOP_SPINDLE);
     onCommand(COMMAND_OPTIONAL_STOP);
@@ -638,36 +722,12 @@ function onSection() {
       error(localize("Compensation offset is out of range."));
       return;
     }
-    writeBlock("T" + toolFormat.format(tool.number), mFormat.format(6), conditional(tool.manualToolChange, gFormat.format(43)));
+    writeBlock("T" + toolFormat.format(tool.number), mFormat.format(6), conditional(tool.manualToolChange && !outputG43OnSeparateLine, gFormat.format(43)));
+    writeBlock(conditional(tool.manualToolChange && outputG43OnSeparateLine, gFormat.format(43)));
     if (tool.comment) {
       writeComment(tool.comment);
     }
 
-    /*
-    if (properties.preloadTool) {
-      var nextTool = getNextTool(tool.number);
-      if (nextTool) {
-        var compensationOffset = nextTool.isTurningTool() ? nextTool.compensationOffset : nextTool.lengthOffset;
-        if (compensationOffset > maxToolNum) {
-          error(localize("Compensation offset is out of range."));
-          return;
-        }
-        writeBlock("T" + toolFormat.format(nextTool.number * 100 + compensationOffset));
-      } else {
-        preload first tool
-        var section = getSection(0);
-        var firstTool = section.getTool().number;
-        if (tool.number != firstTool.number) {
-          var compensationOffset = firstTool.isTurningTool() ? firstTool.compensationOffset : firstTool.lengthOffset;
-          if (compensationOffset > maxToolNum) {
-            error(localize("Compensation offset is out of range."));
-            return;
-          }
-          writeBlock("T" + toolFormat.format(firstTool.number * 100 + compensationOffset));
-        }
-      }
-    }
-*/
   }
 
   // wcs
@@ -680,12 +740,16 @@ function onSection() {
     workOffset = 1;
   }
   if (workOffset > 0) {
-    if (workOffset > 6) {
+    if (workOffset > 9) {
       error(localize("Work offset out of range."));
       return;
     } else {
       if (workOffset != currentWorkOffset) {
-        writeBlock(gFormat.format(53 + workOffset)); // G54->G59
+        if (workOffset > 6)  {
+          writeBlock(gFormat.format(59 + ((workOffset - 6) / 10))); // G59.1->G59.3
+        } else {
+          writeBlock(gFormat.format(53 + workOffset)); // G54->G59
+        }
         currentWorkOffset = workOffset;
       }
     }
@@ -744,8 +808,8 @@ function onDwell(seconds) {
   if (seconds > 99999.999) {
     warning(localize("Dwelling time is out of range."));
   }
-  milliseconds = clamp(1, seconds * 1000, 99999999);
-  writeBlock(/*gFeedModeModal.format(94),*/ gFormat.format(4), "P" + milliFormat.format(milliseconds));
+  _seconds = clamp(0.001, seconds, 99999.999);
+  writeBlock(gFormat.format(4), "P" + secFormat.format(_seconds));
 }
 
 var pendingRadiusCompensation = -1;
@@ -780,7 +844,10 @@ function onRapid(_x, _y, _z) {
 
 function onLinear(_x, _y, _z, feed) {
   if (isSpeedFeedSynchronizationActive()) {
-    error(localize("Threading not supported using synchronization of feed-spindle."));
+    var threadPitch = getParameter("operation:threadPitch");
+    // lead calculated along the drive line.
+    var leadZ = threadPitch * (Vector.diff(getCurrentPosition(), new Vector(_x, _y, _z)).length / (getCurrentPosition().z - _z));
+    writeBlock(gMotionModal.format(33), xOutput.format(_x), yOutput.format(_y), zOutput.format(_z), pitchOutput.format(leadZ));
     return;
   }
 
@@ -829,33 +896,33 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
   var directionCode = (toolingData.toolPost == REAR) ? (clockwise ? 2 : 3) : (clockwise ? 3 : 2);
 
   if (isFullCircle()) {
-    if (properties.useRadius || isHelical()) { // radius mode does not support full arcs
+    if (getProperty("useRadius") || isHelical()) { // radius mode does not support full arcs
       linearize(tolerance);
       return;
     }
     switch (getCircularPlane()) {
     case PLANE_XY:
-      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(17), gMotionModal.format(directionCode), iOutput.format(cx - start.x, 0), jOutput.format(cy - start.y, 0), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90), gMotionModal.format(directionCode), iOutput.format(cx - start.x, 0), jOutput.format(cy - start.y, 0), getFeed(feed));
       break;
     case PLANE_ZX:
-      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(18), gMotionModal.format(directionCode), iOutput.format(cx - start.x, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90), gMotionModal.format(directionCode), iOutput.format(cx - start.x, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
       break;
     case PLANE_YZ:
-      writeBlock(gAbsIncModal.format(90), gPlaneModal.format(19), gMotionModal.format(directionCode), jOutput.format(cy - start.y, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90), gMotionModal.format(directionCode), jOutput.format(cy - start.y, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
       break;
     default:
       linearize(tolerance);
     }
-  } else if (!properties.useRadius) {
+  } else if (!getProperty("useRadius")) {
     switch (getCircularPlane()) {
     case PLANE_XY:
-      error(localize("XY plane not allowed"));
+      writeBlock(gAbsIncModal.format(90), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), iOutput.format(cx - start.x, 0), jOutput.format(cy - start.y, 0), getFeed(feed));
       break;
     case PLANE_ZX:
       writeBlock(gAbsIncModal.format(90), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), iOutput.format(cx - start.x, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
       break;
     case PLANE_YZ:
-      error(localize("XZ plane not allowed"));
+      writeBlock(gAbsIncModal.format(90), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), jOutput.format(cy - start.y, 0), kOutput.format(cz - start.z, 0), getFeed(feed));
       break;
     default:
       linearize(tolerance);
@@ -867,13 +934,13 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
     }
     switch (getCircularPlane()) {
     case PLANE_XY:
-      writeBlock(gPlaneModal.format(17), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90),  gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
       break;
     case PLANE_ZX:
-      writeBlock(gPlaneModal.format(18), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90),  gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
       break;
     case PLANE_YZ:
-      writeBlock(gPlaneModal.format(19), gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
+      writeBlock(gAbsIncModal.format(90),  gMotionModal.format(directionCode), xOutput.format(x), yOutput.format(y), zOutput.format(z), "R" + rFormat.format(r), getFeed(feed));
       break;
     default:
       linearize(tolerance);
@@ -885,27 +952,15 @@ function onCycle() {
 }
 
 function getCommonCycle(x, y, z, r) {
-  forceXYZ(); // force xyz on first drill hole of any cycle
+  // forceXYZ(); // force xyz on first drill hole of any cycle
   return [xOutput.format(x), yOutput.format(y),
     zOutput.format(z),
     "R" + spatialFormat.format(r)];
 }
 
 function onCyclePoint(x, y, z) {
-  switch (cycleType) {
-  case "thread-turning":
-    var inverted = (toolingData.toolPost == REAR) ? 1 : -1;
-    var r = -cycle.incrementalX * inverted; // positive if taper goes down - delta radius
-    var threadsPerInch = 1.0 / cycle.pitch; // per mm for metric
-    var f = 1 / threadsPerInch;
-    writeBlock(
-      gMotionModal.format(76),
-      xOutput.format(x - cycle.incrementalX),
-      yOutput.format(y),
-      zOutput.format(z),
-      conditional(zFormat.isSignificant(r), g92ROutput.format(r)),
-      feedOutput.format(f)
-    );
+  if (!getProperty("useCycles")) {
+    expandCyclePoint(x, y, z);
     return;
   }
 
@@ -916,6 +971,70 @@ function onCyclePoint(x, y, z) {
     gPlane = 17;
   } else {
     expandCyclePoint(x, y, z);
+    return;
+  }
+
+  switch (cycleType) {
+  case "thread-turning":
+    if (isLastCyclePoint()) {
+      if (xFormat.getResultingValue(cycle.incrementalX) != 0) {
+        error(localize("Tapered threading cycle is not supported on this control."));
+        return;
+      }
+      // thread height and depth of cut
+      var threadHeight = getParameter("operation:threadDepth");
+      var firstDepthOfCut = threadHeight / getParameter("operation:numberOfStepdowns");
+      
+      var chamferWidth = threadHeight; // 45 degree chamfer
+      var id = hasParameter("operation:machineInside") && getParameter("operation:machineInside") == 1;
+      var threadClearance = x - cycle.clearance + (id ? -threadHeight : threadHeight);
+      var cuttingAngle = 30; // Angle is not stored with tool. toDeg(tool.getTaperAngle());
+      if (hasParameter("operation:infeedAngle")) {
+        cuttingAngle = getParameter("operation:infeedAngle");
+      }
+
+      var threadInfeedMode = "constant";
+      if (hasParameter("operation:infeedMode")) {
+        threadInfeedMode = getParameter("operation:infeedMode");
+      }
+
+      var repeatPass = hasParameter("operation:nullPass") ? getParameter("operation:nullPass") : 0;
+
+      //  Cutting Method:
+      //  R1.0 selects constant depth
+      //  R2.0  selects constant Area
+      //  2>R>1 selects decreasing depth but increasing area
+      //  R>2 selects decreaing area
+
+      var threadCuttingMode = 1;
+      if (threadInfeedMode == "reduced") {
+        threadCuttingMode = 2;
+      } else if (threadInfeedMode == "constant") {
+        threadCuttingMode = 1;
+      } else {
+        error(localize("Unsupported Infeed Mode."));
+        return;
+      }
+
+      //  L- - Specifies which ends of the thread get the taper.
+      //  Program L0 for no taper (the default), L1 for entry taper,
+      //  L2 for exit taper,
+      //  or L3 for both entry and exit tapers.
+       
+      writeBlock(
+        gMotionModal.format(76),
+        "P" + spatialFormat.format(cycle.pitch),
+        zOutput.format(z),
+        "I" + xFormat.format(threadClearance),
+        "J" + xFormat.format(firstDepthOfCut),
+        "K" + xFormat.format(threadHeight),
+        "R" + spatialFormat.format(threadCuttingMode),
+        "Q" + spatialFormat.format(cuttingAngle),
+        "H" + spatialFormat.format(repeatPass),
+        "E" + spatialFormat.format(chamferWidth),
+        getProperty("threadTaperType")
+      );
+    }
     return;
   }
 
@@ -943,8 +1062,16 @@ function onCyclePoint(x, y, z) {
     var P = !cycle.dwell ? 0 : clamp(1, cycle.dwell * 1000, 99999999); // in milliseconds
 
     switch (cycleType) {
-    case "drilling":
-    case "counter-boring":
+    case "tapping":
+    case "left-tapping":
+    case "right-tapping":
+      F = tool.getThreadPitch();
+      writeBlock(
+        gFormat.format(33.1),
+        zOutput.format(z),
+        pitchOutput.format(F)
+      );
+      break;
     default:
       expandCyclePoint(x, y, z);
     }
@@ -979,6 +1106,10 @@ function onCyclePoint(x, y, z) {
 function onCycleEnd() {
   if (!cycleExpanded) {
     switch (cycleType) {
+    case "tapping":
+    case "left-tapping":
+    case "right-tapping":
+      break;
     case "thread-turning":
       forceFeed();
       xOutput.reset();
@@ -992,35 +1123,82 @@ function onCycleEnd() {
 }
 
 var currentCoolantMode = COOLANT_OFF;
+var coolantOff = undefined;
 
 function setCoolant(coolant) {
+  // cancel coolant if necessary
+  if ((coolant != COOLANT_OFF) && (currentCoolantMode != COOLANT_OFF) && (coolant != currentCoolantMode)) {
+    setCoolant(COOLANT_OFF);
+  }
+  var coolantCodes = getCoolantCodes(coolant);
+  if (Array.isArray(coolantCodes)) {
+    if (singleLineCoolant) {
+      writeBlock(coolantCodes.join(getWordSeparator()));
+    } else {
+      for (var c in coolantCodes) {
+        writeBlock(coolantCodes[c]);
+      }
+    }
+    return undefined;
+  }
+  return coolantCodes;
+}
+
+function getCoolantCodes(coolant) {
+  if ((getProperty("useCoolant") != undefined) && !getProperty("useCoolant")) {
+    return undefined;
+  }
+  if (!coolants) {
+    error(localize("Coolants have not been defined."));
+  }
+  if (isProbeOperation()) { // avoid coolant output for probing
+    coolant = COOLANT_OFF;
+  }
   if (coolant == currentCoolantMode) {
-    return; // coolant is already active
+    return undefined; // coolant is already active
   }
 
-  var m = undefined;
+  var multipleCoolantBlocks = new Array(); // create a formatted array to be passed into the output line
+  var m;
+  var coolantCodes = {};
+  for (var c in coolants) { // find required coolant codes into the coolants array
+    if (coolants[c].id == coolant) {
+      coolantCodes.on = coolants[c].on;
+      if (coolants[c].off != undefined) {
+        coolantCodes.off = coolants[c].off;
+        break;
+      } else {
+        for (var i in coolants) {
+          if (coolants[i].id == COOLANT_OFF) {
+            coolantCodes.off = coolants[i].off;
+            break;
+          }
+        }
+      }
+    }
+  }
   if (coolant == COOLANT_OFF) {
-    writeBlock((currentCoolantMode == COOLANT_MIST) ? getCode("COOLANT_MIST_OFF") : getCode("COOLANT_OFF"));
-    currentCoolantMode = COOLANT_OFF;
-    return;
+    m = !coolantOff ? coolantCodes.off : coolantOff; // use the default coolant off command when an 'off' value is not specified
+  } else {
+    coolantOff = coolantCodes.off;
+    m = coolantCodes.on;
   }
 
-  switch (coolant) {
-  case COOLANT_FLOOD:
-    m = getCode("COOLANT_FLOOD_ON");
-    break;
-  case COOLANT_MIST:
-    m = getCode("COOLANT_MIST_ON");
-    break;
-  default:
+  if (!m) {
     onUnsupportedCoolant(coolant);
-    m = getCode("COOLANT_OFF");
-  }
-  
-  if (m) {
-    writeBlock(m);
+    m = 9;
+  } else {
+    if (Array.isArray(m)) {
+      for (var i in m) {
+        multipleCoolantBlocks.push(mFormat.format(m[i]));
+      }
+    } else {
+      multipleCoolantBlocks.push(mFormat.format(m));
+    }
     currentCoolantMode = coolant;
+    return multipleCoolantBlocks; // return the single formatted coolant value
   }
+  return undefined;
 }
 
 function onSpindleSpeed(spindleSpeed) {
@@ -1054,7 +1232,7 @@ function startSpindle(tappingMode, forceRPMMode, initialPosition, rpm) {
     }
   }
 
-  var maximumSpindleSpeed = (tool.maximumSpindleSpeed > 0) ? Math.min(tool.maximumSpindleSpeed, properties.maximumSpindleSpeed) : properties.maximumSpindleSpeed;
+  var maximumSpindleSpeed = (tool.maximumSpindleSpeed > 0) ? Math.min(tool.maximumSpindleSpeed, getProperty("maximumSpindleSpeed")) : getProperty("maximumSpindleSpeed");
   if (tool.getSpindleMode() == SPINDLE_CONSTANT_SURFACE_SPEED) {
     _spindleSpeed = tool.surfaceSpeed * ((unit == MM) ? 1 / 1000.0 : 1 / 12.0);
     if (forceRPMMode) { // RPM mode is forced until move to initial position
@@ -1093,27 +1271,26 @@ function onCommand(command) {
   switch (command) {
   case COMMAND_COOLANT_OFF:
     setCoolant(COOLANT_OFF);
-    return;
+    break;
   case COMMAND_COOLANT_ON:
     setCoolant(COOLANT_FLOOD);
-    return;
+    break;
   case COMMAND_LOCK_MULTI_AXIS:
-    return;
+    break;
   case COMMAND_UNLOCK_MULTI_AXIS:
-    return;
+    break;
   case COMMAND_START_CHIP_TRANSPORT:
-    return;
+    break;
   case COMMAND_STOP_CHIP_TRANSPORT:
-    return;
+    break;
   case COMMAND_BREAK_CONTROL:
-    return;
+    break;
   case COMMAND_TOOL_MEASURE:
-    return;
+    break;
   case COMMAND_ACTIVATE_SPEED_FEED_SYNCHRONIZATION:
-    return;
+    break;
   case COMMAND_DEACTIVATE_SPEED_FEED_SYNCHRONIZATION:
-    return;
-
+    break;
   case COMMAND_STOP:
     writeBlock(mFormat.format(0));
     forceSpindleSpeed = true;
@@ -1177,8 +1354,8 @@ function engagePartCatcher(engage) {
     writeBlock(getCode("PART_CATCHER_ON"), formatComment(localize("PART CATCHER ON")));
   } else {
     onCommand(COMMAND_COOLANT_OFF);
-    writeBlock(gFormat.format(53), gMotionModal.format(0), "X" + xFormat.format(properties.g53HomePositionX)); // retract
-    writeBlock(gFormat.format(53), gMotionModal.format(0), "Z" + zFormat.format(properties.g53HomePositionZ)); // retract
+    writeBlock(gFormat.format(53), gMotionModal.format(0), "X" + xFormat.format(getProperty("g53HomePositionX"))); // retract
+    writeBlock(gFormat.format(53), gMotionModal.format(0), "Z" + zFormat.format(getProperty("g53HomePositionZ"))); // retract
     writeBlock(getCode("PART_CATCHER_OFF"), formatComment(localize("PART CATCHER OFF")));
     forceXYZ();
   }
@@ -1233,3 +1410,8 @@ function onClose() {
   writeBlock(mFormat.format(30)); // stop program, spindle stop, coolant off
   writeln("%");
 }
+
+function setProperty(property, value) {
+  properties[property].current = value;
+}
+// <<<<< INCLUDED FROM ../common/linuxcnc turning.cps

@@ -1,24 +1,30 @@
 /**
-  Copyright (C) 2012-2020 by Autodesk, Inc.
+  Copyright (C) 2012-2021 by Autodesk, Inc.
   All rights reserved.
 
   LinuxCNC (EMC2) post processor configuration.
 
-  $Revision: 43006 f4d85eaf905595998240b6a851ef217e44a4109a $
-  $Date: 2020-11-17 09:40:56 $
+  $Revision: 43182 08c79bb5b30997ccb5fb33ab8e7c8c26981be334 $
+  $Date: 2021-02-18 16:25:13 $
   
   FORKID {52A5C3D6-1533-413E-B493-7B93D9E48B30}
+  
+  Great references for post processor development:
+  https://forums.autodesk.com/t5/hsm-post-processor-forum/bd-p/218
+  https://forums.autodesk.com/t5/hsm-post-processor-forum/technical-faq/td-p/7473258
+  https://cam.autodesk.com/hsmposts?
 */
 
-description = "LinuxCNC Milling (KVV 20201129)";
+description = "LinuxCNC Milling (KVV 20210313)";
 vendor = "LinuxCNC";
 vendorUrl = "http://www.linuxcnc.org";
 longDescription = description;
+postDescription = description;
 
 // >>>>> INCLUDED FROM ../common/linuxcnc.cps
-legal = "Copyright (C) 2012-2020 by Autodesk, Inc.";
+legal = "Copyright (C) 2012-2021 by Autodesk, Inc.";
 certificationLevel = 2;
-minimumRevision = 40783;
+minimumRevision = 45702;
 
 extension = "ngc";
 setCodePage("ascii");
@@ -36,46 +42,103 @@ allowedCircularPlanes = undefined; // allow any circular motion
 
 // user-defined properties
 properties = {
-  writeMachine: true, // write machine
-  writeTools: true, // writes the tools
-  preloadTool: true, // preloads next tool on tool change if any
-  showSequenceNumbers: true, // show sequence numbers
-  sequenceNumberStart: 10, // first sequence number
-  sequenceNumberIncrement: 5, // increment for sequence numbers
-  optionalStop: true, // optional stop
-  separateWordsWithSpace: true, // specifies that the words should be separated with a white space
-  useRadius: false, // specifies that arcs should be output using the radius (R word) instead of the I, J, and K words
-  useParametricFeed: false, // specifies that feed should be output using Q values
-  showNotes: false, // specifies that operation notes should be output
-  safePositionMethod: "G53" // specifies the desired safe position option
-};
-
-// user-defined property definitions
-propertyDefinitions = {
-  writeMachine: {title:"Write machine", description:"Output the machine settings in the header of the code.", group:0, type:"boolean"},
-  writeTools: {title:"Write tool list", description:"Output a tool list in the header of the code.", group:0, type:"boolean"},
-  preloadTool: {title:"Preload tool", description:"Preloads the next tool at a tool change (if any).", type:"boolean"},
-  showSequenceNumbers: {title:"Use sequence numbers", description:"Use sequence numbers for each block of outputted code.", group:1, type:"boolean"},
-  sequenceNumberStart: {title:"Start sequence number", description:"The number at which to start the sequence numbers.", group:1, type:"integer"},
-  sequenceNumberIncrement: {title:"Sequence number increment", description:"The amount by which the sequence number is incremented by in each block.", group:1, type:"integer"},
-  optionalStop: {title:"Optional stop", description:"Outputs optional stop code during when necessary in the code.", type:"boolean"},
-  separateWordsWithSpace: {title:"Separate words with space", description:"Adds spaces between words if 'yes' is selected.", type:"boolean"},
-  useRadius: {title:"Radius arcs", description:"If yes is selected, arcs are outputted using radius values rather than IJK.", type:"boolean"},
-  useParametricFeed:  {title:"Parametric feed", description:"Specifies the feed value that should be output using a Q value.", type:"boolean"},
-  showNotes: {title:"Show notes", description:"Writes operation notes as comments in the outputted code.", type:"boolean"},
+  writeMachine: {
+    title: "Write machine",
+    description: "Output the machine settings in the header of the code.",
+    group: 0,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  writeTools: {
+    title: "Write tool list",
+    description: "Output a tool list in the header of the code.",
+    group: 0,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  preloadTool: {
+    title: "Preload tool",
+    description: "Preloads the next tool at a tool change (if any).",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  showSequenceNumbers: {
+    title: "Use sequence numbers",
+    description: "Use sequence numbers for each block of outputted code.",
+    group: 1,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  sequenceNumberStart: {
+    title: "Start sequence number",
+    description: "The number at which to start the sequence numbers.",
+    group: 1,
+    type: "integer",
+    value: 10,
+    scope: "post"
+  },
+  sequenceNumberIncrement: {
+    title: "Sequence number increment",
+    description: "The amount by which the sequence number is incremented by in each block.",
+    group: 1,
+    type: "integer",
+    value: 5,
+    scope: "post"
+  },
+  optionalStop: {
+    title: "Optional stop",
+    description: "Outputs optional stop code during when necessary in the code.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  separateWordsWithSpace: {
+    title: "Separate words with space",
+    description: "Adds spaces between words if 'yes' is selected.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  useRadius: {
+    title: "Radius arcs",
+    description: "If yes is selected, arcs are outputted using radius values rather than IJK.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  useParametricFeed: {
+    title: "Parametric feed",
+    description: "Specifies the feed value that should be output using a Q value.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  showNotes: {
+    title: "Show notes",
+    description: "Writes operation notes as comments in the outputted code.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
   safePositionMethod: {
     title: "Safe Retracts",
     description: "Select your desired retract option. 'Clearance Height' retracts to the operation clearance height.",
     type: "enum",
-    values:[
-      {title:"G28", id: "G28"},
-      {title:"G53", id: "G53"},
-      {title:"Clearance Height", id: "clearanceHeight"}
-    ]
+    values: [
+      {title: "G28", id: "G28"},
+      {title: "G53", id: "G53"},
+      {title: "Clearance Height", id: "clearanceHeight"}
+    ],
+    value: "G53",
+    scope: "post"
   }
 };
 
-var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-/\"";
+var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-/\":";
 var maxToolNum = 199;
 
 var singleLineCoolant = false; // specifies to output multiple coolant codes in one line rather than in separate lines
@@ -153,11 +216,11 @@ function writeBlock() {
   if (!text) {
     return;
   }
-  if (properties.showSequenceNumbers) {
+  if (getProperty("showSequenceNumbers")) {
     writeWords2("N" + sequenceNumber, arguments);
-    sequenceNumber += properties.sequenceNumberIncrement;
+    sequenceNumber += getProperty("sequenceNumberIncrement");
     if (sequenceNumber > 99999) {
-      sequenceNumber = properties.sequenceNumberStart;
+      sequenceNumber = getProperty("sequenceNumberStart");
     }
   } else {
     writeWords(arguments);
@@ -168,13 +231,13 @@ function writeBlock() {
   Writes the specified optional block.
 */
 function writeOptionalBlock() {
-  if (properties.showSequenceNumbers) {
+  if (getProperty("showSequenceNumbers")) {
     var words = formatWords(arguments);
     if (words) {
       writeWords("/", "N" + sequenceNumber, words);
-      sequenceNumber += properties.sequenceNumberIncrement;
+      sequenceNumber += getProperty("sequenceNumberIncrement");
       if (sequenceNumber > 99999) {
-        sequenceNumber = properties.sequenceNumberStart;
+        sequenceNumber = getProperty("sequenceNumberStart");
       }
     }
   } else {
@@ -211,7 +274,7 @@ function writeToolDescription(tool) {
 }
 
 function onOpen() {
-  if (properties.useRadius) {
+  if (getProperty("useRadius")) {
     maximumCircularSweep = toRad(90); // avoid potential center calculation errors for CNC
   }
 
@@ -234,11 +297,11 @@ function onOpen() {
     cOutput.disable();
   }
   
-  if (!properties.separateWordsWithSpace) {
+  if (!getProperty("separateWordsWithSpace")) {
     setWordSeparator("");
   }
 
-  sequenceNumber = properties.sequenceNumberStart;
+  sequenceNumber = getProperty("sequenceNumberStart");
   writeln("%");
 
   if (programName) {
@@ -253,7 +316,7 @@ function onOpen() {
   var model = machineConfiguration.getModel();
   var description = machineConfiguration.getDescription();
 
-  if (properties.writeMachine && (vendor || model || description)) {
+  if (getProperty("writeMachine") && (vendor || model || description)) {
     writeComment(localize("Machine"));
     if (vendor) {
       writeComment("  " + localize("vendor") + ": " + vendor);
@@ -265,9 +328,11 @@ function onOpen() {
       writeComment("  " + localize("description") + ": "  + description);
     }
   }
-
+  
+    writeComment("Post processor: " + postDescription);
+  
   // dump tool information
-  if (properties.writeTools) {
+  if (getProperty("writeTools")) {
     zRanges = {};
     if (is3D()) {
       var numberOfSections = getNumberOfSections();
@@ -660,7 +725,7 @@ function onSection() {
     writeToolDescription(tool);
   }
   
-  if (properties.showNotes && hasParameter("notes")) {
+  if (getProperty("showNotes") && hasParameter("notes")) {
     var notes = getParameter("notes");
     if (notes) {
       var lines = String(notes).split("\n");
@@ -688,7 +753,7 @@ function onSection() {
     
     setCoolant(COOLANT_OFF);
   
-    if (!isFirstSection() && properties.optionalStop) {
+    if (!isFirstSection() && getProperty("optionalStop")) {
       onCommand(COMMAND_OPTIONAL_STOP);
     }
 
@@ -729,7 +794,7 @@ function onSection() {
       }
     }
 
-    if (properties.preloadTool) {
+    if (getProperty("preloadTool")) {
       var nextTool = getNextTool(tool.number);
       if (nextTool) {
         writeBlock("T" + toolFormat.format(nextTool.number));
@@ -877,7 +942,7 @@ function onSection() {
     );
   }
 
-  if (properties.useParametricFeed &&
+  if (getProperty("useParametricFeed") &&
       hasParameter("operation-strategy") &&
       (getParameter("operation-strategy") != "drill") && // legacy
       !(currentSection.hasAnyCycle && currentSection.hasAnyCycle())) {
@@ -1222,7 +1287,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
   var start = getCurrentPosition();
 
   if (isFullCircle()) {
-    if (properties.useRadius || isHelical()) { // radius mode does not support full arcs
+    if (getProperty("useRadius") || isHelical()) { // radius mode does not support full arcs
       linearize(tolerance);
       return;
     }
@@ -1239,7 +1304,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
     default:
       linearize(tolerance);
     }
-  } else if (!properties.useRadius) {
+  } else if (!getProperty("useRadius")) {
     switch (getCircularPlane()) {
     case PLANE_XY:
       writeBlock(gAbsIncModal.format(90), gPlaneModal.format(17), gMotionModal.format(clockwise ? 2 : 3), xOutput.format(x), yOutput.format(y), zOutput.format(z), iOutput.format(cx - start.x, 0), jOutput.format(cy - start.y, 0), getFeed(feed));
@@ -1421,7 +1486,7 @@ function onSectionEnd() {
 function writeRetract() {
   var words = []; // store all retracted axes in an array
   var retractAxes = new Array(false, false, false);
-  var method = properties.safePositionMethod;
+  var method = getProperty("safePositionMethod");
   if (method == "clearanceHeight") {
     if (!is3D()) {
       error(localize("Retract option 'Clearance Height' is not supported for multi-axis machining."));
@@ -1509,5 +1574,9 @@ function onClose() {
   onImpliedCommand(COMMAND_STOP_SPINDLE);
   writeBlock(mFormat.format(30)); // stop program, spindle stop, coolant off
   writeln("%");
+}
+
+function setProperty(property, value) {
+  properties[property].current = value;
 }
 // <<<<< INCLUDED FROM ../common/linuxcnc.cps
