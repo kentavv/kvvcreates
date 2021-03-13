@@ -714,6 +714,8 @@ function onSection() {
     writeRetract(Z);
   }
 
+  writeln("");
+
   if (hasParameter("operation-comment")) {
     var comment = getParameter("operation-comment");
     if (comment) {
