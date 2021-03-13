@@ -1,11 +1,11 @@
 /**
-  Copyright (C) 2012-2018 by Autodesk, Inc.
+  Copyright (C) 2012-2021 by Autodesk, Inc.
   All rights reserved.
 
   LinuxCNC (EMC2) post processor configuration.
 
-  $Revision: 42473 905303e8374380273c82d214b32b7e80091ba92e $
-  $Date: 2019-09-04 07:46:02 $
+  $Revision: 43182 08c79bb5b30997ccb5fb33ab8e7c8c26981be334 $
+  $Date: 2021-02-18 16:25:13 $
   
   FORKID {52A5C3D6-1533-413E-B493-7B93D9E48B30}
 */
@@ -13,11 +13,12 @@
 description = "LinuxCNC (EMC2)";
 vendor = "LinuxCNC";
 vendorUrl = "http://www.linuxcnc.org";
-legal = "Copyright (C) 2012-2018 by Autodesk, Inc.";
-certificationLevel = 2;
-minimumRevision = 40783;
-
 longDescription = "Generic milling post for LinuxCNC (EMC2).";
+
+// >>>>> INCLUDED FROM ../common/linuxcnc.cps
+legal = "Copyright (C) 2012-2021 by Autodesk, Inc.";
+certificationLevel = 2;
+minimumRevision = 45702;
 
 extension = "ngc";
 setCodePage("ascii");
@@ -35,34 +36,100 @@ allowedCircularPlanes = undefined; // allow any circular motion
 
 // user-defined properties
 properties = {
-  writeMachine: true, // write machine
-  writeTools: true, // writes the tools
-  preloadTool: true, // preloads next tool on tool change if any
-  showSequenceNumbers: true, // show sequence numbers
-  sequenceNumberStart: 10, // first sequence number
-  sequenceNumberIncrement: 5, // increment for sequence numbers
-  optionalStop: true, // optional stop
-  separateWordsWithSpace: true, // specifies that the words should be separated with a white space
-  useRadius: false, // specifies that arcs should be output using the radius (R word) instead of the I, J, and K words
-  useParametricFeed: false, // specifies that feed should be output using Q values
-  showNotes: false, // specifies that operation notes should be output
-  useG28: false // turn on to use G28 instead of G53 for machine retracts
-};
-
-// user-defined property definitions
-propertyDefinitions = {
-  writeMachine: {title:"Write machine", description:"Output the machine settings in the header of the code.", group:0, type:"boolean"},
-  writeTools: {title:"Write tool list", description:"Output a tool list in the header of the code.", group:0, type:"boolean"},
-  preloadTool: {title:"Preload tool", description:"Preloads the next tool at a tool change (if any).", type:"boolean"},
-  showSequenceNumbers: {title:"Use sequence numbers", description:"Use sequence numbers for each block of outputted code.", group:1, type:"boolean"},
-  sequenceNumberStart: {title:"Start sequence number", description:"The number at which to start the sequence numbers.", group:1, type:"integer"},
-  sequenceNumberIncrement: {title:"Sequence number increment", description:"The amount by which the sequence number is incremented by in each block.", group:1, type:"integer"},
-  optionalStop: {title:"Optional stop", description:"Outputs optional stop code during when necessary in the code.", type:"boolean"},
-  separateWordsWithSpace: {title:"Separate words with space", description:"Adds spaces between words if 'yes' is selected.", type:"boolean"},
-  useRadius: {title:"Radius arcs", description:"If yes is selected, arcs are outputted using radius values rather than IJK.", type:"boolean"},
-  useParametricFeed:  {title:"Parametric feed", description:"Specifies the feed value that should be output using a Q value.", type:"boolean"},
-  showNotes: {title:"Show notes", description:"Writes operation notes as comments in the outputted code.", type:"boolean"},
-  useG28: {title:"G28 Safe retracts", description:"Disable to avoid G28 output for safe machine retracts. When disabled, you must manually ensure safe retracts.", type:"boolean"}
+  writeMachine: {
+    title: "Write machine",
+    description: "Output the machine settings in the header of the code.",
+    group: 0,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  writeTools: {
+    title: "Write tool list",
+    description: "Output a tool list in the header of the code.",
+    group: 0,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  preloadTool: {
+    title: "Preload tool",
+    description: "Preloads the next tool at a tool change (if any).",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  showSequenceNumbers: {
+    title: "Use sequence numbers",
+    description: "Use sequence numbers for each block of outputted code.",
+    group: 1,
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  sequenceNumberStart: {
+    title: "Start sequence number",
+    description: "The number at which to start the sequence numbers.",
+    group: 1,
+    type: "integer",
+    value: 10,
+    scope: "post"
+  },
+  sequenceNumberIncrement: {
+    title: "Sequence number increment",
+    description: "The amount by which the sequence number is incremented by in each block.",
+    group: 1,
+    type: "integer",
+    value: 5,
+    scope: "post"
+  },
+  optionalStop: {
+    title: "Optional stop",
+    description: "Outputs optional stop code during when necessary in the code.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  separateWordsWithSpace: {
+    title: "Separate words with space",
+    description: "Adds spaces between words if 'yes' is selected.",
+    type: "boolean",
+    value: true,
+    scope: "post"
+  },
+  useRadius: {
+    title: "Radius arcs",
+    description: "If yes is selected, arcs are outputted using radius values rather than IJK.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  useParametricFeed: {
+    title: "Parametric feed",
+    description: "Specifies the feed value that should be output using a Q value.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  showNotes: {
+    title: "Show notes",
+    description: "Writes operation notes as comments in the outputted code.",
+    type: "boolean",
+    value: false,
+    scope: "post"
+  },
+  safePositionMethod: {
+    title: "Safe Retracts",
+    description: "Select your desired retract option. 'Clearance Height' retracts to the operation clearance height.",
+    type: "enum",
+    values: [
+      {title: "G28", id: "G28"},
+      {title: "G53", id: "G53"},
+      {title: "Clearance Height", id: "clearanceHeight"}
+    ],
+    value: "G53",
+    scope: "post"
+  }
 };
 
 var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-";
@@ -142,11 +209,11 @@ function writeBlock() {
   if (!text) {
     return;
   }
-  if (properties.showSequenceNumbers) {
+  if (getProperty("showSequenceNumbers")) {
     writeWords2("N" + sequenceNumber, arguments);
-    sequenceNumber += properties.sequenceNumberIncrement;
+    sequenceNumber += getProperty("sequenceNumberIncrement");
     if (sequenceNumber > 99999) {
-      sequenceNumber = properties.sequenceNumberStart;
+      sequenceNumber = getProperty("sequenceNumberStart");
     }
   } else {
     writeWords(arguments);
@@ -157,13 +224,13 @@ function writeBlock() {
   Writes the specified optional block.
 */
 function writeOptionalBlock() {
-  if (properties.showSequenceNumbers) {
+  if (getProperty("showSequenceNumbers")) {
     var words = formatWords(arguments);
     if (words) {
       writeWords("/", "N" + sequenceNumber, words);
-      sequenceNumber += properties.sequenceNumberIncrement;
+      sequenceNumber += getProperty("sequenceNumberIncrement");
       if (sequenceNumber > 99999) {
-        sequenceNumber = properties.sequenceNumberStart;
+        sequenceNumber = getProperty("sequenceNumberStart");
       }
     }
   } else {
@@ -183,7 +250,7 @@ function writeComment(text) {
 }
 
 function onOpen() {
-  if (properties.useRadius) {
+  if (getProperty("useRadius")) {
     maximumCircularSweep = toRad(90); // avoid potential center calculation errors for CNC
   }
 
@@ -206,11 +273,11 @@ function onOpen() {
     cOutput.disable();
   }
   
-  if (!properties.separateWordsWithSpace) {
+  if (!getProperty("separateWordsWithSpace")) {
     setWordSeparator("");
   }
 
-  sequenceNumber = properties.sequenceNumberStart;
+  sequenceNumber = getProperty("sequenceNumberStart");
   writeln("%");
 
   if (programName) {
@@ -225,7 +292,7 @@ function onOpen() {
   var model = machineConfiguration.getModel();
   var description = machineConfiguration.getDescription();
 
-  if (properties.writeMachine && (vendor || model || description)) {
+  if (getProperty("writeMachine") && (vendor || model || description)) {
     writeComment(localize("Machine"));
     if (vendor) {
       writeComment("  " + localize("vendor") + ": " + vendor);
@@ -239,7 +306,7 @@ function onOpen() {
   }
 
   // dump tool information
-  if (properties.writeTools) {
+  if (getProperty("writeTools")) {
     var zRanges = {};
     if (is3D()) {
       var numberOfSections = getNumberOfSections();
@@ -481,10 +548,17 @@ function initializeActiveFeeds() {
     ++id;
   }
   if (true) { // high feed
-    if (movements & (1 << MOVEMENT_HIGH_FEED)) {
-      var feedContext = new FeedContext(id, localize("High Feed"), this.highFeedrate);
+    if ((movements & (1 << MOVEMENT_HIGH_FEED)) || (highFeedMapping != HIGH_FEED_NO_MAPPING)) {
+      var feed;
+      if (hasParameter("operation:highFeedrateMode") && getParameter("operation:highFeedrateMode") != "disabled") {
+        feed = getParameter("operation:highFeedrate");
+      } else {
+        feed = this.highFeedrate;
+      }
+      var feedContext = new FeedContext(id, localize("High Feed"), feed);
       activeFeeds.push(feedContext);
       activeMovements[MOVEMENT_HIGH_FEED] = feedContext;
+      activeMovements[MOVEMENT_RAPID] = feedContext;
     }
     ++id;
   }
@@ -623,7 +697,7 @@ function onSection() {
     }
   }
   
-  if (properties.showNotes && hasParameter("notes")) {
+  if (getProperty("showNotes") && hasParameter("notes")) {
     var notes = getParameter("notes");
     if (notes) {
       var lines = String(notes).split("\n");
@@ -643,7 +717,7 @@ function onSection() {
     
     setCoolant(COOLANT_OFF);
   
-    if (!isFirstSection() && properties.optionalStop) {
+    if (!isFirstSection() && getProperty("optionalStop")) {
       onCommand(COMMAND_OPTIONAL_STOP);
     }
 
@@ -672,7 +746,7 @@ function onSection() {
       }
     }
 
-    if (properties.preloadTool) {
+    if (getProperty("preloadTool")) {
       var nextTool = getNextTool(tool.number);
       if (nextTool) {
         writeBlock("T" + toolFormat.format(nextTool.number));
@@ -716,20 +790,16 @@ function onSection() {
     workOffset = 1;
   }
   if (workOffset > 0) {
-    if (workOffset > 6) {
-      var p = workOffset - 6; // 1->...
-      if (p > 3) {
-        error(localize("Work offset out of range."));
-        return;
-      } else {
-        if (workOffset != currentWorkOffset) {
-          writeBlock(gFormat.format(59.1), "P" + p); // G59.1P
-          currentWorkOffset = workOffset;
-        }
-      }
+    if (workOffset > 9) {
+      error(localize("Work offset out of range."));
+      return;
     } else {
       if (workOffset != currentWorkOffset) {
-        writeBlock(gFormat.format(53 + workOffset)); // G54->G59
+        if (workOffset > 6)  {
+          writeBlock(gFormat.format(59 + ((workOffset - 6) / 10))); // G59.1->G59.3
+        } else {
+          writeBlock(gFormat.format(53 + workOffset)); // G54->G59
+        }
         currentWorkOffset = workOffset;
       }
     }
@@ -806,7 +876,7 @@ function onSection() {
     );
   }
 
-  if (properties.useParametricFeed &&
+  if (getProperty("useParametricFeed") &&
       hasParameter("operation-strategy") &&
       (getParameter("operation-strategy") != "drill") && // legacy
       !(currentSection.hasAnyCycle && currentSection.hasAnyCycle())) {
@@ -1147,7 +1217,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
   var start = getCurrentPosition();
 
   if (isFullCircle()) {
-    if (properties.useRadius || isHelical()) { // radius mode does not support full arcs
+    if (getProperty("useRadius") || isHelical()) { // radius mode does not support full arcs
       linearize(tolerance);
       return;
     }
@@ -1164,7 +1234,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
     default:
       linearize(tolerance);
     }
-  } else if (!properties.useRadius) {
+  } else if (!getProperty("useRadius")) {
     switch (getCircularPlane()) {
     case PLANE_XY:
       writeBlock(gAbsIncModal.format(90), gPlaneModal.format(17), gMotionModal.format(clockwise ? 2 : 3), xOutput.format(x), yOutput.format(y), zOutput.format(z), iOutput.format(cx - start.x, 0), jOutput.format(cy - start.y, 0), getFeed(feed));
@@ -1322,6 +1392,10 @@ function onCommand(command) {
 function onSectionEnd() {
   if (currentSection.isMultiAxis()) {
     writeBlock(gMotionModal.format(49));
+    // the code below gets the machine angles from previous operation.  closestABC must also be set to true
+    if (currentSection.isOptimizedForMachine()) {
+      currentMachineABC = currentSection.getFinalToolAxisABC();
+    }
   }
   writeBlock(gPlaneModal.format(17));
   if (!isLastSection() && (getNextSection().getTool().coolant != tool.coolant)) {
@@ -1337,52 +1411,81 @@ function onSectionEnd() {
 
 /** Output block to do safe retract and/or move to home position. */
 function writeRetract() {
-  if (arguments.length == 0) {
-    error(localize("No axis specified for writeRetract()."));
+  var words = []; // store all retracted axes in an array
+  var retractAxes = new Array(false, false, false);
+  var method = getProperty("safePositionMethod");
+  if (method == "clearanceHeight") {
+    if (!is3D()) {
+      error(localize("Retract option 'Clearance Height' is not supported for multi-axis machining."));
+    }
     return;
   }
-  var words = []; // store all retracted axes in an array
+  validate(arguments.length != 0, "No axis specified for writeRetract().");
+
+  for (i in arguments) {
+    retractAxes[arguments[i]] = true;
+  }
+  if ((retractAxes[0] || retractAxes[1]) && !retracted) { // retract Z first before moving to X/Y home
+    error(localize("Retracting in X/Y is not possible without being retracted in Z."));
+    return;
+  }
+  // special conditions
+  /*
+  if (retractAxes[2]) { // Z doesn't use G53
+    method = "G28";
+  }
+  */
+
+  // define home positions
+  var _xHome;
+  var _yHome;
+  var _zHome;
+  if (method == "G28") {
+    _xHome = toPreciseUnit(0, MM);
+    _yHome = toPreciseUnit(0, MM);
+    _zHome = toPreciseUnit(0, MM);
+  } else {
+    _xHome = machineConfiguration.hasHomePositionX() ? machineConfiguration.getHomePositionX() : toPreciseUnit(0, MM);
+    _yHome = machineConfiguration.hasHomePositionY() ? machineConfiguration.getHomePositionY() : toPreciseUnit(0, MM);
+    _zHome = machineConfiguration.getRetractPlane() != 0 ? machineConfiguration.getRetractPlane() : toPreciseUnit(0, MM);
+  }
   for (var i = 0; i < arguments.length; ++i) {
-    let instances = 0; // checks for duplicate retract calls
-    for (var j = 0; j < arguments.length; ++j) {
-      if (arguments[i] == arguments[j]) {
-        ++instances;
-      }
-    }
-    if (instances > 1) { // error if there are multiple retract calls for the same axis
-      error(localize("Cannot retract the same axis twice in one line"));
-      return;
-    }
     switch (arguments[i]) {
     case X:
-      if (machineConfiguration.hasHomePositionX() || machineConfiguration.hasHomePositionY()) {
-        words.push("X" + xyzFormat.format(machineConfiguration.hasHomePositionX() ? machineConfiguration.getHomePositionX() : 0));
-      }
+      words.push("X" + xyzFormat.format(_xHome));
+      xOutput.reset();
       break;
     case Y:
-      if (machineConfiguration.hasHomePositionX() || machineConfiguration.hasHomePositionY()) {
-        words.push("Y" + xyzFormat.format(machineConfiguration.hasHomePositionY() ? machineConfiguration.getHomePositionY() : 0));
-      }
+      words.push("Y" + xyzFormat.format(_yHome));
+      yOutput.reset();
       break;
     case Z:
-      words.push("Z" + xyzFormat.format(machineConfiguration.getRetractPlane()));
-      retracted = true; // specifies that the tool has been retracted to the safe plane
+      words.push("Z" + xyzFormat.format(_zHome));
+      zOutput.reset();
+      retracted = true;
       break;
     default:
-      error(localize("Bad axis specified for writeRetract()."));
+      error(localize("Unsupported axis specified for writeRetract()."));
       return;
     }
   }
   if (words.length > 0) {
-    if (properties.useG28) {
+    switch (method) {
+    case "G28":
+      gMotionModal.reset();
       gAbsIncModal.reset();
-      writeBlock(gFormat.format(28), gAbsIncModal.format(91), words); // retract
+      writeBlock(gFormat.format(28), gAbsIncModal.format(91), words);
       writeBlock(gAbsIncModal.format(90));
-    } else {
-      writeBlock(gAbsIncModal.format(90), gFormat.format(53), gMotionModal.format(0), words); // retract
+      break;
+    case "G53":
+      // gMotionModal.reset();
+      writeBlock(gAbsIncModal.format(90), gFormat.format(53), gMotionModal.format(0), words);
+      break;
+    default:
+      error(localize("Unsupported safe position method."));
+      return;
     }
   }
-  zOutput.reset();
 }
 
 function onClose() {
@@ -1392,10 +1495,15 @@ function onClose() {
 
   setWorkPlane(new Vector(0, 0, 0)); // reset working plane
 
-  writeRetract(X, Y);
+  // writeRetract(X, Y);
 
   onImpliedCommand(COMMAND_END);
   onImpliedCommand(COMMAND_STOP_SPINDLE);
   writeBlock(mFormat.format(30)); // stop program, spindle stop, coolant off
   writeln("%");
 }
+
+function setProperty(property, value) {
+  properties[property].current = value;
+}
+// <<<<< INCLUDED FROM ../common/linuxcnc.cps
