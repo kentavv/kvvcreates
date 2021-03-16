@@ -721,8 +721,9 @@ function onSection() {
       error(localize("Compensation offset is out of range."));
       return;
     }
-    writeBlock("T" + toolFormat.format(tool.number), mFormat.format(6), conditional(tool.manualToolChange && !outputG43OnSeparateLine, gFormat.format(43)));
-    writeBlock(conditional(tool.manualToolChange && outputG43OnSeparateLine, gFormat.format(43)));
+    // writeBlock("T" + toolFormat.format(tool.number), mFormat.format(6), conditional(tool.manualToolChange && !outputG43OnSeparateLine, gFormat.format(43)));
+    // writeBlock(conditional(tool.manualToolChange && outputG43OnSeparateLine, gFormat.format(43)));
+    writeBlock("T" + toolFormat.format(tool.number), mFormat.format(6), gFormat.format(43));
     if (tool.comment) {
       writeComment(tool.comment);
     }
