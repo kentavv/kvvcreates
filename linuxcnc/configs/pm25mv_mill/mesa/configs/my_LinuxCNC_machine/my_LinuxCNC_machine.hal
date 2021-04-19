@@ -19,14 +19,14 @@ loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
 loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near names=near.spindle0,near.spindle1
 loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault,or2.hscam-stop,or2.pause,or2.spindle-is-on,or2.pause2,or2.resume2,or2.run2,or2.stop2
-loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.vc,and2.motion_lock,and2.spindle-0-brake,and2.trq-pause,and2.stallwatch,and2.stallwatch-pause
-loadrt not names=not.spindle-0-brake,not.tool-change-request,not.hscam-stop
+loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.a5,and2.a6,and2.vc,and2.motion_lock,and2.spindle-0-brake,and2.trq-pause,and2.stallwatch,and2.stallwatch-pause
+loadrt not names=not.spindle-0-brake,not.tool-change-request,not.hscam-stop,not.run
 loadrt toggle count=1
 loadrt toggle2nist count=1
 loadrt debounce cfg=1,1,1
 loadrt timedelay names=timedelay.spindle-0-brake,timedelay.spindle-0-pid,timedelay.spindle-0-enable
 loadrt estop_latch names=estop_latch.fault
-loadrt oneshot names=oneshot.fault
+loadrt oneshot names=oneshot.fault,oneshot.start
 loadrt lincurve names=lincurve.spindle1,lincurve.spindle1b personality=3,7
 loadrt limit1 names=limit1.spindle-0-adaptive
 loadrt mux2 names=mux2.adaptive-feed
@@ -74,10 +74,13 @@ addf or2.run2                 servo-thread
 addf or2.stop2                servo-thread
 addf estop_latch.fault        servo-thread
 addf oneshot.fault            servo-thread
+addf oneshot.start            servo-thread
 addf and2.a1                  servo-thread
 addf and2.a2                  servo-thread
 addf and2.a3                  servo-thread
 addf and2.a4                  servo-thread
+addf and2.a5                  servo-thread
+addf and2.a6                  servo-thread
 addf and2.trq-pause           servo-thread
 addf and2.vc                  servo-thread
 addf and2.motion_lock         servo-thread
@@ -92,6 +95,7 @@ addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
 addf debounce.1               servo-thread
 addf debounce.2               servo-thread
+addf not.run                  servo-thread
 addf timedelay.spindle-0-brake  servo-thread
 addf timedelay.spindle-0-pid    servo-thread
 addf timedelay.spindle-0-enable servo-thread
@@ -654,3 +658,5 @@ net tool-change-confirmed   iocontrol.0.tool-changed      <=  hal_manualtoolchan
 net tool-number             iocontrol.0.tool-prep-number  =>  hal_manualtoolchange.number
 net tool-prepare-loopback   iocontrol.0.tool-prepare      =>  iocontrol.0.tool-prepared
 
+
+# net machine-is-on hm2_7i76e.0.encoder.00.quad-error-enable 
