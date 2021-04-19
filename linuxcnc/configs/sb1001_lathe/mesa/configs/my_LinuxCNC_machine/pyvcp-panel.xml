@@ -1,0 +1,271 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pyvcp>
+<!-- 
+Include your PyVCP panel here.
+The contents of this file will not be overwritten when you run stepconf again.
+-->
+	<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
+
+		<hbox>
+                        <u32>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"now-hour"</halpin>
+                                <format>"02d"</format>
+                        </u32>
+                        <label>
+                                <text>":"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+                        <u32>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"now-minute"</halpin>
+                                <format>"02d"</format>
+                        </u32>
+                        <label>
+                                <text>":"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+                        <u32>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"now-second"</halpin>
+                                <format>"02d"</format>
+                        </u32>
+                        <label>
+                                <text>"."</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+                        <u32>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"now-millisecond"</halpin>
+                                <format>"03d"</format>
+                        </u32>
+		</hbox>
+
+<hbox>
+<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
+
+		<label>
+			<text>"Main Spindle"</text>
+			<font>("Helvetica", 14)</font>
+		</label>
+
+		<hbox>
+			<label>
+				<text>"  Target"</text>
+				<font>("Helvetica", 12)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 12)</font>
+				<halpin>"spindle-0-speed-target"</halpin>
+				<format>"d"</format>
+			</number>
+
+			<led>
+				<halpin>"spindle-0-at-speed-led"</halpin>
+				<size>22</size>
+				<on_color>"green"</on_color>
+				<off_color>"red"</off_color>
+			</led>
+		</hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Actual"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-speed-abs"</halpin>
+                                <format>"d"</format>
+                        </number>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Pos1: "</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-position-c"</halpin>
+                                <format>"3.2f"</format>
+                        </number>
+                </hbox>
+
+</vbox>
+
+<vbox>
+                <relief>RIDGE</relief>
+                <bd>3</bd>
+
+                <label>
+                        <text>"Gear"</text>
+                        <font>("Helvetica", 14)</font>
+                </label>
+
+                <radiobutton>
+			<choices>["Low","High"]</choices> 
+			<halpin>"spindle-gear"</halpin> 
+			<initval>1</initval>
+			<font>("Helvetica", 12)</font>
+				<size>22</size>
+                </radiobutton>
+</vbox>
+
+</hbox>
+
+<hbox>
+<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
+
+
+		<label>
+			<text>"Status"</text>
+			<font>("Helvetica", 14)</font>
+		</label>
+
+                <hbox>
+                        <label>
+                                <text>"  Axes"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"axes-good-led"</halpin>
+                                <size>22</size>
+                                <on_color>"green"</on_color>
+                                <off_color>"red"</off_color>
+                        </led>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Spindle"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"spindle-0-good-led"</halpin>
+                                <size>22</size>
+                                <on_color>"green"</on_color>
+                                <off_color>"red"</off_color>
+                        </led>
+                </hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  Faulted"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"fault-led"</halpin>
+                                <size>22</size>
+                                <on_color>"red"</on_color>
+                                <off_color>"green"</off_color>
+                        </led>
+
+                        <button>
+                                <font>("Helvetica", 12)</font>
+                                <width>3</width>
+                                <halpin>"reset-fault"</halpin>
+                                <text>"Reset"</text>
+                        </button>
+                </hbox>
+</vbox>
+<vbox>
+		<relief>RIDGE</relief>
+		<bd>3</bd>
+
+
+		<label>
+			<text>"Velocity"</text>
+			<font>("Helvetica", 14)</font>
+                        <width>"15"</width>
+		</label>
+
+		<hbox>
+			<label>
+				<text>"  X: "</text>
+				<font>("Helvetica", 12)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 12)</font>
+				<halpin>"x-velocity-upm"</halpin>
+				<format>"+3.2f"</format>
+			</number>
+		</hbox>
+
+		<hbox>
+			<label>
+				<text>"  Z: "</text>
+				<font>("Helvetica", 12)</font>
+			</label>
+
+			<number>
+				<font>("Helvetica", 12)</font>
+				<halpin>"z-velocity-upm"</halpin>
+				<format>"+3.2f"</format>
+			</number>
+		</hbox>
+
+                <hbox>
+                        <label>
+                                <text>"  C: "</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+                        <number>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"spindle-0-speed-c"</halpin>
+                                <format>"+3.2f"</format>
+                        </number>
+                </hbox>
+</vbox>
+</hbox>
+
+<vbox>
+                <relief>RIDGE</relief>
+                <bd>3</bd>
+
+                <label>
+                        <text>"Recording"</text>
+                        <font>("Helvetica", 14)</font>
+                </label>
+
+<hbox>
+                <hbox>
+		        <checkbutton>
+				<font>("Helvetica", 12)</font>
+				<halpin>"datalogger-enable"</halpin>
+				<text>"Data logger    "</text>
+			</checkbutton>
+		</hbox>
+
+                <hbox>
+                        <label>
+                                <text>"High-speed cam"</text>
+                                <font>("Helvetica", 12)</font>
+                        </label>
+
+                        <led>
+                                <halpin>"hscam-recording"</halpin>
+                                <size>22</size>
+                                <on_color>"green"</on_color>
+                                <off_color>"red"</off_color>
+                        </led>
+                </hbox>
+</hbox>
+</vbox>
+
+	</vbox>
+</pyvcp>
