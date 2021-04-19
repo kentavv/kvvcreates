@@ -4,7 +4,6 @@
 #
 #Thanks to John and Andy, I got my Pause/Resume button. I did a little work on my own and was able to get the Run/Step button (admittedly the far easier). So, for what it's worth, here is the program for both buttons:
 #
-#
 #This is how they function:
 #
 #Pressing Run/Step will begin executing a program.
@@ -23,27 +22,46 @@
 ## Changes made to incorperate latching alarms
 
 
-
 # (The toggle component has debounce by default)
 
 # Pause/Resume Section
-net pause-resume-btn and2.a1.in0 and2.a2.in0
-net pause-on toggle2nist.0.is-on and2.a1.in1 and2.a4.in1 <= halui.program.is-paused
-net run-on and2.a2.in1 <= halui.program.is-running
-net pause-sig or2.o1.in0 <= and2.a1.out
-net resume-sig or2.o1.in1 <= and2.a2.out
-net toggle-ok toggle.0.in <= or2.o1.out
-net togglesig toggle2nist.0.in <= toggle.0.out
-net toggleon halui.program.pause <= toggle2nist.0.on
-net toggleoff halui.program.resume <= toggle2nist.0.off
+net pause-resume-btn                          => and2.a1.in0 and2.a2.in0
+net pause-on         halui.program.is-paused  => toggle2nist.0.is-on and2.a1.in1 and2.a4.in1
+net run-on           halui.program.is-running => and2.a2.in1 and2.stallwatch-pause.in1
+net pause-sig        and2.a1.out              => or2.o1.in0
+net resume-sig       and2.a2.out              => or2.o1.in1
+net toggle-ok        or2.o1.out               => toggle.0.in
+net togglesig        toggle.0.out             => toggle2nist.0.in
+net toggleon         toggle2nist.0.on         => or2.pause.in1
+net spindle-0-torque-stallwatch               => and2.stallwatch-pause.in0
+net stallwatch-pause and2.stallwatch-pause.out => or2.pause.in0
+
+
+net pause1a          or2.pause.out            => or2.pause2.in0
+net                  pendent-pause            => or2.pause2.in1
+net pause-in         or2.pause2.out           => halui.program.pause
+
+net resume1a         toggle2nist.0.off        => or2.resume2.in0
+net                  pendent-resume           => or2.resume2.in1
+net toggleoff        or2.resume2.out          => halui.program.resume
+
 
 # Run/Step Section
-net run-step-btn and2.a3.in0 and2.a4.in0
+#net run-step-btn and2.a3.in0 and2.a4.in0 <= hm2_7i76e.0.7i76.0.0.input-07 #(this is your input)
+net run-step-btn or2.run2.in0
+net pendent-run or2.run2.in1
+net run-step-btn2 or2.run2.out and2.a3.in0 and2.a4.in0
 net idle-on and2.a3.in1 <= halui.program.is-idle
 # net pause.on and 2.3.in1 <= halui.program.is-paused
 # and2.3.in1 was added in the net pause-on statement in Pause/Resume Section
-net run-sig halui.mode.auto halui.program.run <= and2.a3.out
-net step-sig halui.program.step <= and2.a4.out
+
+net run-sig0 and2.a3.out and2.a5.in0
+net run-allowed and2.a5.in1
+net step-sig0 and2.a4.out and2.a6.in0
+net run-allowed and2.a6.in1
+
+net run-sig          and2.a5.out              => halui.mode.auto halui.program.run
+net step-sig         and2.a6.out              => halui.program.step
 
 # Stop Section
 #net stop-btn <= hm2_7i76e.0.7i76.0.0.input-09-not => halui.program.stop
@@ -53,7 +71,10 @@ net stop-btn => or2.stop.in1
 net stop-btn-all or2.stop.out or2.stop2.in0
 net pendent-stop or2.stop2.in1
 
-net spindle-alarm => or2.stop1.in0
+net spindle-0-alarm => or2.stop0.in0
+#net spindle-1-alarm => or2.stop0.in1
+
+net spindle-alarms or2.stop0.out => or2.stop1.in0
 net axes-alarm => or2.stop1.in1
 
 setp debounce.1.delay 5 # 5 * servo-thread period (1000us) = 5ms
@@ -64,15 +85,24 @@ net fault-latch-loopout estop_latch.fault.fault-out  => or2.stop.in0
 #setp estop_latch.fault.ok-in 1
 # The following single line should work, but there's a glitch or something at the start that causes a latch to occur
 # so we also use the estop-reset to reset the fault latch
-#net result-fault => estop_latch.fault.reset
+#net reset-fault => estop_latch.fault.reset
 
-net estop-reset or2.fault.in0
-net result-fault or2.fault.in1
-net result-fault2 or2.fault.out estop_latch.fault.reset
+setp oneshot.start.in 1
+setp oneshot.start.width 1
+net fault-start-clear oneshot.start.out or2.fault.in0
+
+#net estop-reset or2.fault.in0
+net reset-fault or2.fault.in1
+net reset-fault2 or2.fault.out estop_latch.fault.reset
 
 #net stop-request or2.stop.out halui.program.stop
 # The following is better than halui.program.stop but requires changes to Axis
 # detailed in https://forum.linuxcnc.org/21-axis/27585-enable-disable-run-button
-# This line must be in a post_gui_hal file, which it is, in custom_postgui.hal
+# This line must be in a post_gui_hal file, e.g., custom_postgui.hal
 #net run-disabled or2.stop.out axisui.run-disable
+
+net run-disable or2.stop2.out oneshot.fault.in or2.hscam-stop.in0 not.run.in
+net run-allowed not.run.out 
+net stop-requested oneshot.fault.out halui.program.stop
+setp oneshot.fault.width .05
 

@@ -11,7 +11,7 @@ net spindle-at-speed    pyvcp.spindle-0-at-speed-led
 net axes-good           pyvcp.axes-good-led
 net spindle-good        pyvcp.spindle-0-good-led
 net fault-latch-loopout pyvcp.fault-led
-net result-fault        pyvcp.reset-fault
+net reset-fault         pyvcp.reset-fault
 
 #net probe-in            pyvcp.probe-led
 
@@ -32,12 +32,7 @@ net datalogger-enable pyvcp.datalogger-enable
 #net datalogger-enabled datalogger.enable pyvcp.datalogger-enable
 #net datalogger-enabled ppmc.0.encoder.03.index-enable pyvcp.datalogger-enabled
 
-#net stop-request or2.stop.out halui.program.stop
-# The following adds to halui.program.stop to prevent program execution but requires changes 
-# to Axis detailed in https://forum.linuxcnc.org/21-axis/27585-enable-disable-run-button
-net run-disabled or2.stop2.out oneshot.fault.in axisui.run-disable or2.hscam-stop.in0
-net stop-requested oneshot.fault.out halui.program.stop 
-setp oneshot.fault.width .05
+net run-disabled axisui.run-disable
 
 net machine-is-enabled not.hscam-stop.in
 net hs-cam-me-not not.hscam-stop.out or2.hscam-stop.in1

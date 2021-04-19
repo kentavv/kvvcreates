@@ -114,8 +114,7 @@ The contents of this file will not be overwritten when you run stepconf again.
 			<choices>["Low","High"]</choices> 
 			<halpin>"spindle-gear"</halpin> 
 			<initval>1</initval>
-			<font>("Helvetica", 12)</font>
-				<size>22</size>
+			<font>("Helvetica", 16)</font>
                 </radiobutton>
 </vbox>
 
