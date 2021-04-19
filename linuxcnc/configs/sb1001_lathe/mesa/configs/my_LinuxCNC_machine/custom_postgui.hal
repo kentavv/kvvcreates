@@ -3,8 +3,8 @@
 # The commands in this file are run after the AXIS GUI (including PyVCP panel) starts
 
 net spindle-vel-cmd-rpm-abs      pyvcp.spindle-0-speed-target # datalogger.spindle-speed-commanded 
-net spindle-fb-rpm               pyvcp.spindle-0-speed-c # datalogger.spindle-speed-actual 
-net spindle-fb-rpm-abs-filtered  pyvcp.spindle-0-speed-abs
+net spindle-vel-fb-rpm               pyvcp.spindle-0-speed-c # datalogger.spindle-speed-actual 
+net spindle-vel-fb-rpm-abs-filtered  pyvcp.spindle-0-speed-abs
 
 net spindle-at-speed    pyvcp.spindle-0-at-speed-led
 
@@ -54,4 +54,6 @@ net now-hour datalogger.hour pyvcp.now-hour
 net now-minute datalogger.minute pyvcp.now-minute
 net now-second datalogger.second pyvcp.now-second
 net now-millisecond datalogger.millisecond pyvcp.now-millisecond
+
+net gear-select-a pyvcp.spindle-gear.Low
 
