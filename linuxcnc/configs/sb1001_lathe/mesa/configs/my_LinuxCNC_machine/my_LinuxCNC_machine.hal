@@ -24,7 +24,7 @@ loadrt abs names=abs.spindle,abs.0
 loadrt lowpass names=lowpass.spindle
 loadrt scale names=scale.spindle,scale.x-vel,scale.z-vel,scale.gear,scale.spindle1
 loadrt near
-loadrt estop_latch names=estop_latch.fault
+loadrt estop_latch names=estop_latch.fault,oneshot.0,oneshot.1
 loadrt oneshot names=oneshot.fault,oneshot.start
 loadrt angpos names=angpos.spindle0
 loadrt logic count=2 personality=520,515
@@ -58,12 +58,17 @@ addf or2.resume2              servo-thread
 addf or2.run2                 servo-thread
 addf or2.stop0                servo-thread
 addf or2.spindle-is-on        servo-thread
+
+# For working around VistaCNC pedent problem
 addf abs.0                    servo-thread
 addf conv-s32-float.0         servo-thread
 addf ddt.0                    servo-thread
 addf wcomp.0                  servo-thread
 addf logic.0                  servo-thread
 addf logic.1                  servo-thread
+addf oneshot.0                servo-thread
+addf oneshot.1                servo-thread
+
 addf estop_latch.fault        servo-thread
 addf oneshot.fault            servo-thread
 addf oneshot.start            servo-thread

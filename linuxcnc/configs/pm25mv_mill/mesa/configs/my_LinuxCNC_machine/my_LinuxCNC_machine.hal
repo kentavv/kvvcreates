@@ -58,10 +58,6 @@ addf scale.y-vel              servo-thread
 addf scale.z-vel              servo-thread
 addf abs.spindle0             servo-thread
 addf abs.spindle1             servo-thread
-addf abs.0                    servo-thread
-addf conv-s32-float.0         servo-thread
-addf ddt.0                    servo-thread
-addf wcomp.0                  servo-thread
 addf lowpass.spindle0         servo-thread
 addf lowpass.spindle1         servo-thread
 addf near.spindle0            servo-thread
@@ -80,11 +76,19 @@ addf or2.pause2               servo-thread
 addf or2.resume2              servo-thread
 addf or2.run2                 servo-thread
 addf or2.stop2                servo-thread
+
+# For working around VistaCNC pedent problem
+addf abs.0                    servo-thread
+addf conv-s32-float.0         servo-thread
+addf ddt.0                    servo-thread
+addf wcomp.0                  servo-thread
+addf logic.0                  servo-thread
+addf logic.1                  servo-thread
+addf oneshot.0                servo-thread
+addf oneshot.1                servo-thread
 addf estop_latch.fault        servo-thread
 addf oneshot.fault            servo-thread
 addf oneshot.start            servo-thread
-addf oneshot.0                servo-thread
-addf oneshot.1                servo-thread
 addf and2.a1                  servo-thread
 addf and2.a2                  servo-thread
 addf and2.a3                  servo-thread
@@ -100,8 +104,6 @@ addf and2.stallwatch-pause    servo-thread
 addf not.spindle-0-brake      servo-thread
 addf not.tool-change-request  servo-thread
 addf not.hscam-stop           servo-thread
-addf logic.0                  servo-thread
-addf logic.1                  servo-thread
 addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
