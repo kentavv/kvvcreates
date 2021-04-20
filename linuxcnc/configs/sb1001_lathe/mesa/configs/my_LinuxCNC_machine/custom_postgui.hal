@@ -32,7 +32,7 @@ net datalogger-enable pyvcp.datalogger-enable
 #net datalogger-enabled datalogger.enable pyvcp.datalogger-enable
 #net datalogger-enabled ppmc.0.encoder.03.index-enable pyvcp.datalogger-enabled
 
-net run-disabled axisui.run-disable
+net run-disable axisui.run-disable
 
 net machine-is-enabled not.hscam-stop.in
 net hs-cam-me-not not.hscam-stop.out or2.hscam-stop.in1
