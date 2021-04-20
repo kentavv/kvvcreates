@@ -14,7 +14,7 @@ loadrt hostmot2
 loadrt hm2_eth board_ip="10.10.10.10" config=" num_encoders=1 num_pwmgens=0 num_stepgens=5 sserial_port_0=20xxxx" 
 setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
 loadrt pid names=pid.x,pid.y,pid.z,pid.s,pid.spindle1,pid.spindle-0-adaptive
-loadrt abs names=abs.spindle0,abs.spindle1
+loadrt abs names=abs.spindle0,abs.spindle1,abs.0
 loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
 loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near names=near.spindle0,near.spindle1
@@ -26,12 +26,16 @@ loadrt toggle2nist count=1
 loadrt debounce cfg=1,1,1
 loadrt timedelay names=timedelay.spindle-0-brake,timedelay.spindle-0-pid,timedelay.spindle-0-enable
 loadrt estop_latch names=estop_latch.fault
-loadrt oneshot names=oneshot.fault,oneshot.start
+loadrt oneshot names=oneshot.fault,oneshot.start,oneshot.0,oneshot.1
 loadrt lincurve names=lincurve.spindle1,lincurve.spindle1b personality=3,7
 loadrt limit1 names=limit1.spindle-0-adaptive
 loadrt mux2 names=mux2.adaptive-feed
 loadrt constant names=constant.constant-1
 loadrt angpos names=angpos.spindle0
+loadrt logic count=2 personality=520,515
+loadrt conv_s32_float count=1
+loadrt ddt count=1
+loadrt wcomp count=1
 
 addf hm2_7i76e.0.read         servo-thread
 addf motion-command-handler   servo-thread
@@ -54,6 +58,10 @@ addf scale.y-vel              servo-thread
 addf scale.z-vel              servo-thread
 addf abs.spindle0             servo-thread
 addf abs.spindle1             servo-thread
+addf abs.0                    servo-thread
+addf conv-s32-float.0         servo-thread
+addf ddt.0                    servo-thread
+addf wcomp.0                  servo-thread
 addf lowpass.spindle0         servo-thread
 addf lowpass.spindle1         servo-thread
 addf near.spindle0            servo-thread
@@ -75,6 +83,8 @@ addf or2.stop2                servo-thread
 addf estop_latch.fault        servo-thread
 addf oneshot.fault            servo-thread
 addf oneshot.start            servo-thread
+addf oneshot.0                servo-thread
+addf oneshot.1                servo-thread
 addf and2.a1                  servo-thread
 addf and2.a2                  servo-thread
 addf and2.a3                  servo-thread
@@ -90,6 +100,8 @@ addf and2.stallwatch-pause    servo-thread
 addf not.spindle-0-brake      servo-thread
 addf not.tool-change-request  servo-thread
 addf not.hscam-stop           servo-thread
+addf logic.0                  servo-thread
+addf logic.1                  servo-thread
 addf toggle.0                 servo-thread
 addf toggle2nist.0            servo-thread
 addf debounce.0               servo-thread
