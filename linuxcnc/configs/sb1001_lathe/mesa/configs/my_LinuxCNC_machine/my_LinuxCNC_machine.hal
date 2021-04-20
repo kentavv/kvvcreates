@@ -24,8 +24,8 @@ loadrt abs names=abs.spindle,abs.0
 loadrt lowpass names=lowpass.spindle
 loadrt scale names=scale.spindle,scale.x-vel,scale.z-vel,scale.gear,scale.spindle1
 loadrt near
-loadrt estop_latch names=estop_latch.fault,oneshot.0,oneshot.1
-loadrt oneshot names=oneshot.fault,oneshot.start
+loadrt estop_latch names=estop_latch.fault
+loadrt oneshot names=oneshot.fault,oneshot.start,oneshot.0,oneshot.1
 loadrt angpos names=angpos.spindle0
 loadrt logic count=2 personality=520,515
 loadrt conv_s32_float count=1
