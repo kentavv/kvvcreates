@@ -50,5 +50,47 @@ net now-minute datalogger.minute pyvcp.now-minute
 net now-second datalogger.second pyvcp.now-second
 net now-millisecond datalogger.millisecond pyvcp.now-millisecond
 
+
+# The following is to help switch Axis to manual when the VistaCNC pendent is used
+# If Axis is in MDI mode the pendent cannot be used for jogging.
+# In LinuxCNC before 2.8, jogging with the pendent would cause Axis to switch to manual mode.
+# Something changed in LinuxCNC 2.8 that keeps one in MDI mode ignoring the pendent.
+# For the pendent to work in LinuxCNC 2.8, one must switch to the Manual tab.
+# The following code helps to correct this, but requires changes to Axis.
+
+# Check for movement from the pendent in step mode.
+net jog-counts conv-s32-float.0.in
+net jog-counts-f conv-s32-float.0.out ddt.0.in
+net jog-counts-deriv ddt.0.out abs.0.in
+net jog-counts-deriv-abs abs.0.out wcomp.0.in
+setp wcomp.0.min 0
+setp wcomp.0.max 100000000
+net is-jogging wcomp.0.out
+
+# Check for a pendent switch to step mode on any axis.
+# The pendent holds these inputs high until leaving step mode, so we
+# use oneshot to create a pulse.
+net axis.0.jog-en logic.1.in-00
+net axis.1.jog-en logic.1.in-01
+net axis.2.jog-en logic.1.in-02
+net axis.any.jog-en logic.1.or oneshot.1.in
+setp oneshot.1.width 1
+
+# Combine the possible pendent jogging indicators.
+net jog.0.cont-plus  logic.0.in-00
+net jog.0.cont-minus logic.0.in-01
+net jog.1.cont-plus  logic.0.in-02
+net jog.1.cont-minus logic.0.in-03
+net jog.2.cont-plus  logic.0.in-04
+net jog.2.cont-minus logic.0.in-05
+net axis.any.jog-en-pulse oneshot.1.out logic.0.in-06
+net is-jogging logic.0.in-07
+
+# Create a pulse to Axis requesting manual mode.
+net pendent-request-manual-pulse logic.0.or oneshot.0.in
+setp oneshot.0.width 1
+net pendent-request-manual oneshot.0.out axisui.set-manual-mode
+
+
 net gear-select-a pyvcp.spindle-gear.Low
 

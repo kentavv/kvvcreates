@@ -20,15 +20,20 @@ loadrt debounce cfg=1,1,1
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.a5,and2.a6,and2.vc,and2.stallwatch-pause
 loadrt ilowpass count=2
 loadrt pid names=pid.x,pid.z,pid.s
-loadrt abs names=abs.spindle
+loadrt abs names=abs.spindle,abs.0
 loadrt lowpass names=lowpass.spindle
 loadrt scale names=scale.spindle,scale.x-vel,scale.z-vel,scale.gear,scale.spindle1
 loadrt near
 loadrt estop_latch names=estop_latch.fault
 loadrt oneshot names=oneshot.fault,oneshot.start
 loadrt angpos names=angpos.spindle0
+loadrt logic count=2 personality=520,515
+loadrt conv_s32_float count=1
+loadrt ddt count=1
+loadrt wcomp count=1
 loadrt mux2 names=mux2.ratio_select
 loadrt lincurve personality=9
+
 
 addf hm2_7i76e.0.read          servo-thread
 
@@ -53,6 +58,12 @@ addf or2.resume2              servo-thread
 addf or2.run2                 servo-thread
 addf or2.stop0                servo-thread
 addf or2.spindle-is-on        servo-thread
+addf abs.0                    servo-thread
+addf conv-s32-float.0         servo-thread
+addf ddt.0                    servo-thread
+addf wcomp.0                  servo-thread
+addf logic.0                  servo-thread
+addf logic.1                  servo-thread
 addf estop_latch.fault        servo-thread
 addf oneshot.fault            servo-thread
 addf oneshot.start            servo-thread
