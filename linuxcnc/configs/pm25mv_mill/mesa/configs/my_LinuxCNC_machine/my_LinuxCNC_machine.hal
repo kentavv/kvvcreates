@@ -18,7 +18,7 @@ loadrt abs names=abs.spindle0,abs.spindle1,abs.0
 loadrt lowpass names=lowpass.spindle0,lowpass.spindle1
 loadrt scale names=scale.spindle0,scale.spindle1,scale.x-vel,scale.y-vel,scale.z-vel
 loadrt near names=near.spindle0,near.spindle1
-loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault,or2.hscam-stop,or2.pause,or2.spindle-is-on,or2.pause2,or2.resume2,or2.run2,or2.stop2
+loadrt or2 names=or2.coolant,or2.o1,or2.stop0,or2.stop,or2.stop1,or2.fault,or2.hscam-stop,or2.pause,or2.spindle-is-on,or2.pause2,or2.resume2,or2.run2,or2.stop2,or2.probe
 loadrt and2 names=and2.a1,and2.a2,and2.a3,and2.a4,and2.a5,and2.a6,and2.vc,and2.motion_lock,and2.spindle-0-brake,and2.trq-pause,and2.stallwatch,and2.stallwatch-pause
 loadrt not names=not.spindle-0-brake,not.tool-change-request,not.hscam-stop,not.run
 loadrt toggle count=1
@@ -36,6 +36,7 @@ loadrt logic count=2 personality=520,515
 loadrt conv_s32_float count=1
 loadrt ddt count=1
 loadrt wcomp count=1
+loadrt camera_trigger count=1
 
 addf hm2_7i76e.0.read         servo-thread
 addf motion-command-handler   servo-thread
@@ -76,6 +77,8 @@ addf or2.pause2               servo-thread
 addf or2.resume2              servo-thread
 addf or2.run2                 servo-thread
 addf or2.stop2                servo-thread
+addf or2.probe                servo-thread
+addf camera-trigger.0         servo-thread
 
 # For working around VistaCNC pedent problem
 addf abs.0                    servo-thread
@@ -144,14 +147,21 @@ setp timedelay.spindle-0-brake.on-delay 3
 setp timedelay.spindle-0-brake.off-delay 0
 net spindle-0-brake-not not.spindle-0-brake.out => hm2_7i76e.0.7i76.0.0.output-04
 
+# --- CAMERA-TRIGGER ---
+net camera-trigger =>     hm2_7i76e.0.7i76.0.0.output-06
+
 
 # external input signals
 
 
-# --- PROBE ---
+# --- TOOL-LENGTH-PROBE ---
+net touchprobe-in-raw     <=  hm2_7i76e.0.7i76.0.0.input-21-not
+
+
+# --- TOOL-LENGTH-PROBE ---
 net probe-in-raw     <=  hm2_7i76e.0.7i76.0.0.input-20-not
 
-# --- PROBE-BLAST ---
+# --- TOOL-LENGTH-PROBE-BLAST ---
 net probe-blast =>     hm2_7i76e.0.7i76.0.0.output-05
 net probe-blast => motion.digital-out-00
 
@@ -649,7 +659,9 @@ net coolant or2.coolant.out
 #  ---probe signal---
 
 setp debounce.2.delay 20  # 20 * servo-thread period (1000us) = 20ms
-net probe-in-raw     =>  debounce.2.0.in
+net touchprobe-in-raw     =>  or2.probe.in0
+net probe-in-raw     =>  or2.probe.in1
+net allprobe-in-raw or2.probe.out =>  debounce.2.0.in
 net probe-in debounce.2.0.out => motion.probe-input
 
 #  ---motion control signals---
@@ -674,3 +686,10 @@ net tool-prepare-loopback   iocontrol.0.tool-prepare      =>  iocontrol.0.tool-p
 
 
 # net machine-is-on hm2_7i76e.0.encoder.00.quad-error-enable 
+
+
+
+net spindle-0-index-enable camera-trigger.0.index-enable
+net camera-enable camera-trigger.0.camera-enable
+net camera-trigger camera-trigger.0.trigger
+
