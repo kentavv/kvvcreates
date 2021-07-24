@@ -1,0 +1,31 @@
+component camera_trigger "Trigger camera pin following the spindle index pulse";
+
+pin io bit index_enable;
+pin in bit camera_enable;
+pin out bit trigger;
+
+variable int old = 0;
+
+function _;
+
+license "GPL"; // indicates GPL v2 or later
+
+;;
+
+FUNCTION(_) {
+    trigger = 0;
+
+    if (camera_enable) {
+        if (index_enable) {
+        } else {
+            if (old) {
+                trigger = 1;
+            } else {
+                index_enable = 1;
+            }
+        }
+    }
+
+    old = index_enable;
+}
+
