@@ -563,6 +563,17 @@ The contents of this file will not be overwritten when you run stepconf again.
                         </led>
                 </hbox>
 </hbox>
+
+<hbox>
+                <hbox>
+                        <checkbutton>
+                                <font>("Helvetica", 12)</font>
+                                <halpin>"camera-enable"</halpin>
+                                <text>"Camera    "</text>
+                        </checkbutton>
+                </hbox>
+</hbox>
+
 </vbox>
 
 <vbox>

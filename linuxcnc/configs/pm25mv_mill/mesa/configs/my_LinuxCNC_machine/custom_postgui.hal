@@ -40,6 +40,8 @@ net datalogger-enable pyvcp.datalogger-enable
 #net datalogger-enabled datalogger.enable pyvcp.datalogger-enable
 #net datalogger-enabled ppmc.0.encoder.03.index-enable pyvcp.datalogger-enabled
 
+net camera-enable pyvcp.camera-enable
+
 net load-haimer halui.mdi-command-00 <= pyvcp.load-haimer
 net tool-probe0 halui.mdi-command-01 <= pyvcp.tool-probe0
 net tool-probe1 halui.mdi-command-02 <= pyvcp.tool-probe1
